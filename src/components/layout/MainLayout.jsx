@@ -10,7 +10,7 @@ export default function MainLayout() {
       <header className="border-b border-slate-200 sticky top-0 bg-white/95 backdrop-blur z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="text-2xl font-black tracking-tighter text-green-600">
-            BenTech News<span className="text-slate-900">.</span>
+            LatinoTech IA<span className="text-slate-900">.</span>
           </Link>
           <nav className="hidden md:flex gap-8 font-semibold text-sm text-slate-600">
             <Link to="/?category=IA" className="hover:text-green-600 transition-colors">IA</Link>
@@ -33,7 +33,7 @@ export default function MainLayout() {
       </main>
       <footer className="border-t border-slate-200 py-12 mt-12 bg-slate-50">
         <div className="container mx-auto px-4 text-center text-slate-500 text-sm font-medium">
-          <p>© {new Date().getFullYear()} BenTech News. Contenido generado con IA.</p>
+          <p>© {new Date().getFullYear()} LatinoTech IA. Contenido generado con IA.</p>
         </div>
       </footer>
     </div>
