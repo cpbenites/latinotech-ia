@@ -31,10 +31,16 @@ Deno.serve(async (req) => {
                     Título: ${item.title}
                     Resumen original: ${item.contentSnippet || item.content || ''}
                     
+                    REGLAS ESTRICTAS PARA EL CONTENIDO (content):
+                    1. Tamaño y Profundidad: Escribe un artículo completo, profundo y detallado con al menos 5 a 7 párrafos bien desarrollados. ESTÁ ESTRICTAMENTE PROHIBIDO hacer resúmenes cortos.
+                    2. Estructura Periodística: El artículo DEBE contener al menos dos o tres subtítulos (usa Markdown ## o ### equivalentes a <h2>/<h3>) para organizar la lectura y mejorar el SEO.
+                    3. Contextualización: Expande la noticia. Explica "por qué esto importa", "cuál es el impacto en el mercado latino/global" y "qué cambia para el usuario final".
+                    4. Formato: El contenido debe estar formateado en Markdown usando párrafos, subtítulos (##/###) y negritas (**) en las palabras clave importantes.
+                    
                     Devuelve EXCLUSIVAMENTE un JSON válido con:
                     - title: Título hiper atractivo y optimizado para SEO (clickbait elegante)
                     - summary: Resumen de 2 líneas exactas que atrape al lector
-                    - content: El artículo completo reescrito en Markdown (3 o 4 párrafos bien desarrollados). Usa negritas para destacar ideas.
+                    - content: El artículo completo siguiendo las REGLAS ESTRICTAS descritas arriba.
                     - seo_keywords: 5 a 7 palabras clave separadas por coma
                     - image_prompt: Un prompt de máximo 20 palabras en inglés para generar una imagen hiperrealista y limpia estilo editorial de tecnología sobre este tema.
                     `;
