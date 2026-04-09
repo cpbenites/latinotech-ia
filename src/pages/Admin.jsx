@@ -292,7 +292,8 @@ export default function Admin() {
                   <tr>
                     <th className="px-6 py-4 font-bold uppercase tracking-wider">Fecha y Hora</th>
                     <th className="px-6 py-4 font-bold uppercase tracking-wider">País / Ciudad</th>
-                    <th className="px-6 py-4 font-bold uppercase tracking-wider">IP</th>
+                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Tipo</th>
+                    <th className="px-6 py-4 font-bold uppercase tracking-wider">IP / Detalles</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -310,14 +311,24 @@ export default function Admin() {
                           <span className="text-slate-400 font-medium">• {log.city}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-mono text-slate-500">
-                        {user?.role === 'super_admin' ? log.ip_address : (log.ip_address?.includes(':') ? log.ip_address.split(':').slice(0, 4).join(':') + ':xxxx:xxxx:xxxx:xxxx' : log.ip_address?.split('.').map((p, i) => i < 2 ? p : 'xxx').join('.'))}
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${log.is_bot ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                          {log.is_bot ? '🤖 Bot' : '👤 Humano'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-slate-500 text-xs">
+                        {user?.role === 'super_admin' ? log.ip_address : (log.ip_address?.includes('Oculto') ? log.ip_address : (log.ip_address?.includes(':') ? log.ip_address.split(':').slice(0, 4).join(':') + ':xxxx:xxxx:xxxx:xxxx' : log.ip_address?.split('.').map((p, i) => i < 2 ? p : 'xxx').join('.')))}
+                        {log.user_agent && (
+                          <div className="mt-1 text-[10px] text-slate-400 truncate max-w-[200px]" title={log.user_agent}>
+                            {log.user_agent}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
                   {visitorLogs.length === 0 && (
                     <tr>
-                      <td colSpan="3" className="px-6 py-12 text-center text-slate-500 font-medium">No se han registrado visitas todavía.</td>
+                      <td colSpan="4" className="px-6 py-12 text-center text-slate-500 font-medium">No se han registrado visitas todavía.</td>
                     </tr>
                   )}
                 </tbody>

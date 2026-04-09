@@ -1,6 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
+import CookieBanner from './CookieBanner';
 
 export default function MainLayout() {
   const { user } = useAuth();
@@ -42,6 +43,7 @@ export default function MainLayout() {
           </div>
         </div>
       </footer>
+      <CookieBanner />
     </div>
   );
 }

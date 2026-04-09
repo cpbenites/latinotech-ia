@@ -17,6 +17,17 @@
     "access_date": {
       "type": "string",
       "format": "date-time"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "is_bot": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_given": {
+      "type": "boolean",
+      "default": false
     }
   },
   "required": [

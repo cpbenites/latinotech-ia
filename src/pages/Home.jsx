@@ -17,20 +17,41 @@ export default function Home() {
         if (logged) return;
         const res = await fetch('https://ipapi.co/json/');
         const data = await res.json();
-        await base44.entities.VisitorLog.create({
-          ip_address: data.ip || 'Desconocido',
+        
+        const hasConsent = localStorage.getItem('cookieConsent') === 'true';
+        
+        const log = await base44.entities.VisitorLog.create({
+          ip_address: hasConsent ? (data.ip || 'Desconocido') : 'Oculto (Sin Consentimiento)',
           country: data.country_name || 'Desconocido',
           country_code: data.country_code || 'XX',
           city: data.city || 'Desconocido',
-          access_date: new Date().toISOString()
+          access_date: new Date().toISOString(),
+          user_agent: navigator.userAgent || 'Desconocido',
+          is_bot: false,
+          consent_given: hasConsent
         });
+        
         sessionStorage.setItem('tracked_visit', 'true');
+        sessionStorage.setItem('visitor_log_id', log.id);
       } catch (err) {
         console.error("Error tracking visitor", err);
       }
     }
     trackVisitor();
   }, []);
+
+  const handleHoneypot = async (e) => {
+    if (e.target.value) {
+      const logId = sessionStorage.getItem('visitor_log_id');
+      if (logId) {
+        try {
+          await base44.entities.VisitorLog.update(logId, { is_bot: true });
+        } catch (err) {
+          console.error("Error updating honeypot status");
+        }
+      }
+    }
+  };
 
   useEffect(() => {
     async function fetchArticles() {
@@ -60,6 +81,9 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
+      {/* Honeypot field for bot detection */}
+      <input type="text" name="website_url" style={{display: 'none'}} tabIndex="-1" autoComplete="off" onChange={handleHoneypot} aria-hidden="true" />
+      
       {category && (
         <div className="flex items-center gap-4 mb-12 border-b border-slate-200 pb-4">
           <h1 className="text-4xl font-black tracking-tight capitalize text-slate-900">{category}</h1>
