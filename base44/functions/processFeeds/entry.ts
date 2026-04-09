@@ -91,7 +91,15 @@ Deno.serve(async (req) => {
                         console.error("Image generation failed:", e);
                     }
                     
-                    const articleSlug = generateSlug(llmResponse.title) + "-" + Math.random().toString(36).substring(2, 7);
+                    let baseSlug = generateSlug(llmResponse.title);
+                    let articleSlug = baseSlug;
+                    let slugCounter = 2;
+                    
+                    // Verificação inteligente de colisão de slug
+                    while ((await base44.asServiceRole.entities.NewsArticle.filter({ slug: articleSlug })).length > 0) {
+                        articleSlug = `${baseSlug}-${slugCounter}`;
+                        slugCounter++;
+                    }
 
                     const createdArticle = await base44.asServiceRole.entities.NewsArticle.create({
                         slug: articleSlug,
@@ -114,7 +122,7 @@ Deno.serve(async (req) => {
                         
                         if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
                             const shortSummary = llmResponse.summary.length > 150 ? llmResponse.summary.substring(0, 147) + "..." : llmResponse.summary;
-                            const telegramMessage = `<b>${llmResponse.title}</b>\n\n${shortSummary}\n\n🚀 Lee la noticia completa aquí:\nhttps://latinotechia.com/article/${createdArticle.slug}`;
+                            const telegramMessage = `<b>${llmResponse.title}</b>\n\n${shortSummary}\n\n🚀 Lee la noticia completa aquí:\nhttps://latinotechia.com/noticia/${createdArticle.slug}`;
                             
                             if (image_url) {
                                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
