@@ -69,6 +69,7 @@ export default function Home() {
         const allData = await base44.entities.NewsArticle.filter(filter, '-published_date', 5000);
         setTotalCount(allData.length);
         
+        console.log('Artigos recebidos:', data);
         setArticles(data);
       } catch (err) {
         console.error(err);
@@ -95,8 +96,8 @@ export default function Home() {
     </div>
   );
 
-  const featured = page === 1 ? articles[0] : null;
-  const gridArticles = page === 1 ? articles.slice(1) : articles;
+  const featured = (page === 1 && !category) ? articles[0] : null;
+  const gridArticles = (page === 1 && !category) ? articles.slice(1) : articles;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
