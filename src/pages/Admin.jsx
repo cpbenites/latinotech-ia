@@ -7,11 +7,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
 import ReactMarkdown from 'react-markdown';
+import { Navigate } from 'react-router-dom';
+import { FileText, Rss } from 'lucide-react';
 
 export default function Admin() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('pending'); 
+  const [isLoading, setIsLoading] = useState(true);
   
   const [pendingArticles, setPendingArticles] = useState([]);
   const [feeds, setFeeds] = useState([]);
@@ -29,13 +32,26 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    if (user?.role === 'admin') {
-      fetchPending();
-      fetchFeeds();
+    async function loadData() {
+      if (user?.role === 'admin') {
+        setIsLoading(true);
+        await Promise.all([fetchPending(), fetchFeeds()]);
+        setIsLoading(false);
+      }
     }
+    loadData();
   }, [user]);
 
-  if (user?.role !== 'admin') return <div className="p-20 text-center font-bold text-2xl text-slate-500">Acceso denegado. Requiere privilegios de Admin.</div>;
+  if (user?.role !== 'admin') return <Navigate to="/" replace />;
+
+  if (isLoading) return (
+    <div className="min-h-[50vh] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div>
+        <p className="text-slate-500 font-bold tracking-tight">Cargando panel...</p>
+      </div>
+    </div>
+  );
 
   const handleApprove = async (id) => {
     await base44.entities.NewsArticle.update(id, { status: 'published', published_date: new Date().toISOString() });
@@ -73,12 +89,32 @@ export default function Admin() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-5xl">
-      <div className="flex justify-between items-center mb-10 border-b border-slate-200 pb-6">
+      <div className="flex justify-between items-start mb-10 border-b border-slate-200 pb-6">
         <div>
           <h1 className="text-4xl font-black tracking-tight">Panel Editorial</h1>
           <p className="text-slate-500 mt-2 font-medium">Revisa y publica contenido generado por IA</p>
+          <div className="flex gap-4 mt-6">
+            <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-3 flex items-center gap-4 shadow-sm">
+              <div className="bg-orange-100 text-orange-600 p-2.5 rounded-lg">
+                <FileText className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Pendientes</p>
+                <p className="text-2xl font-black leading-none mt-1 text-slate-900">{pendingArticles.length}</p>
+              </div>
+            </div>
+            <div className="bg-slate-50 border border-slate-200 rounded-xl px-5 py-3 flex items-center gap-4 shadow-sm">
+              <div className="bg-blue-100 text-blue-600 p-2.5 rounded-lg">
+                <Rss className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">Fuentes RSS</p>
+                <p className="text-2xl font-black leading-none mt-1 text-slate-900">{feeds.length}</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 pt-2">
           <Button variant={activeTab === 'pending' ? 'default' : 'outline'} onClick={() => setActiveTab('pending')} className={activeTab === 'pending' ? 'bg-slate-900' : ''}>
             Pendientes ({pendingArticles.length})
           </Button>
@@ -115,14 +151,14 @@ export default function Admin() {
                 </div>
                 <h2 className="text-3xl font-black tracking-tight mb-3 leading-tight">{article.title}</h2>
                 <p className="text-slate-600 font-medium mb-6 text-lg">{article.summary}</p>
-                <div className="markdown-content text-sm text-slate-700 max-h-64 overflow-y-auto mb-6 pr-4">
+                <div className="markdown-content text-base text-slate-700 max-h-96 overflow-y-auto mb-6 pr-6 leading-loose space-y-2 bg-slate-50/50 p-6 rounded-xl border border-slate-100">
                   <ReactMarkdown>{article.content}</ReactMarkdown>
                 </div>
                 <div className="mt-auto flex justify-between items-center pt-6 border-t border-slate-100">
                   <a href={article.original_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-slate-400 hover:text-slate-800">Ver fuente original &rarr;</a>
-                  <div className="flex gap-3">
-                    <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 font-bold" onClick={() => handleReject(article.id)}>Descartar</Button>
-                    <Button className="bg-green-600 hover:bg-green-700 font-bold" onClick={() => handleApprove(article.id)}>Aprobar y Publicar</Button>
+                  <div className="flex gap-4">
+                    <Button variant="outline" size="lg" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 font-bold" onClick={() => handleReject(article.id)}>Descartar</Button>
+                    <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white font-black shadow-lg shadow-green-600/30 px-8 transition-all hover:scale-105" onClick={() => handleApprove(article.id)}>Aprobar y Publicar ✨</Button>
                   </div>
                 </div>
               </div>
