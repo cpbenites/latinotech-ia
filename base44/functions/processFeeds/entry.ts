@@ -80,7 +80,7 @@ Deno.serve(async (req) => {
                         console.error("Image generation failed:", e);
                     }
                     
-                    await base44.asServiceRole.entities.NewsArticle.create({
+                    const createdArticle = await base44.asServiceRole.entities.NewsArticle.create({
                         title: llmResponse.title,
                         summary: llmResponse.summary,
                         content: llmResponse.content,
@@ -92,6 +92,30 @@ Deno.serve(async (req) => {
                         source_name: feed.name,
                         published_date: new Date().toISOString()
                     });
+
+                    // Envio automático para o Telegram
+                    try {
+                        const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN") || "TU_TOKEN_AQUI";
+                        const TELEGRAM_CHAT_ID = Deno.env.get("TELEGRAM_CHAT_ID") || "TU_CHAT_ID_AQUI";
+                        
+                        if (TELEGRAM_BOT_TOKEN !== "TU_TOKEN_AQUI" && TELEGRAM_CHAT_ID !== "TU_CHAT_ID_AQUI") {
+                            const shortSummary = llmResponse.summary.length > 150 ? llmResponse.summary.substring(0, 147) + "..." : llmResponse.summary;
+                            const telegramMessage = `<b>${llmResponse.title}</b>\n\n${shortSummary}\n\n🚀 Lee la noticia completa aquí:\nhttps://latinotechia.com/article/${createdArticle.id}`;
+                            
+                            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    chat_id: TELEGRAM_CHAT_ID,
+                                    text: telegramMessage,
+                                    parse_mode: 'HTML'
+                                })
+                            });
+                        }
+                    } catch (telegramError) {
+                        console.error("Error al enviar mensaje a Telegram:", telegramError);
+                    }
+
                     processedCount++;
                 }
             } catch (e) {
