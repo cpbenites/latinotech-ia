@@ -77,6 +77,30 @@
 
 
 
+@layer components {
+  .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+    @apply font-black mt-8 mb-4 tracking-tight text-slate-900;
+  }
+  .markdown-content h2 {
+    @apply text-3xl;
+  }
+  .markdown-content h3 {
+    @apply text-xl;
+  }
+  .markdown-content p {
+    @apply mb-6 leading-relaxed;
+  }
+  .markdown-content ul {
+    @apply list-disc pl-5 mb-6 space-y-2;
+  }
+  .markdown-content strong {
+    @apply font-bold text-slate-900;
+  }
+  .markdown-content a {
+    @apply text-green-600 font-semibold hover:underline;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
