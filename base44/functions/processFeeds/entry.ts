@@ -12,14 +12,17 @@ Deno.serve(async (req) => {
         const activeFeeds = feeds.filter(f => f.is_active);
         
         let processedCount = 0;
+        const MAX_ITEMS_PER_RUN = 2; // Limite total por execução para evitar Timeout
         
         for (const feed of activeFeeds) {
+            if (processedCount >= MAX_ITEMS_PER_RUN) break;
             try {
                 const feedData = await parser.parseURL(feed.url);
                 // Procesamos solo las 2 más recientes por fuente para optimizar tiempos y créditos
                 const items = feedData.items.slice(0, 2);
                 
                 for (const item of items) {
+                    if (processedCount >= MAX_ITEMS_PER_RUN) break;
                     const existing = await base44.asServiceRole.entities.NewsArticle.filter({ original_url: item.link });
                     if (existing.length > 0) continue;
                     
