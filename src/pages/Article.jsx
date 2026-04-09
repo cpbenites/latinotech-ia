@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
+import NewsletterCTA from '@/components/NewsletterCTA';
 
 export default function Article() {
   const { slug } = useParams();
@@ -77,6 +78,10 @@ export default function Article() {
               Ver noticia original en {article.source_name || 'la fuente'} &rarr;
             </a>
           )}
+        </div>
+
+        <div className="mt-12 mb-8">
+          <NewsletterCTA />
         </div>
       </div>
     </article>
