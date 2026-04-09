@@ -39,21 +39,21 @@ export default function Admin() {
 
   const handleApprove = async (id) => {
     await base44.entities.NewsArticle.update(id, { status: 'published', published_date: new Date().toISOString() });
-    toast({ title: "Artículo publicado con éxito" });
+    toast({ title: "Artículo publicado con éxito", duration: 4000 });
     fetchPending();
   };
 
   const handleReject = async (id) => {
     await base44.entities.NewsArticle.update(id, { status: 'rejected' });
-    toast({ title: "Artículo descartado", variant: "destructive" });
+    toast({ title: "Artículo descartado", variant: "destructive", duration: 4000 });
     fetchPending();
   };
 
   const handleAddFeed = async () => {
-    if(!newFeed.url || !newFeed.name) return toast({ title: "Faltan campos", variant: "destructive" });
+    if(!newFeed.url || !newFeed.name) return toast({ title: "Faltan campos", variant: "destructive", duration: 4000 });
     await base44.entities.RssFeed.create(newFeed);
     setNewFeed({ url: '', name: '', category: 'Tech' });
-    toast({ title: "Feed RSS añadido" });
+    toast({ title: "Feed RSS añadido", duration: 4000 });
     fetchFeeds();
   };
 
@@ -61,10 +61,11 @@ export default function Admin() {
     setIsProcessing(true);
     try {
       const res = await base44.functions.invoke('processFeeds', {});
-      toast({ title: "Búsqueda con IA completada", description: `Noticias procesadas: ${res.data.processed}` });
+      toast({ title: "Búsqueda con IA completada", description: `Noticias procesadas: ${res.data.processed}`, duration: 4000 });
       fetchPending();
     } catch (e) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      console.error("Erro no processFeeds:", e);
+      toast({ title: "Error", description: e.message, variant: "destructive", duration: 8000 });
     } finally {
       setIsProcessing(false);
     }
