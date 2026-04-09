@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
                     const existing = await base44.asServiceRole.entities.NewsArticle.filter({ original_url: item.link });
                     if (existing.length > 0) continue;
                     
-                    const prompt = `Actúa como un periodista experto en tecnología y SEO para TechLatino, un sitio top de noticias estilo TechCrunch.
+                    const prompt = `Actúa como un periodista experto en tecnología y SEO para BenTech News, un sitio top de noticias estilo TechCrunch.
                     Reescribe la siguiente noticia en español, orientada al público de Latinoamérica.
                     El tono debe ser profesional, dinámico, limpio y atractivo. Usa excelente redacción.
                     
