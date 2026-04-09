@@ -3,6 +3,17 @@ import Parser from 'npm:rss-parser';
 
 const parser = new Parser();
 
+function generateSlug(text) {
+    return text.toString().toLowerCase()
+        .normalize("NFD") // Normaliza para separar os acentos das letras (ex: 'ñ' -> 'n' e '~')
+        .replace(/[\u0300-\u036f]/g, "") // Elimina os acentos e diacríticos
+        .replace(/[^a-z0-9 -]/g, "") // Elimina caracteres não alfanuméricos exceto espaços e hifens
+        .replace(/\s+/g, "-") // Substitui espaços por hifens
+        .replace(/-+/g, "-") // Elimina hifens repetidos
+        .replace(/^-+/, "") // Elimina hifens no início
+        .replace(/-+$/, ""); // Elimina hifens no fim
+}
+
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
@@ -80,7 +91,10 @@ Deno.serve(async (req) => {
                         console.error("Image generation failed:", e);
                     }
                     
+                    const articleSlug = generateSlug(llmResponse.title) + "-" + Math.random().toString(36).substring(2, 7);
+
                     const createdArticle = await base44.asServiceRole.entities.NewsArticle.create({
+                        slug: articleSlug,
                         title: llmResponse.title,
                         summary: llmResponse.summary,
                         content: llmResponse.content,
@@ -100,7 +114,7 @@ Deno.serve(async (req) => {
                         
                         if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
                             const shortSummary = llmResponse.summary.length > 150 ? llmResponse.summary.substring(0, 147) + "..." : llmResponse.summary;
-                            const telegramMessage = `<b>${llmResponse.title}</b>\n\n${shortSummary}\n\n🚀 Lee la noticia completa aquí:\nhttps://latinotechia.com/article/${createdArticle.id}`;
+                            const telegramMessage = `<b>${llmResponse.title}</b>\n\n${shortSummary}\n\n🚀 Lee la noticia completa aquí:\nhttps://latinotechia.com/article/${createdArticle.slug}`;
                             
                             if (image_url) {
                                 await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {

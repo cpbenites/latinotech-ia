@@ -114,7 +114,7 @@ export default function Home() {
       )}
       
       {!category && featured && (
-        <Link to={`/article/${featured.id}`} className="block mb-16 group">
+        <Link to={`/article/${featured.slug || featured.id}`} className="block mb-16 group">
           <div className="grid md:grid-cols-5 gap-8 items-center">
             <div className="md:col-span-3 aspect-[16/10] bg-slate-100 overflow-hidden relative">
               {featured.image_url ? (
@@ -139,7 +139,7 @@ export default function Home() {
       {gridArticles.length > 0 && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
           {gridArticles.map(article => (
-            <Link key={article.id} to={`/article/${article.id}`} className="group flex flex-col">
+            <Link key={article.id} to={`/article/${article.slug || article.id}`} className="group flex flex-col">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative">
                 {article.image_url ? (
                   <img src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />

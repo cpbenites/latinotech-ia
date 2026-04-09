@@ -46,6 +46,9 @@
     },
     "source_name": {
       "type": "string"
+    },
+    "slug": {
+      "type": "string"
     }
   },
   "required": [

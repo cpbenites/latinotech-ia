@@ -22,8 +22,9 @@ Deno.serve(async (req) => {
         // Iterar pelos artigos publicados
         for (const article of articles) {
             const lastMod = article.published_date || article.created_date || today;
+            const articleUrlIdentifier = article.slug || article.id;
             xml += `  <url>\n`;
-            xml += `    <loc>${baseUrl}/article/${article.id}</loc>\n`;
+            xml += `    <loc>${baseUrl}/article/${articleUrlIdentifier}</loc>\n`;
             xml += `    <lastmod>${new Date(lastMod).toISOString()}</lastmod>\n`;
             xml += `    <priority>0.6</priority>\n`;
             xml += `  </url>\n`;

@@ -6,14 +6,25 @@ import { es } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
 
 export default function Article() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchArticle() {
       try {
-        const data = await base44.entities.NewsArticle.get(id);
+        // Buscar primeiro pelo slug, com fallback para ID em notícias antigas
+        let data;
+        const articlesBySlug = await base44.entities.NewsArticle.filter({ slug: slug });
+        if (articlesBySlug.length > 0) {
+          data = articlesBySlug[0];
+        } else {
+          try {
+            data = await base44.entities.NewsArticle.get(slug);
+          } catch (e) {
+             // Não encontrado nem por slug nem por ID
+          }
+        }
         setArticle(data);
       } catch (err) {
         console.error(err);
@@ -22,7 +33,7 @@ export default function Article() {
       }
     }
     fetchArticle();
-  }, [id]);
+  }, [slug]);
 
   if (loading) return (
     <div className="min-h-[50vh] flex items-center justify-center">
