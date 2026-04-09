@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tech-mundo-ia.base44.app/api/functions/sitemap
