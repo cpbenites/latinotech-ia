@@ -6,9 +6,12 @@ import { es } from 'date-fns/locale';
 
 export default function Home() {
   const [articles, setArticles] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const category = searchParams.get('category');
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  const ITEMS_PER_PAGE = 12;
 
   useEffect(() => {
     async function trackVisitor() {
@@ -59,7 +62,13 @@ export default function Home() {
       try {
         const filter = { status: 'published' };
         if (category) filter.category = category;
-        const data = await base44.entities.NewsArticle.filter(filter, '-published_date', 20);
+        
+        const skip = (page - 1) * ITEMS_PER_PAGE;
+        const data = await base44.entities.NewsArticle.filter(filter, '-published_date', ITEMS_PER_PAGE, skip);
+        
+        const allData = await base44.entities.NewsArticle.filter(filter, '-published_date', 5000);
+        setTotalCount(allData.length);
+        
         setArticles(data);
       } catch (err) {
         console.error(err);
@@ -68,7 +77,17 @@ export default function Home() {
       }
     }
     fetchArticles();
-  }, [category]);
+  }, [category, page]);
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE) || 1;
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', newPage.toString());
+    setSearchParams(newParams);
+    window.scrollTo(0, 0);
+  };
 
   if (loading) return (
     <div className="min-h-[50vh] flex items-center justify-center">
@@ -76,8 +95,8 @@ export default function Home() {
     </div>
   );
 
-  const featured = articles[0];
-  const gridArticles = articles.slice(1);
+  const featured = page === 1 ? articles[0] : null;
+  const gridArticles = page === 1 ? articles.slice(1) : articles;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -88,7 +107,7 @@ export default function Home() {
         <div className="flex items-center gap-4 mb-12 border-b border-slate-200 pb-4">
           <h1 className="text-4xl font-black tracking-tight capitalize text-slate-900">{category}</h1>
           <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-            {articles.length} Artículos
+            {totalCount} Artículos
           </span>
         </div>
       )}
@@ -143,6 +162,28 @@ export default function Home() {
         <div className="text-center py-20">
           <p className="text-2xl font-bold tracking-tight text-slate-400 mb-2">Aún no hay noticias.</p>
           <p className="text-slate-500">Los artículos publicados aparecerán aquí.</p>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 pt-12 pb-8 border-t border-slate-200 mt-12">
+          <button 
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
+            className="px-4 py-2 border border-slate-200 rounded-md font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            &lt; Anterior
+          </button>
+          <span className="text-sm font-medium text-slate-500">
+            Página {page} de {totalPages}
+          </span>
+          <button 
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
+            className="px-4 py-2 border border-slate-200 rounded-md font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Próxima &gt;
+          </button>
         </div>
       )}
     </div>
