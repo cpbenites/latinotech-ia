@@ -11,6 +11,28 @@ export default function Home() {
   const category = searchParams.get('category');
 
   useEffect(() => {
+    async function trackVisitor() {
+      try {
+        const logged = sessionStorage.getItem('tracked_visit');
+        if (logged) return;
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        await base44.entities.VisitorLog.create({
+          ip_address: data.ip || 'Desconocido',
+          country: data.country_name || 'Desconocido',
+          country_code: data.country_code || 'XX',
+          city: data.city || 'Desconocido',
+          access_date: new Date().toISOString()
+        });
+        sessionStorage.setItem('tracked_visit', 'true');
+      } catch (err) {
+        console.error("Error tracking visitor", err);
+      }
+    }
+    trackVisitor();
+  }, []);
+
+  useEffect(() => {
     async function fetchArticles() {
       setLoading(true);
       try {

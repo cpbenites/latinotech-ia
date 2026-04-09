@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
 import ReactMarkdown from 'react-markdown';
 import { Navigate } from 'react-router-dom';
-import { FileText, Rss } from 'lucide-react';
+import { FileText, Rss, Users, MapPin } from 'lucide-react';
 
 export default function Admin() {
   const { user } = useAuth();
@@ -18,6 +18,7 @@ export default function Admin() {
   
   const [pendingArticles, setPendingArticles] = useState([]);
   const [feeds, setFeeds] = useState([]);
+  const [visitorLogs, setVisitorLogs] = useState([]);
   const [newFeed, setNewFeed] = useState({ url: '', name: '', category: 'Tech' });
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -31,11 +32,16 @@ export default function Admin() {
     setFeeds(data);
   };
 
+  const fetchAudience = async () => {
+    const data = await base44.entities.VisitorLog.list('-access_date', 50);
+    setVisitorLogs(data);
+  };
+
   useEffect(() => {
     async function loadData() {
       if (user?.role === 'admin') {
         setIsLoading(true);
-        await Promise.all([fetchPending(), fetchFeeds()]);
+        await Promise.all([fetchPending(), fetchFeeds(), fetchAudience()]);
         setIsLoading(false);
       }
     }
@@ -120,6 +126,9 @@ export default function Admin() {
           </Button>
           <Button variant={activeTab === 'feeds' ? 'default' : 'outline'} onClick={() => setActiveTab('feeds')} className={activeTab === 'feeds' ? 'bg-slate-900' : ''}>
             Fuentes RSS
+          </Button>
+          <Button variant={activeTab === 'audience' ? 'default' : 'outline'} onClick={() => setActiveTab('audience')} className={activeTab === 'audience' ? 'bg-slate-900' : ''}>
+            Audiencia
           </Button>
           <Button onClick={runProcessFeeds} disabled={isProcessing} className="bg-green-600 hover:bg-green-700 font-bold ml-4">
             {isProcessing ? '🤖 Generando...' : 'Generar Noticias Ahora'}
@@ -212,6 +221,78 @@ export default function Admin() {
               </div>
             ))}
             {feeds.length === 0 && <p className="text-slate-500 font-medium">No hay fuentes configuradas.</p>}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'audience' && (
+        <div className="space-y-8">
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm col-span-full md:col-span-1">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><Users className="w-4 h-4" /> Total Visitas (Top 50)</h3>
+              <p className="text-4xl font-black text-slate-900">{visitorLogs.length}</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm col-span-full md:col-span-2">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><MapPin className="w-4 h-4" /> Top 3 Países</h3>
+              <div className="flex flex-wrap gap-4">
+                {(() => {
+                  const countryCounts = visitorLogs.reduce((acc, log) => {
+                    const c = log.country || 'Desconocido';
+                    acc[c] = (acc[c] || 0) + 1;
+                    return acc;
+                  }, {});
+                  const topCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                  if (topCountries.length === 0) return <p className="text-slate-400 font-medium">No hay datos suficientes.</p>;
+                  return topCountries.map(([country, count], i) => (
+                    <div key={country} className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-lg px-4 py-2 shadow-sm">
+                      <span className="text-lg font-black text-slate-300">#{i + 1}</span>
+                      <span className="font-bold text-slate-800">{country}</span>
+                      <span className="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-bold">{count}</span>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
+                  <tr>
+                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Fecha y Hora</th>
+                    <th className="px-6 py-4 font-bold uppercase tracking-wider">País / Ciudad</th>
+                    <th className="px-6 py-4 font-bold uppercase tracking-wider">IP</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {visitorLogs.map((log) => (
+                    <tr key={log.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
+                        {log.access_date ? format(new Date(log.access_date), 'dd MMM yyyy, HH:mm') : 'N/A'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          {log.country_code && log.country_code !== 'XX' && (
+                            <img src={`https://flagcdn.com/24x18/${log.country_code.toLowerCase()}.png`} alt={log.country_code} className="rounded-sm border border-slate-200 shadow-sm" />
+                          )}
+                          <span className="font-bold text-slate-800">{log.country}</span>
+                          <span className="text-slate-400 font-medium">• {log.city}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 font-mono text-slate-500">
+                        {log.ip_address}
+                      </td>
+                    </tr>
+                  ))}
+                  {visitorLogs.length === 0 && (
+                    <tr>
+                      <td colSpan="3" className="px-6 py-12 text-center text-slate-500 font-medium">No se han registrado visitas todavía.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

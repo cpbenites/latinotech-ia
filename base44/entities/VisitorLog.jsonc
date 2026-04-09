@@ -1,0 +1,25 @@
+{
+  "name": "VisitorLog",
+  "type": "object",
+  "properties": {
+    "ip_address": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "country_code": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "access_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "ip_address"
+  ]
+}
