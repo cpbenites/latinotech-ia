@@ -1,11 +1,50 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import CookieBanner from './CookieBanner';
+import { useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
 
 export default function MainLayout() {
   const { user } = useAuth();
-  
+  const location = useLocation();
+
+  useEffect(() => {
+    async function trackVisitor() {
+      // 1. Ignorar rotas Admin
+      if (location.pathname.startsWith('/admin')) return;
+      
+      // 2. Ignorar Sessão de Administrador
+      if (user?.role === 'admin') return;
+
+      try {
+        const logged = sessionStorage.getItem('tracked_visit');
+        if (logged) return;
+        const res = await fetch('https://ipapi.co/json/');
+        const data = await res.json();
+        
+        const hasConsent = localStorage.getItem('cookieConsent') === 'true';
+        
+        const log = await base44.entities.VisitorLog.create({
+          ip_address: hasConsent ? (data.ip || 'Desconocido') : 'Oculto (Sin Consentimiento)',
+          country: data.country_name || 'Desconocido',
+          country_code: data.country_code || 'XX',
+          city: data.city || 'Desconocido',
+          access_date: new Date().toISOString(),
+          user_agent: navigator.userAgent || 'Desconocido',
+          is_bot: false,
+          consent_given: hasConsent
+        });
+        
+        sessionStorage.setItem('tracked_visit', 'true');
+        sessionStorage.setItem('visitor_log_id', log.id);
+      } catch (err) {
+        console.error("Error tracking visitor", err);
+      }
+    }
+    trackVisitor();
+  }, [location.pathname, user]);
+
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 flex flex-col">
       <header className="border-b border-slate-200 sticky top-0 bg-white/95 backdrop-blur z-50">

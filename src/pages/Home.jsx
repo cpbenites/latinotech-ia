@@ -13,36 +13,6 @@ export default function Home() {
   const page = parseInt(searchParams.get('page') || '1', 10);
   const ITEMS_PER_PAGE = 12;
 
-  useEffect(() => {
-    async function trackVisitor() {
-      try {
-        const logged = sessionStorage.getItem('tracked_visit');
-        if (logged) return;
-        const res = await fetch('https://ipapi.co/json/');
-        const data = await res.json();
-        
-        const hasConsent = localStorage.getItem('cookieConsent') === 'true';
-        
-        const log = await base44.entities.VisitorLog.create({
-          ip_address: hasConsent ? (data.ip || 'Desconocido') : 'Oculto (Sin Consentimiento)',
-          country: data.country_name || 'Desconocido',
-          country_code: data.country_code || 'XX',
-          city: data.city || 'Desconocido',
-          access_date: new Date().toISOString(),
-          user_agent: navigator.userAgent || 'Desconocido',
-          is_bot: false,
-          consent_given: hasConsent
-        });
-        
-        sessionStorage.setItem('tracked_visit', 'true');
-        sessionStorage.setItem('visitor_log_id', log.id);
-      } catch (err) {
-        console.error("Error tracking visitor", err);
-      }
-    }
-    trackVisitor();
-  }, []);
-
   const handleHoneypot = async (e) => {
     if (e.target.value) {
       const logId = sessionStorage.getItem('visitor_log_id');
