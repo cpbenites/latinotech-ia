@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
 import ReactMarkdown from 'react-markdown';
 import { Navigate } from 'react-router-dom';
-import { FileText, Rss, Users, MapPin } from 'lucide-react';
+import { FileText, Rss, Users, MapPin, Download } from 'lucide-react';
 
 export default function Admin() {
   const { user } = useAuth();
@@ -35,6 +35,11 @@ export default function Admin() {
   const fetchAudience = async () => {
     const data = await base44.entities.VisitorLog.list('-access_date', 50);
     setVisitorLogs(data);
+  };
+
+  const handleExportLogs = () => {
+    console.log("Exporting Visitor Logs (Full Data):", visitorLogs);
+    toast({ title: "Logs exportados", description: "Revisa la consola del navegador para ver los datos completos.", duration: 4000 });
   };
 
   useEffect(() => {
@@ -227,14 +232,20 @@ export default function Admin() {
 
       {activeTab === 'audience' && (
         <div className="space-y-8">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-2xl font-black tracking-tight text-slate-900">Análisis de Tráfico</h2>
+            <Button onClick={handleExportLogs} variant="outline" className="flex items-center gap-2 font-bold text-slate-600">
+              <Download className="w-4 h-4" /> Exportar Logs
+            </Button>
+          </div>
           <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm col-span-full md:col-span-1">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><Users className="w-4 h-4" /> Total Visitas (Top 50)</h3>
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><Users className="w-4 h-4" /> Visitas (Top 50)</h3>
               <p className="text-4xl font-black text-slate-900">{visitorLogs.length}</p>
             </div>
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm col-span-full md:col-span-2">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
               <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><MapPin className="w-4 h-4" /> Top 3 Países</h3>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-col gap-3">
                 {(() => {
                   const countryCounts = visitorLogs.reduce((acc, log) => {
                     const c = log.country || 'Desconocido';
@@ -242,12 +253,31 @@ export default function Admin() {
                     return acc;
                   }, {});
                   const topCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
-                  if (topCountries.length === 0) return <p className="text-slate-400 font-medium">No hay datos suficientes.</p>;
+                  if (topCountries.length === 0) return <p className="text-slate-400 font-medium text-sm">No hay datos.</p>;
                   return topCountries.map(([country, count], i) => (
-                    <div key={country} className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-lg px-4 py-2 shadow-sm">
-                      <span className="text-lg font-black text-slate-300">#{i + 1}</span>
-                      <span className="font-bold text-slate-800">{country}</span>
-                      <span className="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-bold">{count}</span>
+                    <div key={country} className="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 shadow-sm text-sm">
+                      <span className="font-bold text-slate-800 truncate pr-2">{i + 1}. {country}</span>
+                      <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-bold">{count}</span>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><MapPin className="w-4 h-4" /> Top 3 Ciudades</h3>
+              <div className="flex flex-col gap-3">
+                {(() => {
+                  const cityCounts = visitorLogs.reduce((acc, log) => {
+                    const c = log.city || 'Desconocido';
+                    acc[c] = (acc[c] || 0) + 1;
+                    return acc;
+                  }, {});
+                  const topCities = Object.entries(cityCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+                  if (topCities.length === 0) return <p className="text-slate-400 font-medium text-sm">No hay datos.</p>;
+                  return topCities.map(([city, count], i) => (
+                    <div key={city} className="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 shadow-sm text-sm">
+                      <span className="font-bold text-slate-800 truncate pr-2">{i + 1}. {city}</span>
+                      <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-bold">{count}</span>
                     </div>
                   ));
                 })()}
@@ -281,7 +311,7 @@ export default function Admin() {
                         </div>
                       </td>
                       <td className="px-6 py-4 font-mono text-slate-500">
-                        {log.ip_address}
+                        {user?.role === 'super_admin' ? log.ip_address : (log.ip_address?.includes(':') ? log.ip_address.split(':').slice(0, 4).join(':') + ':xxxx:xxxx:xxxx:xxxx' : log.ip_address?.split('.').map((p, i) => i < 2 ? p : 'xxx').join('.'))}
                       </td>
                     </tr>
                   ))}

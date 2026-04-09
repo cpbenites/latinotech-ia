@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
                     const existing = await base44.asServiceRole.entities.NewsArticle.filter({ original_url: item.link });
                     if (existing.length > 0) continue;
                     
-                    const prompt = `Actúa como un periodista experto en tecnología y SEO para LatinoTech IA, un sitio top de noticias estilo TechCrunch.
+                    let prompt = `Actúa como un periodista experto en tecnología y SEO para LatinoTech IA, un sitio top de noticias estilo TechCrunch.
                     Reescribe la siguiente noticia en español, orientada al público de Latinoamérica.
                     El tono debe ser profesional, dinámico, limpio y atractivo. Usa excelente redacción.
                     
@@ -38,6 +38,14 @@ Deno.serve(async (req) => {
                     - seo_keywords: 5 a 7 palabras clave separadas por coma
                     - image_prompt: Un prompt de máximo 20 palabras en inglés para generar una imagen hiperrealista y limpia estilo editorial de tecnología sobre este tema.
                     `;
+
+                    if (feed.category === 'Software') {
+                      prompt += `\nINSTRUCCIONES OBLIGATORIAS PARA CATEGORÍA SOFTWARE:
+                    - Debes buscar e incluir el nombre de la herramienta.
+                    - Debes indicar claramente si es gratuita o de pago.
+                    - Debes incluir una breve sección o lista de "Cómo empezar" (How to start).
+                    - El 'summary' debe estar enfocado en la utilidad práctica de la herramienta para el usuario.`;
+                    }
                     
                     const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
                         prompt: prompt,
