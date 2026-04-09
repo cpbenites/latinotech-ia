@@ -35,7 +35,7 @@ export default function MainLayout() {
       <footer className="border-t border-slate-200 py-12 mt-12 bg-slate-50">
         <div className="container mx-auto px-4 text-center">
           <p className="text-slate-500 text-sm font-medium mb-4">
-            © {new Date().getFullYear()} LatinoTech IA. Contenido generado con IA.
+            © {new Date().getFullYear()} LatinoTech IA. Noticias curadas e impulsadas por Inteligencia Artificial.
           </p>
           <div className="flex justify-center gap-6 text-xs text-slate-400">
             <Link to="/privacidad" className="hover:text-slate-600 transition-colors">Política de Privacidad</Link>
