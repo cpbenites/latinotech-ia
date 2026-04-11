@@ -65,6 +65,7 @@ export default function MainLayout() {
             <Link to="/?category=Gadgets" className="hover:text-green-600 transition-colors">Gadgets</Link>
             <Link to="/?category=Software" className="hover:text-green-600 transition-colors">Software</Link>
             <Link to="/?category=Gaming" className="hover:text-green-600 transition-colors">Gaming</Link>
+            <Link to="/?category=Tutoriales" className="hover:text-green-600 transition-colors">Tutoriales</Link>
           </nav>
           <div className="flex items-center gap-4">
             <div className="hidden md:block mr-2">

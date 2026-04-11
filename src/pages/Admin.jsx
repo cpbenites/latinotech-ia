@@ -235,6 +235,7 @@ export default function Admin() {
                     <SelectItem value="Startups">Startups</SelectItem>
                     <SelectItem value="Gaming">Gaming</SelectItem>
                     <SelectItem value="Tech">General Tech</SelectItem>
+                    <SelectItem value="Tutoriales">Tutoriales</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

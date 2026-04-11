@@ -50,11 +50,16 @@ Deno.serve(async (req) => {
                     2. Estructura Periodística: El artículo DEBE contener al menos dos o tres subtítulos (usa Markdown ## o ### equivalentes a <h2>/<h3>) para organizar la lectura y mejorar el SEO.
                     3. Contextualización: Expande la noticia. Explica "por qué esto importa", "cuál es el impacto en el mercado latino/global" y "qué cambia para el usuario final".
                     4. Formato: El contenido debe estar formateado en Markdown usando párrafos, subtítulos (##/###) y negritas (**) en las palabras clave importantes.
+                    5. Tutoriales de IA: Si la noticia es sobre el lanzamiento, actualización o funcionalidad de una herramienta de Inteligencia Artificial (ex: Midjourney, ChatGPT, Grok, Runway, etc.), debes OBRIGATORIAMENTE incluir al final del artículo una sección titulada '🚀 Cómo aprovechar esta actualización (Tutorial & Prompts)'. En esta sección, escribe una guía rápida de 3 pasos de cómo usar la novedad y proporciona 1 o 2 ejemplos prácticos de 'Prompts' (destacados en bloques de código/quotes) que el lector puede copiar y pegar para probar la herramienta.
+
+                    IMPORTANTE SOBRE LA CATEGORÍA:
+                    Si aplicaste la regla 5 (Tutoriales de IA) y generaste una guía práctica con prompts, la categoría DEBE ser "Tutoriales". De lo contrario, usa la categoría original: "${feed.category}".
                     
                     Devuelve EXCLUSIVAMENTE un JSON válido con:
                     - title: Título hiper atractivo y optimizado para SEO (clickbait elegante)
                     - summary: Resumen de 2 líneas exactas que atrape al lector
                     - content: El artículo completo siguiendo las REGLAS ESTRICTAS descritas arriba.
+                    - category: La categoría asignada ("Tutoriales" o la original).
                     - seo_keywords: 5 a 7 palabras clave separadas por coma
                     - image_prompt: Un prompt de máximo 20 palabras en inglés para generar una imagen hiperrealista y limpia estilo editorial de tecnología sobre este tema.
                     `;
@@ -75,6 +80,7 @@ Deno.serve(async (req) => {
                                 title: { type: "string" },
                                 summary: { type: "string" },
                                 content: { type: "string" },
+                                category: { type: "string" },
                                 seo_keywords: { type: "string" },
                                 image_prompt: { type: "string" }
                             }
@@ -108,7 +114,7 @@ Deno.serve(async (req) => {
                         content: llmResponse.content,
                         original_url: item.link,
                         image_url: image_url,
-                        category: feed.category,
+                        category: llmResponse.category || feed.category,
                         status: "pending", // Queda pendiente para aprobación del Admin
                         seo_keywords: llmResponse.seo_keywords,
                         source_name: feed.name,
