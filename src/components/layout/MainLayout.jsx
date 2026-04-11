@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import CookieBanner from './CookieBanner';
 import { useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import SearchBar from '@/components/SearchBar';
 
 const TelegramIcon = ({ className }) => (
   <svg viewBox="0 0 24 24" className={className} fill="currentColor">
@@ -58,7 +59,7 @@ export default function MainLayout() {
           <Link to="/" className="text-2xl font-black tracking-tighter text-green-600">
             LatinoTech IA<span className="text-slate-900">.</span>
           </Link>
-          <nav className="hidden md:flex gap-8 font-semibold text-sm text-slate-600">
+          <nav className="hidden lg:flex gap-6 font-semibold text-sm text-slate-600">
             <Link to="/?category=IA" className="hover:text-green-600 transition-colors">IA</Link>
             <Link to="/?category=Startups" className="hover:text-green-600 transition-colors">Startups</Link>
             <Link to="/?category=Gadgets" className="hover:text-green-600 transition-colors">Gadgets</Link>
@@ -66,6 +67,9 @@ export default function MainLayout() {
             <Link to="/?category=Gaming" className="hover:text-green-600 transition-colors">Gaming</Link>
           </nav>
           <div className="flex items-center gap-4">
+            <div className="hidden md:block mr-2">
+              <SearchBar />
+            </div>
             <a 
               href="https://t.me/latinotech" 
               target="_blank" 
