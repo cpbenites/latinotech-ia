@@ -11,7 +11,7 @@ export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const category = searchParams.get('category');
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const ITEMS_PER_PAGE = 12;
+  const ITEMS_PER_PAGE = 13;
 
   const handleHoneypot = async (e) => {
     if (e.target.value) {
