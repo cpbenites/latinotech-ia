@@ -8,7 +8,8 @@ import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
 import ReactMarkdown from 'react-markdown';
 import { Navigate } from 'react-router-dom';
-import { FileText, Rss, Users, MapPin, Download } from 'lucide-react';
+import { FileText, Rss, Users, MapPin, Download, Video, Copy, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Admin() {
   const { user } = useAuth();
@@ -21,6 +22,9 @@ export default function Admin() {
   const [visitorLogs, setVisitorLogs] = useState([]);
   const [newFeed, setNewFeed] = useState({ url: '', name: '', category: 'Tech' });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [scriptModalOpen, setScriptModalOpen] = useState(false);
+  const [generatedScript, setGeneratedScript] = useState('');
+  const [generatingScriptId, setGeneratingScriptId] = useState(null);
 
   const fetchPending = async () => {
     const data = await base44.entities.NewsArticle.filter({ status: 'pending' }, '-created_date');
@@ -82,6 +86,28 @@ export default function Admin() {
     setNewFeed({ url: '', name: '', category: 'Tech' });
     toast({ title: "Feed RSS añadido", duration: 4000 });
     fetchFeeds();
+  };
+
+  const handleGenerateScript = async (article) => {
+    setGeneratingScriptId(article.id);
+    try {
+      const res = await base44.functions.invoke('generateVideoScript', {
+        title: article.title,
+        summary: article.summary,
+        content: article.content
+      });
+      setGeneratedScript(res.data.script);
+      setScriptModalOpen(true);
+    } catch (e) {
+      toast({ title: "Error al generar guion", description: e.message, variant: "destructive", duration: 4000 });
+    } finally {
+      setGeneratingScriptId(null);
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(generatedScript);
+    toast({ title: "¡Copiado!", description: "Guion copiado al portapapeles.", duration: 3000 });
   };
 
   const runProcessFeeds = async () => {
@@ -168,8 +194,20 @@ export default function Admin() {
                 <div className="markdown-content text-base text-slate-700 max-h-96 overflow-y-auto mb-6 pr-6 leading-loose space-y-2 bg-slate-50/50 p-6 rounded-xl border border-slate-100">
                   <ReactMarkdown>{article.content}</ReactMarkdown>
                 </div>
-                <div className="mt-auto flex justify-between items-center pt-6 border-t border-slate-100">
-                  <a href={article.original_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-slate-400 hover:text-slate-800">Ver fuente original &rarr;</a>
+                <div className="mt-auto flex flex-col md:flex-row justify-between items-center pt-6 border-t border-slate-100 gap-4">
+                  <div className="flex items-center gap-4">
+                    <a href={article.original_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-slate-400 hover:text-slate-800">Ver fuente original &rarr;</a>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleGenerateScript(article)}
+                      disabled={generatingScriptId === article.id}
+                      className="border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 font-bold flex items-center gap-2 shadow-sm"
+                    >
+                      {generatingScriptId === article.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
+                      {generatingScriptId === article.id ? 'Generando...' : 'Script Viral'}
+                    </Button>
+                  </div>
                   <div className="flex gap-4">
                     <Button variant="outline" size="lg" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 font-bold" onClick={() => handleReject(article.id)}>Descartar</Button>
                     <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white font-black shadow-lg shadow-green-600/30 px-8 transition-all hover:scale-105" onClick={() => handleApprove(article.id)}>Aprobar y Publicar ✨</Button>
@@ -337,6 +375,27 @@ export default function Admin() {
           </div>
         </div>
       )}
+
+      <Dialog open={scriptModalOpen} onOpenChange={setScriptModalOpen}>
+        <DialogContent className="sm:max-w-2xl bg-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black flex items-center gap-2 text-slate-900">
+              <Video className="w-6 h-6 text-purple-600" /> Guion Viral Generado
+            </DialogTitle>
+          </DialogHeader>
+          <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 my-4 max-h-[60vh] overflow-y-auto">
+            <div className="whitespace-pre-wrap text-slate-700 leading-relaxed font-medium text-lg">
+              {generatedScript}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setScriptModalOpen(false)} className="font-bold">Cerrar</Button>
+            <Button onClick={copyToClipboard} className="bg-purple-600 hover:bg-purple-700 text-white font-bold flex items-center gap-2">
+              <Copy className="w-4 h-4" /> Copiar Guion
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
