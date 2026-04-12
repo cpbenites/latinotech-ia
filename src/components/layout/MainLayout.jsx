@@ -2,9 +2,10 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/lib/AuthContext';
 import { Button } from '@/components/ui/button';
 import CookieBanner from './CookieBanner';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import SearchBar from '@/components/SearchBar';
+import { Search, X } from 'lucide-react';
 
 const TelegramIcon = ({ className }) => (
   <svg viewBox="0 0 24 24" className={className} fill="currentColor">
@@ -17,6 +18,11 @@ export default function MainLayout() {
   const location = useLocation();
   const isPt = location.pathname.startsWith('/br');
   const langPrefix = isPt ? '/br' : '';
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileSearchOpen(false);
+  }, [location.pathname]);
 
   const handleLangSwitch = (newLang) => {
     if (newLang === 'pt' && !isPt) {
@@ -95,6 +101,12 @@ export default function MainLayout() {
             <div className="hidden md:block mr-2">
               <SearchBar lang={isPt ? 'pt' : 'es'} />
             </div>
+            <button
+              onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+              className="md:hidden text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center w-9 h-9 rounded-full hover:bg-slate-100"
+            >
+              {isMobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+            </button>
             <a 
               href="https://t.me/latinotech" 
               target="_blank" 
@@ -105,12 +117,17 @@ export default function MainLayout() {
               <TelegramIcon className="w-5 h-5" />
             </a>
             {user?.role === 'admin' && (
-              <Link to={`${langPrefix}/admin`}>
+              <Link to={`${langPrefix}/admin`} className="hidden sm:block">
                 <Button variant="ghost" size="sm" className="font-bold text-slate-800 hover:bg-slate-100">Panel Admin</Button>
               </Link>
             )}
           </div>
         </div>
+        {isMobileSearchOpen && (
+          <div className="md:hidden border-t border-slate-100 bg-white px-4 py-3 shadow-inner">
+            <SearchBar lang={isPt ? 'pt' : 'es'} />
+          </div>
+        )}
       </header>
       <main className="flex-1">
         <Outlet />

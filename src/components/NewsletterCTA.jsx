@@ -3,11 +3,14 @@ import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Mail, CheckCircle2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 export default function NewsletterCTA() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
   const [message, setMessage] = useState('');
+  const location = useLocation();
+  const isPt = location.pathname.includes('/br');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,11 +26,11 @@ export default function NewsletterCTA() {
         setMessage(response.data.error);
       } else {
         setStatus('success');
-        setMessage('¡Gracias por suscribirte!');
+        setMessage(isPt ? 'Obrigado por subscrever!' : '¡Gracias por suscribirte!');
       }
     } catch (error) {
       setStatus('error');
-      setMessage(error.response?.data?.error || 'Hubo un error al procesar tu solicitud.');
+      setMessage(error.response?.data?.error || (isPt ? 'Ocorreu um erro ao processar o seu pedido.' : 'Hubo un error al procesar tu solicitud.'));
     }
   };
 
@@ -43,7 +46,7 @@ export default function NewsletterCTA() {
           </div>
           <h3 className="text-3xl font-black tracking-tight">{message}</h3>
           <p className="text-slate-300 font-medium max-w-md mx-auto">
-            Te hemos añadido a la lista VIP. Pronto recibirás las mejores noticias tecnológicas en tu bandeja.
+            {isPt ? 'Adicionámos o seu e-mail à lista VIP. Em breve receberá as melhores notícias tecnológicas.' : 'Te hemos añadido a la lista VIP. Pronto recibirás las mejores noticias tecnológicas en tu bandeja.'}
           </p>
         </div>
       </div>
@@ -58,10 +61,10 @@ export default function NewsletterCTA() {
       <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
         <div>
           <h3 className="text-3xl md:text-4xl font-black tracking-tight mb-3 leading-tight">
-            Únete a la Revolución IA
+            {isPt ? 'Junte-se à Revolução IA' : 'Únete a la Revolución IA'}
           </h3>
           <p className="text-slate-300 font-medium text-base mb-0 leading-relaxed">
-            Recibe las noticias más importantes sobre Inteligencia Artificial, Startups y Tecnología directamente en tu correo.
+            {isPt ? 'Receba as notícias mais importantes sobre Inteligência Artificial, Startups e Tecnologia diretamente no seu e-mail.' : 'Recibe las noticias más importantes sobre Inteligencia Artificial, Startups y Tecnología directamente en tu correo.'}
           </p>
         </div>
         
@@ -71,7 +74,7 @@ export default function NewsletterCTA() {
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
               <Input
                 type="email"
-                placeholder="Tu correo electrónico..."
+                placeholder={isPt ? 'O seu e-mail...' : 'Tu correo electrónico...'}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="pl-11 h-12 bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus-visible:ring-green-500 focus-visible:border-green-500 rounded-xl"
@@ -83,14 +86,14 @@ export default function NewsletterCTA() {
               className="h-12 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl w-full text-base transition-colors"
               disabled={status === 'loading'}
             >
-              {status === 'loading' ? 'Suscribiendo...' : 'Suscribirme Ahora 🚀'}
+              {status === 'loading' ? (isPt ? 'A subscrever...' : 'Suscribiendo...') : (isPt ? 'Subscrever Agora 🚀' : 'Suscribirme Ahora 🚀')}
             </Button>
             {status === 'error' && (
               <p className="text-red-400 text-sm font-medium mt-1 text-center">{message}</p>
             )}
           </form>
           <p className="text-slate-500 text-xs text-center mt-4">
-            Cero spam. Cancela tu suscripción en cualquier momento.
+            {isPt ? 'Zero spam. Cancele a sua subscrição a qualquer momento.' : 'Cero spam. Cancela tu suscripción en cualquier momento.'}
           </p>
         </div>
       </div>

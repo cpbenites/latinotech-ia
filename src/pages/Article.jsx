@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
@@ -49,8 +49,51 @@ const PreBlock = ({ children, ...props }) => {
   );
 };
 
+const BlockquoteBlock = ({ children, ...props }) => {
+  const [copied, setCopied] = useState(false);
+  const textRef = useRef(null);
+
+  const handleCopy = () => {
+    if (textRef.current) {
+      navigator.clipboard.writeText(textRef.current.innerText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="relative group my-8">
+      <button
+        onClick={handleCopy}
+        className="absolute right-3 top-3 bg-white/80 backdrop-blur-sm text-slate-500 border border-slate-200 hover:bg-slate-50 hover:text-slate-800 px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
+      >
+        {copied ? (
+          <>
+            <Check className="w-3.5 h-3.5 text-green-600" />
+            <span className="text-green-600">Copiado!</span>
+          </>
+        ) : (
+          <>
+            <Copy className="w-3.5 h-3.5" />
+            Copiar
+          </>
+        )}
+      </button>
+      <blockquote
+        ref={textRef}
+        className="bg-slate-50 border-l-4 border-green-500 text-slate-700 p-6 pt-12 md:pt-6 rounded-r-xl text-lg italic font-medium leading-relaxed shadow-sm"
+        {...props}
+      >
+        {children}
+      </blockquote>
+    </div>
+  );
+};
+
 export default function Article() {
   const { slug } = useParams();
+  const location = useLocation();
+  const isPt = location.pathname.includes('/br');
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -118,6 +161,7 @@ export default function Article() {
           <ReactMarkdown
             components={{
               pre: PreBlock,
+              blockquote: BlockquoteBlock,
               code({node, inline, className, children, ...props}) {
                 return !inline ? (
                   <code className={className} {...props}>
@@ -138,7 +182,7 @@ export default function Article() {
         <div className="mt-16 pt-8 border-t border-slate-200 bg-slate-50 p-6 rounded-xl">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
             <div>
-              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">Información Meta (SEO)</h3>
+              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">{isPt ? 'INFORMAÇÕES META (SEO)' : 'INFORMACIÓN META (SEO)'}</h3>
               <div className="flex flex-wrap gap-2">
                 {article.seo_keywords?.split(',').map((kw, i) => (
                   <span key={i} className="bg-white border border-slate-200 text-slate-600 text-xs px-2 py-1 rounded">{kw.trim()}</span>
@@ -146,13 +190,13 @@ export default function Article() {
               </div>
             </div>
             <div className="shrink-0">
-              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">Compartir artículo</h3>
+              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">{isPt ? 'PARTILHAR ARTIGO' : 'COMPARTIR ARTÍCULO'}</h3>
               <ShareButtons title={article.title} />
             </div>
           </div>
           {article.original_url && (
             <a href={article.original_url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-green-600 hover:text-green-700 transition-colors inline-block">
-              Ver noticia original en {article.source_name || 'la fuente'} &rarr;
+              {isPt ? 'Ver notícia original no' : 'Ver noticia original en'} {article.source_name || (isPt ? 'fonte' : 'la fuente')} &rarr;
             </a>
           )}
         </div>
