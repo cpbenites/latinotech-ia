@@ -39,7 +39,6 @@ export default function Home({ lang = 'es' }) {
         const allData = await base44.entities.NewsArticle.filter(filter, '-published_date', 5000);
         setTotalCount(allData.length);
         
-        console.log('Artigos recebidos:', data);
         setArticles(data);
       } catch (err) {
         console.error(err);
@@ -108,7 +107,6 @@ export default function Home({ lang = 'es' }) {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
-      {/* Honeypot field for bot detection */}
       <input type="text" name="website_url" style={{display: 'none'}} tabIndex="-1" autoComplete="off" onChange={handleHoneypot} aria-hidden="true" />
       
       {category && (
