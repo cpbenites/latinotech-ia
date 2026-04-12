@@ -91,12 +91,21 @@ const BlockquoteBlock = ({ children, ...props }) => {
 };
 
 const isPromptText = (children) => {
-  const childrenArray = React.Children.toArray(children);
-  if (childrenArray.length > 0 && typeof childrenArray[0] === 'string') {
-    const text = childrenArray[0].trim();
-    return text.startsWith('"') || text.startsWith('“') || text.startsWith('«') || text.startsWith('”');
-  }
-  return false;
+  const extractText = (nodes) => {
+    let text = '';
+    React.Children.forEach(nodes, node => {
+      if (typeof node === 'string' || typeof node === 'number') {
+        text += node;
+      } else if (React.isValidElement(node) && node.props && node.props.children) {
+        text += extractText(node.props.children);
+      }
+    });
+    return text;
+  };
+  
+  const text = extractText(children).toLowerCase();
+  
+  return text.includes('prompt');
 };
 
 const PromptCard = ({ children, isList, ...props }) => {
