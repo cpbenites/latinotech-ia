@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
                     3. Contextualización: Expande la noticia. Explica "por qué esto importa".
                     4. Formato: Markdown usando párrafos, subtítulos y negritas (**).
                     5. Tutoriales de IA: Si la noticia es sobre IA, incluye al final una sección de Tutorial & Prompts (en el idioma respectivo).
+                    6. Categorías Estrictas: La categoría del artículo DEBE OBLIGATORIAMENTE ser una de estas (exactamente con esta ortografía, independientemente del idioma): "IA", "Startups", "Gadgets", "Software", "Gaming", o "Tutoriales". NO inventes categorías nuevas ni las traduzcas.
                     
                     Devuelve EXCLUSIVAMENTE un JSON válido con la siguiente estructura:
                     - "es": Objeto con { title, summary, content, category, seo_keywords } (en Español)

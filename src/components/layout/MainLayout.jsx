@@ -118,7 +118,9 @@ export default function MainLayout() {
       <footer className="border-t border-slate-200 py-12 mt-12 bg-slate-50">
         <div className="container mx-auto px-4 text-center">
           <div className="mb-10">
-            <h4 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-4">Comunidad</h4>
+            <h4 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-4">
+              {isPt ? 'Comunidade' : 'Comunidad'}
+            </h4>
             <a 
               href="https://t.me/latinotech" 
               target="_blank" 
@@ -126,15 +128,19 @@ export default function MainLayout() {
               className="inline-flex items-center gap-3 bg-white border border-slate-200 px-6 py-3 rounded-full text-slate-700 font-bold hover:text-[#0088cc] hover:border-[#0088cc]/30 hover:bg-[#0088cc]/5 transition-all shadow-sm hover:shadow-md"
             >
               <TelegramIcon className="w-5 h-5 text-[#0088cc]" />
-              Únete a nuestro canal para noticias en tiempo real
+              {isPt ? 'Junte-se ao nosso canal para notícias em tempo real' : 'Únete a nuestro canal para noticias en tiempo real'}
             </a>
           </div>
           <p className="text-slate-500 text-sm font-medium mb-4">
-            © {new Date().getFullYear()} LatinoTech IA. Noticias curadas e impulsadas por Inteligencia Artificial.
+            © {new Date().getFullYear()} LatinoTech IA. {isPt ? 'Notícias curadas e impulsionadas por Inteligência Artificial.' : 'Noticias curadas e impulsadas por Inteligencia Artificial.'}
           </p>
           <div className="flex justify-center gap-6 text-xs text-slate-400">
-            <Link to={`${langPrefix}/privacidad`} className="hover:text-slate-600 transition-colors">Política de Privacidad</Link>
-            <Link to={`${langPrefix}/terminos`} className="hover:text-slate-600 transition-colors">Términos de Uso</Link>
+            <Link to={`${langPrefix}/privacidad`} className="hover:text-slate-600 transition-colors">
+              {isPt ? 'Política de Privacidade' : 'Política de Privacidad'}
+            </Link>
+            <Link to={`${langPrefix}/terminos`} className="hover:text-slate-600 transition-colors">
+              {isPt ? 'Termos de Uso' : 'Términos de Uso'}
+            </Link>
           </div>
         </div>
       </footer>
