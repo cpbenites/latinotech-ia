@@ -38,7 +38,7 @@ export default function MainLayout() {
   useEffect(() => {
     async function trackVisitor() {
       // 1. Ignorar rotas Admin
-      if (location.pathname.startsWith('/admin')) return;
+      if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/br/admin')) return;
       
       // 2. Ignorar Sessão de Administrador
       if (user?.role === 'admin') return;
@@ -105,7 +105,7 @@ export default function MainLayout() {
               <TelegramIcon className="w-5 h-5" />
             </a>
             {user?.role === 'admin' && (
-              <Link to="/admin">
+              <Link to={`${langPrefix}/admin`}>
                 <Button variant="ghost" size="sm" className="font-bold text-slate-800 hover:bg-slate-100">Panel Admin</Button>
               </Link>
             )}
@@ -133,8 +133,8 @@ export default function MainLayout() {
             © {new Date().getFullYear()} LatinoTech IA. Noticias curadas e impulsadas por Inteligencia Artificial.
           </p>
           <div className="flex justify-center gap-6 text-xs text-slate-400">
-            <Link to="/privacidad" className="hover:text-slate-600 transition-colors">Política de Privacidad</Link>
-            <Link to="/terminos" className="hover:text-slate-600 transition-colors">Términos de Uso</Link>
+            <Link to={`${langPrefix}/privacidad`} className="hover:text-slate-600 transition-colors">Política de Privacidad</Link>
+            <Link to={`${langPrefix}/terminos`} className="hover:text-slate-600 transition-colors">Términos de Uso</Link>
           </div>
         </div>
       </footer>
