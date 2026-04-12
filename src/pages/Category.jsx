@@ -71,8 +71,22 @@ export default function Category({ lang = 'es' }) {
   };
 
   if (loading) return (
-    <div className="min-h-[50vh] flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div>
+    <div className="container mx-auto px-4 py-12 max-w-6xl">
+      <div className="flex items-center gap-4 mb-12 border-b border-slate-200 pb-4">
+        <div className="h-10 w-48 bg-slate-200 rounded animate-pulse"></div>
+        <div className="h-6 w-24 bg-slate-200 rounded-full animate-pulse"></div>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
+        {[1, 2, 3, 4, 5, 6].map(i => (
+          <div key={i} className="flex flex-col space-y-3">
+            <div className="aspect-video bg-slate-200 rounded-xl animate-pulse mb-2"></div>
+            <div className="h-3 w-20 bg-slate-200 rounded animate-pulse"></div>
+            <div className="h-6 w-full bg-slate-200 rounded animate-pulse"></div>
+            <div className="h-6 w-4/5 bg-slate-200 rounded animate-pulse"></div>
+            <div className="h-10 w-full mt-auto bg-slate-200 rounded animate-pulse"></div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 
