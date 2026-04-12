@@ -4,7 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export default function Home() {
+export default function Home({ lang = 'es' }) {
   const [articles, setArticles] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,7 @@ export default function Home() {
     async function fetchArticles() {
       setLoading(true);
       try {
-        const filter = { status: 'published' };
+        const filter = { status: 'published', language: lang };
         if (category) filter.category = category;
         
         const skip = (page - 1) * ITEMS_PER_PAGE;
@@ -68,6 +68,7 @@ export default function Home() {
 
   const featured = (page === 1 && !category) ? articles[0] : null;
   const gridArticles = (page === 1 && !category) ? articles.slice(1) : articles;
+  const langPrefix = lang === 'pt' ? '/br' : '';
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -84,7 +85,7 @@ export default function Home() {
       )}
       
       {!category && featured && (
-        <Link to={`/noticia/${featured.slug || featured.id}`} className="block mb-16 group">
+        <Link to={`${langPrefix}/noticia/${featured.slug || featured.id}`} className="block mb-16 group">
           <div className="grid md:grid-cols-5 gap-8 items-center">
             <div className="md:col-span-3 aspect-[16/10] bg-slate-100 overflow-hidden relative">
               {featured.image_url ? (
@@ -109,7 +110,7 @@ export default function Home() {
       {gridArticles.length > 0 && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
           {gridArticles.map(article => (
-            <Link key={article.id} to={`/noticia/${article.slug || article.id}`} className="group flex flex-col">
+            <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative">
                 {article.image_url ? (
                   <img src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />

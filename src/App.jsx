@@ -39,8 +39,10 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home lang="es" />} />
+        <Route path="/br" element={<Home lang="pt" />} />
         <Route path="/noticia/:slug" element={<Article />} />
+        <Route path="/br/noticia/:slug" element={<Article />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/privacidad" element={<Privacy />} />
         <Route path="/terminos" element={<Terms />} />

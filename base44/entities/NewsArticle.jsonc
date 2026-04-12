@@ -50,6 +50,14 @@
     },
     "slug": {
       "type": "string"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "es",
+        "pt"
+      ],
+      "default": "es"
     }
   },
   "required": [

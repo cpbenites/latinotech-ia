@@ -15,6 +15,25 @@ const TelegramIcon = ({ className }) => (
 export default function MainLayout() {
   const { user } = useAuth();
   const location = useLocation();
+  const isPt = location.pathname.startsWith('/br');
+  const langPrefix = isPt ? '/br' : '';
+
+  const handleLangSwitch = (newLang) => {
+    if (newLang === 'pt' && !isPt) {
+      if (location.pathname.startsWith('/noticia/')) {
+        window.location.href = '/br';
+      } else {
+        window.location.href = '/br' + (location.pathname === '/' ? '' : location.pathname) + location.search;
+      }
+    } else if (newLang === 'es' && isPt) {
+      if (location.pathname.startsWith('/br/noticia/')) {
+        window.location.href = '/';
+      } else {
+        const newPath = location.pathname.replace('/br', '') || '/';
+        window.location.href = newPath + location.search;
+      }
+    }
+  };
 
   useEffect(() => {
     async function trackVisitor() {
@@ -56,20 +75,25 @@ export default function MainLayout() {
     <div className="min-h-screen bg-white font-sans text-slate-900 flex flex-col">
       <header className="border-b border-slate-200 sticky top-0 bg-white/95 backdrop-blur z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-black tracking-tighter text-green-600">
+          <Link to={`${langPrefix}/`} className="text-2xl font-black tracking-tighter text-green-600">
             LatinoTech IA<span className="text-slate-900">.</span>
           </Link>
           <nav className="hidden lg:flex gap-6 font-semibold text-sm text-slate-600">
-            <Link to="/?category=IA" className="hover:text-green-600 transition-colors">IA</Link>
-            <Link to="/?category=Startups" className="hover:text-green-600 transition-colors">Startups</Link>
-            <Link to="/?category=Gadgets" className="hover:text-green-600 transition-colors">Gadgets</Link>
-            <Link to="/?category=Software" className="hover:text-green-600 transition-colors">Software</Link>
-            <Link to="/?category=Gaming" className="hover:text-green-600 transition-colors">Gaming</Link>
-            <Link to="/?category=Tutoriales" className="hover:text-green-600 transition-colors">Tutoriales</Link>
+            <Link to={`${langPrefix}/?category=IA`} className="hover:text-green-600 transition-colors">IA</Link>
+            <Link to={`${langPrefix}/?category=Startups`} className="hover:text-green-600 transition-colors">Startups</Link>
+            <Link to={`${langPrefix}/?category=Gadgets`} className="hover:text-green-600 transition-colors">Gadgets</Link>
+            <Link to={`${langPrefix}/?category=Software`} className="hover:text-green-600 transition-colors">Software</Link>
+            <Link to={`${langPrefix}/?category=Gaming`} className="hover:text-green-600 transition-colors">Gaming</Link>
+            <Link to={`${langPrefix}/?category=Tutoriales`} className="hover:text-green-600 transition-colors">Tutoriales</Link>
           </nav>
           <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 mr-2 bg-slate-100 px-3 py-1.5 rounded-full">
+              <button onClick={() => handleLangSwitch('es')} className={`text-xs font-black transition-colors ${!isPt ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>ES</button>
+              <span className="text-slate-300 text-xs">|</span>
+              <button onClick={() => handleLangSwitch('pt')} className={`text-xs font-black transition-colors ${isPt ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>PT-BR</button>
+            </div>
             <div className="hidden md:block mr-2">
-              <SearchBar />
+              <SearchBar lang={isPt ? 'pt' : 'es'} />
             </div>
             <a 
               href="https://t.me/latinotech" 

@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import debounce from 'lodash/debounce';
 
-export default function SearchBar() {
+export default function SearchBar({ lang = 'es' }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -19,7 +19,7 @@ export default function SearchBar() {
     }
 
     try {
-      const data = await base44.entities.NewsArticle.filter({ status: 'published' }, '-published_date', 300);
+      const data = await base44.entities.NewsArticle.filter({ status: 'published', language: lang }, '-published_date', 300);
       const lowerTerm = searchTerm.toLowerCase();
       
       const filtered = data.filter(article => 
@@ -108,7 +108,7 @@ export default function SearchBar() {
               {results.map((article) => (
                 <Link
                   key={article.id}
-                  to={`/noticia/${article.slug || article.id}`}
+                  to={`${lang === 'pt' ? '/br' : ''}/noticia/${article.slug || article.id}`}
                   onClick={() => {
                     setIsOpen(false);
                     setQuery('');
