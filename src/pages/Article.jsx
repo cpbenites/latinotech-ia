@@ -6,6 +6,7 @@ import { es } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { Copy, Check } from 'lucide-react';
+import ShareButtons from '@/components/ShareButtons';
 
 const PreBlock = ({ children, ...props }) => {
   const [copied, setCopied] = useState(false);
@@ -86,7 +87,12 @@ export default function Article() {
   if (!article) return <div className="p-12 text-center text-slate-500 font-bold text-2xl">Artículo no encontrado</div>;
 
   return (
-    <article className="container mx-auto px-4 py-12 max-w-4xl">
+    <article className="container mx-auto px-4 py-12 max-w-4xl relative">
+      
+      <div className="absolute left-0 top-12 -ml-16 hidden xl:block">
+        <ShareButtons title={article.title} isSticky={true} />
+      </div>
+
       <div className="mb-10 text-center max-w-3xl mx-auto">
         <div className="flex items-center justify-center gap-3 mb-6">
           <span className="text-green-600 font-bold text-xs uppercase tracking-widest">{article.category}</span>
@@ -95,6 +101,10 @@ export default function Article() {
         </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-[1.1] text-slate-900">{article.title}</h1>
         <p className="text-xl text-slate-600 font-medium leading-relaxed">{article.summary}</p>
+        
+        <div className="mt-8 flex justify-center xl:hidden">
+          <ShareButtons title={article.title} />
+        </div>
       </div>
       
       {article.image_url && (
@@ -126,11 +136,19 @@ export default function Article() {
         </div>
         
         <div className="mt-16 pt-8 border-t border-slate-200 bg-slate-50 p-6 rounded-xl">
-          <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">Información Meta (SEO)</h3>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {article.seo_keywords?.split(',').map((kw, i) => (
-              <span key={i} className="bg-white border border-slate-200 text-slate-600 text-xs px-2 py-1 rounded">{kw.trim()}</span>
-            ))}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
+            <div>
+              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">Información Meta (SEO)</h3>
+              <div className="flex flex-wrap gap-2">
+                {article.seo_keywords?.split(',').map((kw, i) => (
+                  <span key={i} className="bg-white border border-slate-200 text-slate-600 text-xs px-2 py-1 rounded">{kw.trim()}</span>
+                ))}
+              </div>
+            </div>
+            <div className="shrink-0">
+              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">Compartir artículo</h3>
+              <ShareButtons title={article.title} />
+            </div>
           </div>
           {article.original_url && (
             <a href={article.original_url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-green-600 hover:text-green-700 transition-colors inline-block">
