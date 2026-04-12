@@ -20,7 +20,15 @@ export default function ShareButtons({ title, className = "", isSticky = false }
   useEffect(() => {
     const BASE_URL = 'https://latinotechia.com';
     const currentPath = window.location.pathname;
-    setUrl(BASE_URL + currentPath);
+    
+    const match = currentPath.match(/\/noticia\/([^/]+)/);
+    if (match) {
+      const slug = match[1];
+      const isPt = currentPath.includes('/br');
+      setUrl(`${BASE_URL}/api/functions/shareArticle?slug=${slug}&lang=${isPt ? 'pt' : 'es'}`);
+    } else {
+      setUrl(BASE_URL + currentPath);
+    }
   }, []);
 
   const handleCopy = () => {

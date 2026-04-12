@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
                     2. Estructura Periodística: El artículo DEBE contener al menos dos o tres subtítulos (usa Markdown ## o ###).
                     3. Contextualización: Expande la noticia. Explica "por qué esto importa".
                     4. Formato: Markdown usando párrafos, subtítulos y negritas (**).
-                    5. Tutoriales de IA: Si la noticia es sobre IA, incluye al final una sección de Tutorial & Prompts (en el idioma respectivo).
+                    5. Tutoriales de IA: Si la noticia es sobre IA, incluye al final una sección de Tutorial & Prompts (en el idioma respectivo). IMPORTANTE: Cuando generes los prompts de ejemplo, TIENEN QUE SER AMPLIOS Y DETALLADOS. Cada prompt debe tener obligatoriamente entre 3 y 5 líneas de longitud, explicando un contexto, una acción y un formato deseado. No escribas prompts de una sola frase.
                     6. Categorías Estrictas: La categoría del artículo DEBE OBLIGATORIAMENTE ser una de estas (exactamente con esta ortografía, independientemente del idioma): "IA", "Startups", "Gadgets", "Software", "Gaming", o "Tutoriales". NO inventes categorías nuevas ni las traduzcas.
                     
                     Devuelve EXCLUSIVAMENTE un JSON válido con la siguiente estructura:
