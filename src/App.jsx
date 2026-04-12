@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -6,25 +7,18 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import MainLayout from '@/components/layout/MainLayout';
-import React, { Suspense, lazy } from 'react';
 
-const Home = lazy(() => import('@/pages/Home'));
-const Category = lazy(() => import('@/pages/Category'));
-const Article = lazy(() => import('@/pages/Article'));
-const Admin = lazy(() => import('@/pages/Admin'));
-const Privacy = lazy(() => import('@/pages/Privacy'));
-const Terms = lazy(() => import('@/pages/Terms'));
-
-const LoadingFallback = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
-    <div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div>
-  </div>
-);
+// Lazy Loading das páginas para acelerar o Mobile
+const Home = React.lazy(() => import('@/pages/Home'));
+const Category = React.lazy(() => import('@/pages/Category'));
+const Article = React.lazy(() => import('@/pages/Article'));
+const Admin = React.lazy(() => import('@/pages/Admin'));
+const Privacy = React.lazy(() => import('@/pages/Privacy'));
+const Terms = React.lazy(() => import('@/pages/Terms'));
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -33,44 +27,40 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
+  // O Suspense divide o Javascript e carrega muito mais rápido
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div></div>}>
       <Routes>
         <Route element={<MainLayout />}>
-        <Route path="/" element={<Home lang="es" />} />
-        <Route path="/br" element={<Home lang="pt" />} />
-        <Route path="/categoria/:id" element={<Category lang="es" />} />
-        <Route path="/br/categoria/:id" element={<Category lang="pt" />} />
-        <Route path="/noticia/:slug" element={<Article />} />
-        <Route path="/br/noticia/:slug" element={<Article />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/br/admin" element={<Admin />} />
-        <Route path="/privacidad" element={<Privacy />} />
-        <Route path="/br/privacidad" element={<Privacy />} />
-        <Route path="/terminos" element={<Terms />} />
-        <Route path="/br/terminos" element={<Terms />} />
-      </Route>
-      <Route path="*" element={<PageNotFound />} />
+          <Route path="/" element={<Home lang="es" />} />
+          <Route path="/br" element={<Home lang="pt" />} />
+          <Route path="/categoria/:id" element={<Category lang="es" />} />
+          <Route path="/br/categoria/:id" element={<Category lang="pt" />} />
+          <Route path="/noticia/:slug" element={<Article />} />
+          <Route path="/br/noticia/:slug" element={<Article />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/br/admin" element={<Admin />} />
+          <Route path="/privacidad" element={<Privacy />} />
+          <Route path="/br/privacidad" element={<Privacy />} />
+          <Route path="/terminos" element={<Terms />} />
+          <Route path="/br/terminos" element={<Terms />} />
+        </Route>
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Suspense>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
@@ -83,4 +73,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
