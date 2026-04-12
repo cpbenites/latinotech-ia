@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -90,6 +90,68 @@ const BlockquoteBlock = ({ children, ...props }) => {
   );
 };
 
+const isPromptText = (children) => {
+  const childrenArray = React.Children.toArray(children);
+  if (childrenArray.length > 0 && typeof childrenArray[0] === 'string') {
+    const text = childrenArray[0].trim();
+    return text.startsWith('"') || text.startsWith('“') || text.startsWith('«') || text.startsWith('”');
+  }
+  return false;
+};
+
+const PromptCard = ({ children, isList, ...props }) => {
+  const [copied, setCopied] = useState(false);
+  const cardRef = useRef(null);
+
+  const handleCopy = () => {
+    if (cardRef.current) {
+      navigator.clipboard.writeText(cardRef.current.innerText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const content = (
+    <div className="relative group my-6 bg-slate-900 text-slate-100 p-6 rounded-xl border border-slate-800 shadow-lg">
+      <button
+        onClick={handleCopy}
+        className="absolute right-3 top-3 bg-slate-800/80 backdrop-blur-sm text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
+      >
+        {copied ? (
+          <>
+            <Check className="w-3.5 h-3.5 text-green-400" />
+            <span className="text-green-400">Copiado!</span>
+          </>
+        ) : (
+          <>
+            <Copy className="w-3.5 h-3.5" />
+            Copiar
+          </>
+        )}
+      </button>
+      <div ref={cardRef} className="pr-16 font-mono text-sm leading-relaxed whitespace-pre-wrap" {...props}>
+        {children}
+      </div>
+    </div>
+  );
+
+  return isList ? <li className="list-none mb-4">{content}</li> : content;
+};
+
+const ParagraphBlock = ({ children, ...props }) => {
+  if (isPromptText(children)) {
+    return <PromptCard isList={false} {...props}>{children}</PromptCard>;
+  }
+  return <p {...props}>{children}</p>;
+};
+
+const ListItemBlock = ({ children, ...props }) => {
+  if (isPromptText(children)) {
+    return <PromptCard isList={true} {...props}>{children}</PromptCard>;
+  }
+  return <li {...props}>{children}</li>;
+};
+
 export default function Article() {
   const { slug } = useParams();
   const location = useLocation();
@@ -121,6 +183,34 @@ export default function Article() {
     }
     fetchArticle();
   }, [slug]);
+
+  useEffect(() => {
+    if (article) {
+      document.title = `${article.title} - LatinoTech IA`;
+      
+      const setMetaTag = (selector, attribute, value) => {
+        let element = document.querySelector(selector);
+        if (!element) {
+          element = document.createElement('meta');
+          if (selector.includes('property=')) {
+            element.setAttribute('property', selector.match(/property="([^"]+)"/)[1]);
+          } else if (selector.includes('name=')) {
+            element.setAttribute('name', selector.match(/name="([^"]+)"/)[1]);
+          }
+          document.head.appendChild(element);
+        }
+        element.setAttribute(attribute, value);
+      };
+
+      setMetaTag('meta[property="og:title"]', 'content', article.title);
+      setMetaTag('meta[property="og:image"]', 'content', article.image_url || '');
+      setMetaTag('meta[property="og:url"]', 'content', window.location.href);
+      setMetaTag('meta[property="og:type"]', 'content', 'article');
+      setMetaTag('meta[name="twitter:card"]', 'content', 'summary_large_image');
+      setMetaTag('meta[name="twitter:image"]', 'content', article.image_url || '');
+      setMetaTag('meta[name="twitter:title"]', 'content', article.title);
+    }
+  }, [article]);
 
   if (loading) return (
     <div className="min-h-[50vh] flex items-center justify-center">
@@ -162,6 +252,8 @@ export default function Article() {
             components={{
               pre: PreBlock,
               blockquote: BlockquoteBlock,
+              p: ParagraphBlock,
+              li: ListItemBlock,
               code({node, inline, className, children, ...props}) {
                 return !inline ? (
                   <code className={className} {...props}>
