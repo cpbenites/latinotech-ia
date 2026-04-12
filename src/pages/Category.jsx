@@ -105,8 +105,8 @@ export default function Category({ lang = 'es' }) {
 
       {articles.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
-          {articles.map(article => (
-            <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col">
+          {articles.slice(0, 12).map(article => (
+            <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col content-auto">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative">
                 {article.image_url ? (
                   <img loading="lazy" src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />

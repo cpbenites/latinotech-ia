@@ -1,7 +1,12 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
   build: {
+    target: 'esnext',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {

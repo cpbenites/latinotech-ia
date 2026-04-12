@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 300px;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
