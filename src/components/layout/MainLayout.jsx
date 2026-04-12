@@ -79,12 +79,12 @@ export default function MainLayout() {
             LatinoTech IA<span className="text-slate-900">.</span>
           </Link>
           <nav className="hidden lg:flex gap-6 font-semibold text-sm text-slate-600">
-            <Link to={`${langPrefix}/?category=IA`} className="hover:text-green-600 transition-colors">IA</Link>
-            <Link to={`${langPrefix}/?category=Startups`} className="hover:text-green-600 transition-colors">Startups</Link>
-            <Link to={`${langPrefix}/?category=Gadgets`} className="hover:text-green-600 transition-colors">Gadgets</Link>
-            <Link to={`${langPrefix}/?category=Software`} className="hover:text-green-600 transition-colors">Software</Link>
-            <Link to={`${langPrefix}/?category=Gaming`} className="hover:text-green-600 transition-colors">Gaming</Link>
-            <Link to={`${langPrefix}/?category=Tutoriales`} className="hover:text-green-600 transition-colors">Tutoriales</Link>
+            <Link to={`${langPrefix}/categoria/IA`} className="hover:text-green-600 transition-colors">IA</Link>
+            <Link to={`${langPrefix}/categoria/Startups`} className="hover:text-green-600 transition-colors">Startups</Link>
+            <Link to={`${langPrefix}/categoria/Gadgets`} className="hover:text-green-600 transition-colors">Gadgets</Link>
+            <Link to={`${langPrefix}/categoria/Software`} className="hover:text-green-600 transition-colors">Software</Link>
+            <Link to={`${langPrefix}/categoria/Gaming`} className="hover:text-green-600 transition-colors">Gaming</Link>
+            <Link to={`${langPrefix}/categoria/Tutoriales`} className="hover:text-green-600 transition-colors">Tutoriales</Link>
           </nav>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 mr-2 bg-slate-100 px-3 py-1.5 rounded-full">
