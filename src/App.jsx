@@ -6,12 +6,20 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import MainLayout from '@/components/layout/MainLayout';
-import Home from '@/pages/Home';
-import Category from '@/pages/Category';
-import Article from '@/pages/Article';
-import Admin from '@/pages/Admin';
-import Privacy from '@/pages/Privacy';
-import Terms from '@/pages/Terms';
+import React, { Suspense, lazy } from 'react';
+
+const Home = lazy(() => import('@/pages/Home'));
+const Category = lazy(() => import('@/pages/Category'));
+const Article = lazy(() => import('@/pages/Article'));
+const Admin = lazy(() => import('@/pages/Admin'));
+const Privacy = lazy(() => import('@/pages/Privacy'));
+const Terms = lazy(() => import('@/pages/Terms'));
+
+const LoadingFallback = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm z-50">
+    <div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div>
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -38,8 +46,9 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
-    <Routes>
-      <Route element={<MainLayout />}>
+    <Suspense fallback={<LoadingFallback />}>
+      <Routes>
+        <Route element={<MainLayout />}>
         <Route path="/" element={<Home lang="es" />} />
         <Route path="/br" element={<Home lang="pt" />} />
         <Route path="/categoria/:id" element={<Category lang="es" />} />
@@ -54,7 +63,8 @@ const AuthenticatedApp = () => {
         <Route path="/br/terminos" element={<Terms />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 };
 

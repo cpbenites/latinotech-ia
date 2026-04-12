@@ -113,7 +113,7 @@ export default function Home({ lang = 'es' }) {
             <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative">
                 {article.image_url ? (
-                  <img src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />
+                  <img loading="lazy" src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />
                 ) : (
                   <div className="w-full h-full bg-slate-200"></div>
                 )}
