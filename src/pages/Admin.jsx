@@ -50,12 +50,18 @@ export default function Admin() {
     async function loadData() {
       if (user?.role === 'admin') {
         setIsLoading(true);
-        await Promise.all([fetchPending(), fetchFeeds(), fetchAudience()]);
-        setIsLoading(false);
+        try {
+          await Promise.all([fetchPending(), fetchFeeds(), fetchAudience()]);
+        } catch (error) {
+          console.error("Error loading admin data:", error);
+          toast({ title: "Error de red", description: "No se pudieron cargar algunos datos. Por favor, recargue la página.", variant: "destructive" });
+        } finally {
+          setIsLoading(false);
+        }
       }
     }
     loadData();
-  }, [user]);
+  }, [user, toast]);
 
   if (user?.role !== 'admin') return <Navigate to="/" replace />;
 
