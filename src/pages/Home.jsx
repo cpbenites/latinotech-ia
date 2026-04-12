@@ -89,7 +89,7 @@ export default function Home({ lang = 'es' }) {
           <div className="grid md:grid-cols-5 gap-8 items-center">
             <div className="md:col-span-3 aspect-[16/10] bg-slate-100 overflow-hidden relative">
               {featured.image_url ? (
-                <img src={featured.image_url} alt={featured.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" />
+                <img fetchpriority="high" src={featured.image_url} alt={featured.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" />
               ) : (
                 <div className="w-full h-full bg-slate-200"></div>
               )}
