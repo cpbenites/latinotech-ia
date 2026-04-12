@@ -108,7 +108,7 @@ const isPromptText = (children) => {
   return text.includes('prompt');
 };
 
-const PromptCard = ({ children, isList, ...props }) => {
+const PromptCard = ({ children, ...props }) => {
   const [copied, setCopied] = useState(false);
   const cardRef = useRef(null);
 
@@ -120,8 +120,8 @@ const PromptCard = ({ children, isList, ...props }) => {
     }
   };
 
-  const content = (
-    <div className="relative group my-6 bg-slate-900 text-slate-100 p-6 rounded-xl border border-slate-800 shadow-lg">
+  return (
+    <li className="bg-gray-900 text-gray-100 p-5 rounded-xl my-5 relative text-left block w-full list-none group shadow-lg border border-slate-800" {...props}>
       <button
         onClick={handleCopy}
         className="absolute right-3 top-3 bg-slate-800/80 backdrop-blur-sm text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
@@ -138,25 +138,20 @@ const PromptCard = ({ children, isList, ...props }) => {
           </>
         )}
       </button>
-      <div ref={cardRef} className="pr-16 font-mono text-sm leading-relaxed whitespace-pre-wrap" {...props}>
+      <div ref={cardRef} className="pr-16 font-mono text-sm leading-relaxed whitespace-pre-wrap">
         {children}
       </div>
-    </div>
+    </li>
   );
-
-  return isList ? <li className="list-none mb-4">{content}</li> : content;
 };
 
 const ParagraphBlock = ({ children, ...props }) => {
-  if (isPromptText(children)) {
-    return <PromptCard isList={false} {...props}>{children}</PromptCard>;
-  }
   return <p {...props}>{children}</p>;
 };
 
 const ListItemBlock = ({ children, ...props }) => {
   if (isPromptText(children)) {
-    return <PromptCard isList={true} {...props}>{children}</PromptCard>;
+    return <PromptCard {...props}>{children}</PromptCard>;
   }
   return <li {...props}>{children}</li>;
 };
