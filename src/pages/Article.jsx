@@ -121,7 +121,7 @@ const PromptCard = ({ children, ...props }) => {
   };
 
   return (
-    <li className="bg-gray-900 text-gray-100 p-5 rounded-xl my-5 relative text-left block w-full list-none group shadow-lg border border-slate-800" {...props}>
+    <li className="bg-gray-900 text-gray-200 p-6 rounded-xl my-5 relative text-left w-full font-sans leading-relaxed shadow-lg pr-24 list-none group" {...props}>
       <button
         onClick={handleCopy}
         className="absolute right-3 top-3 bg-slate-800/80 backdrop-blur-sm text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
@@ -138,7 +138,7 @@ const PromptCard = ({ children, ...props }) => {
           </>
         )}
       </button>
-      <div ref={cardRef} className="pr-16 font-mono text-sm leading-relaxed whitespace-pre-wrap">
+      <div ref={cardRef} className="[&>p:first-child]:mt-0 [&>*:first-child]:mt-0">
         {children}
       </div>
     </li>
