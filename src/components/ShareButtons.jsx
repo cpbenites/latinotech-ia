@@ -18,7 +18,9 @@ export default function ShareButtons({ title, className = "", isSticky = false }
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    setUrl(window.location.href);
+    const BASE_URL = 'https://latinotechia.com';
+    const currentPath = window.location.pathname;
+    setUrl(BASE_URL + currentPath);
   }, []);
 
   const handleCopy = () => {
