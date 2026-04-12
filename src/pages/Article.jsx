@@ -105,7 +105,11 @@ const isPromptText = (children) => {
   
   const text = extractText(children).toLowerCase();
   
-  return text.includes('prompt');
+  return text.includes('prompt') || 
+         text.includes('geração') || text.includes('geracao') ||
+         text.includes('escrita') || 
+         text.includes('resolução') || text.includes('resolucao') ||
+         text.includes('criação') || text.includes('criacao');
 };
 
 const PromptCard = ({ children, ...props }) => {
@@ -121,10 +125,10 @@ const PromptCard = ({ children, ...props }) => {
   };
 
   return (
-    <li className="bg-gray-900 text-gray-200 p-6 rounded-xl my-5 relative text-left w-full font-sans leading-relaxed shadow-lg pr-24 list-none group [&_strong]:text-blue-300 [&_strong]:font-bold [&_b]:text-blue-300" {...props}>
+    <li className="bg-slate-900 text-slate-100 p-6 rounded-xl my-4 relative shadow-2xl border border-slate-800 block w-full text-left pr-24 list-none group [&_strong]:text-blue-400 [&_strong]:font-black [&_b]:text-blue-400" {...props}>
       <button
         onClick={handleCopy}
-        className="absolute right-3 top-3 bg-slate-800/80 backdrop-blur-sm text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
+        className="absolute right-4 top-4 bg-slate-800/80 backdrop-blur-sm text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 text-xs font-bold shadow-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 z-10"
       >
         {copied ? (
           <>
