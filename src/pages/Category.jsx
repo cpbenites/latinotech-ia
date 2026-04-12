@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
-import { Link, useSearchParams, useParams } from 'react-router-dom';
+import { Link, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -10,7 +10,10 @@ export default function Category({ lang = 'es' }) {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const routeParams = useParams();
-  const category = routeParams.id;
+  const categoryId = routeParams.id;
+  const location = useLocation();
+  const currentLang = location.pathname.includes('/br') ? 'pt' : 'es';
+  const category = categoryId;
   const page = parseInt(searchParams.get('page') || '1', 10);
   const ITEMS_PER_PAGE = 13;
 
@@ -31,23 +34,23 @@ export default function Category({ lang = 'es' }) {
     async function fetchArticles() {
       setLoading(true);
       try {
-        // Filtragem conjunta por status, language e category
-        const filter = { status: 'published', language: lang };
-        if (category) {
-          let finalCategory = category;
-          if (category.toLowerCase() === 'ia') finalCategory = 'IA';
-          else finalCategory = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+        console.log('Categoria Procurada:', categoryId, 'Idioma:', currentLang);
+        
+        // Buscamos todos os artigos publicados neste idioma
+        const allPublished = await base44.entities.NewsArticle.filter({ status: 'published', language: currentLang }, '-published_date', 5000);
+        
+        // Filtro case-insensitive
+        const filteredByCategory = categoryId 
+          ? allPublished.filter(article => article.category && article.category.toLowerCase() === categoryId.toLowerCase())
+          : allPublished;
           
-          filter.category = finalCategory;
-        }
+        setTotalCount(filteredByCategory.length);
         
+        // Paginação manual
         const skip = (page - 1) * ITEMS_PER_PAGE;
-        const data = await base44.entities.NewsArticle.filter(filter, '-published_date', ITEMS_PER_PAGE, skip);
+        const paginatedData = filteredByCategory.slice(skip, skip + ITEMS_PER_PAGE);
         
-        const allData = await base44.entities.NewsArticle.filter(filter, '-published_date', 5000);
-        setTotalCount(allData.length);
-        
-        setArticles(data);
+        setArticles(paginatedData);
       } catch (err) {
         console.error(err);
       } finally {
@@ -55,7 +58,7 @@ export default function Category({ lang = 'es' }) {
       }
     }
     fetchArticles();
-  }, [category, page, lang]);
+  }, [category, page, currentLang, categoryId]);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE) || 1;
 
@@ -73,7 +76,7 @@ export default function Category({ lang = 'es' }) {
     </div>
   );
 
-  const langPrefix = lang === 'pt' ? '/br' : '';
+  const langPrefix = currentLang === 'pt' ? '/br' : '';
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -82,7 +85,7 @@ export default function Category({ lang = 'es' }) {
       <div className="flex items-center gap-4 mb-12 border-b border-slate-200 pb-4">
         <h1 className="text-4xl font-black tracking-tight capitalize text-slate-900">{category}</h1>
         <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-          {totalCount} {lang === 'pt' ? 'Artigos' : 'Artículos'}
+          {totalCount} {currentLang === 'pt' ? 'Artigos' : 'Artículos'}
         </span>
       </div>
 
@@ -109,8 +112,8 @@ export default function Category({ lang = 'es' }) {
         </div>
       ) : (
         <div className="text-center py-20">
-          <p className="text-2xl font-bold tracking-tight text-slate-400 mb-2">{lang === 'pt' ? 'Ainda não há notícias.' : 'Aún no hay noticias.'}</p>
-          <p className="text-slate-500">{lang === 'pt' ? 'Os artigos publicados aparecerão aqui.' : 'Los artículos publicados aparecerán aquí.'}</p>
+          <p className="text-2xl font-bold tracking-tight text-slate-400 mb-2">{currentLang === 'pt' ? 'Ainda não há notícias.' : 'Aún no hay noticias.'}</p>
+          <p className="text-slate-500">{currentLang === 'pt' ? 'Os artigos publicados aparecerão aqui.' : 'Los artículos publicados aparecerán aquí.'}</p>
         </div>
       )}
 
@@ -121,17 +124,17 @@ export default function Category({ lang = 'es' }) {
             disabled={page === 1}
             className="px-4 py-2 border border-slate-200 rounded-md font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            &lt; {lang === 'pt' ? 'Anterior' : 'Anterior'}
+            &lt; {currentLang === 'pt' ? 'Anterior' : 'Anterior'}
           </button>
           <span className="text-sm font-medium text-slate-500">
-            {lang === 'pt' ? 'Página' : 'Página'} {page} {lang === 'pt' ? 'de' : 'de'} {totalPages}
+            {currentLang === 'pt' ? 'Página' : 'Página'} {page} {currentLang === 'pt' ? 'de' : 'de'} {totalPages}
           </span>
           <button 
             onClick={() => handlePageChange(page + 1)}
             disabled={page === totalPages}
             className="px-4 py-2 border border-slate-200 rounded-md font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {lang === 'pt' ? 'Próxima' : 'Próxima'} &gt;
+            {currentLang === 'pt' ? 'Próxima' : 'Próxima'} &gt;
           </button>
         </div>
       )}
