@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
 import NewsletterCTA from '@/components/NewsletterCTA';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Zap } from 'lucide-react';
 import ShareButtons from '@/components/ShareButtons';
 
 const PreBlock = ({ children, ...props }) => {
@@ -277,6 +277,28 @@ export default function Article() {
           >
             {article.content}
           </ReactMarkdown>
+        </div>
+
+        <div className="mt-12 bg-green-50 border border-green-200 p-6 rounded-xl flex flex-col md:flex-row items-center gap-6 shadow-sm">
+          <div className="bg-green-100 text-green-600 p-3 rounded-full shrink-0">
+            <Zap className="w-8 h-8" />
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <h4 className="font-black text-green-900 text-lg mb-1">
+              {isPt ? 'Dica LatinoTech' : 'Consejo LatinoTech'}
+            </h4>
+            <p className="text-green-800 font-medium text-sm">
+              {isPt ? 'Queres criar o teu próprio portal de IA ou SaaS sem programar? Usa a plataforma que nós usamos.' : '¿Quieres crear tu propio portal de IA o SaaS sin programar? Usa la plataforma que nosotros usamos.'}
+            </p>
+          </div>
+          <a
+            href="https://base44.pxf.io/c/7181530/2049275/25619?trafcat=base"
+            target="_blank"
+            rel="nofollow sponsored noopener noreferrer"
+            className="shrink-0 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-sm shadow-md"
+          >
+            {isPt ? 'Conhecer a Base44 (No-Code)' : 'Conocer Base44 (No-Code)'}
+          </a>
         </div>
         
         <div className="mt-16 pt-8 border-t border-slate-200 bg-slate-50 p-6 rounded-xl">
