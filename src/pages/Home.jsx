@@ -6,7 +6,7 @@ import { es } from 'date-fns/locale';
 
 export default function Home({ lang = 'es' }) {
   const [articles, setArticles] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const category = searchParams.get('category');
@@ -33,13 +33,21 @@ export default function Home({ lang = 'es' }) {
         const filter = { status: 'published', language: lang };
         if (category) filter.category = category;
         
+        // TRUQUE DE PERFORMANCE: Pedimos (Limite + 1) para saber se há próxima página
+        const limitToFetch = ITEMS_PER_PAGE + 1;
         const skip = (page - 1) * ITEMS_PER_PAGE;
-        const data = await base44.entities.NewsArticle.filter(filter, '-published_date', ITEMS_PER_PAGE, skip);
         
-        const allData = await base44.entities.NewsArticle.filter(filter, '-published_date', 5000);
-        setTotalCount(allData.length);
+        const data = await base44.entities.NewsArticle.filter(filter, '-published_date', limitToFetch, skip);
         
-        setArticles(data);
+        // Verificamos se recebemos o artigo "extra"
+        if (data.length > ITEMS_PER_PAGE) {
+          setHasNextPage(true);
+          setArticles(data.slice(0, ITEMS_PER_PAGE)); // Removemos o extra da vista
+        } else {
+          setHasNextPage(false);
+          setArticles(data);
+        }
+        
       } catch (err) {
         console.error(err);
       } finally {
@@ -49,10 +57,8 @@ export default function Home({ lang = 'es' }) {
     fetchArticles();
   }, [category, page]);
 
-  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE) || 1;
-
   const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalPages) return;
+    if (newPage < 1) return;
     const newParams = new URLSearchParams(searchParams);
     newParams.set('page', newPage.toString());
     setSearchParams(newParams);
@@ -112,9 +118,6 @@ export default function Home({ lang = 'es' }) {
       {category && (
         <div className="flex items-center gap-4 mb-12 border-b border-slate-200 pb-4">
           <h1 className="text-4xl font-black tracking-tight capitalize text-slate-900">{category}</h1>
-          <span className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-            {totalCount} Artículos
-          </span>
         </div>
       )}
       
@@ -171,7 +174,7 @@ export default function Home({ lang = 'es' }) {
         </div>
       )}
 
-      {totalPages > 1 && (
+      {(page > 1 || hasNextPage) && (
         <div className="flex items-center justify-center gap-4 pt-12 pb-8 border-t border-slate-200 mt-12">
           <button 
             onClick={() => handlePageChange(page - 1)}
@@ -181,11 +184,11 @@ export default function Home({ lang = 'es' }) {
             &lt; Anterior
           </button>
           <span className="text-sm font-medium text-slate-500">
-            Página {page} de {totalPages}
+            Página {page}
           </span>
           <button 
             onClick={() => handlePageChange(page + 1)}
-            disabled={page === totalPages}
+            disabled={!hasNextPage}
             className="px-4 py-2 border border-slate-200 rounded-md font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Próxima &gt;
