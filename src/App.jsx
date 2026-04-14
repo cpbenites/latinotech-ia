@@ -3,7 +3,6 @@ import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import MainLayout from '@/components/layout/MainLayout';
@@ -15,6 +14,13 @@ const Article = React.lazy(() => import('@/pages/Article'));
 const Admin = React.lazy(() => import('@/pages/Admin'));
 const Privacy = React.lazy(() => import('@/pages/Privacy'));
 const Terms = React.lazy(() => import('@/pages/Terms'));
+const PageNotFound = React.lazy(() => import('./lib/PageNotFound'));
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div>
+  </div>
+);
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -36,9 +42,9 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // O Suspense divide o Javascript e carrega muito mais rápido
+  // O Suspense divide o Javascript e usa o novo Loader limpo
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div></div>}>
+    <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home lang="es" />} />
