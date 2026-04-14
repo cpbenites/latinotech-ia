@@ -5,31 +5,29 @@ const parser = new Parser();
 
 function generateSlug(text) {
     return text.toString().toLowerCase()
-        .normalize("NFD") // Normaliza para separar os acentos das letras (ex: 'ñ' -> 'n' e '~')
-        .replace(/[\u0300-\u036f]/g, "") // Elimina os acentos e diacríticos
-        .replace(/[^a-z0-9 -]/g, "") // Elimina caracteres não alfanuméricos exceto espaços e hifens
-        .replace(/\s+/g, "-") // Substitui espaços por hifens
-        .replace(/-+/g, "-") // Elimina hifens repetidos
-        .replace(/^-+/, "") // Elimina hifens no início
-        .replace(/-+$/, ""); // Elimina hifens no fim
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9 -]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
 }
 
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
         
-        // Ejecutamos como admin/serviceRole porque correrá en background (Cron)
         const feeds = await base44.asServiceRole.entities.RssFeed.list();
         const activeFeeds = feeds.filter(f => f.is_active);
         
         let processedCount = 0;
-        const MAX_ITEMS_PER_RUN = 2; // Limite total por execução para evitar Timeout
+        const MAX_ITEMS_PER_RUN = 2;
         
         for (const feed of activeFeeds) {
             if (processedCount >= MAX_ITEMS_PER_RUN) break;
             try {
                 const feedData = await parser.parseURL(feed.url);
-                // Procesamos solo las 2 más recientes por fuente para optimizar tiempos y créditos
                 const items = feedData.items.slice(0, 2);
                 
                 for (const item of items) {
@@ -38,7 +36,7 @@ Deno.serve(async (req) => {
                     if (existing.length > 0) continue;
                     
                     let prompt = `Actúa como un periodista experto en tecnología y SEO para LatinoTech IA, un sitio top de noticias estilo TechCrunch.
-                    Genera DOS versiones de la siguiente noticia: una en ESPAÑOL (orientada a LATAM) y otra en PORTUGUÉS (orientada a BRASIL).
+                    Genera TRES versiones de la siguiente noticia: una en ESPAÑOL (orientada a LATAM), una en PORTUGUÉS (orientada a BRASIL) y una en INGLÉS (orientada a la audiencia GLOBAL/EEUU).
                     El tono debe ser profesional, dinámico, limpio y atractivo. Usa excelente redacción.
                     
                     Noticia original:
@@ -48,20 +46,21 @@ Deno.serve(async (req) => {
                     REGLAS ESTRICTAS PARA EL CONTENIDO:
                     1. Tamaño y Profundidad: Escribe artículos completos, profundos y detallados con al menos 5 a 7 párrafos bien desarrollados.
                     2. Estructura Periodística: El artículo DEBE contener al menos dos o tres subtítulos (usa Markdown ## o ###).
-                    3. Contextualización: Expande la noticia. Explica "por qué esto importa".
+                    3. Contextualización: Expande la noticia. Explica "por qué esto importa" en cada mercado.
                     4. Formato: Markdown usando párrafos, subtítulos y negritas (**).
-                    5. Tutoriales de IA: Si la noticia es sobre IA, incluye al final una sección de Tutorial & Prompts (en el idioma respectivo). IMPORTANTE: Cuando generes los prompts de ejemplo, TIENEN QUE SER AMPLIOS Y DETALLADOS. Cada prompt debe tener obligatoriamente entre 3 y 5 líneas de longitud, explicando un contexto, una acción y un formato deseado. No escribas prompts de una sola frase.
+                    5. Tutoriales de IA: Si la noticia es sobre IA, incluye al final una sección de Tutorial & Prompts (en el idioma respectivo). IMPORTANTE: Cuando generes los prompts de ejemplo, TIENEN QUE SER AMPLIOS Y DETALLADOS. Cada prompt debe tener obligatoriamente entre 3 y 5 líneas de longitud. No escribas prompts de una sola frase.
                     6. Categorías Estrictas: La categoría del artículo DEBE OBLIGATORIAMENTE ser una de estas (exactamente con esta ortografía, independientemente del idioma): "IA", "Startups", "Gadgets", "Software", "Gaming", o "Tutoriales". NO inventes categorías nuevas ni las traduzcas.
                     
                     Devuelve EXCLUSIVAMENTE un JSON válido con la siguiente estructura:
                     - "es": Objeto con { title, summary, content, category, seo_keywords } (en Español)
                     - "pt": Objeto con { title, summary, content, category, seo_keywords } (en Portugués)
+                    - "en": Objeto con { title, summary, content, category, seo_keywords } (en Inglés)
                     - "image_prompt": Un prompt de máximo 20 palabras en inglés para generar una imagen sobre este tema.
                     `;
 
                     if (feed.category === 'Software') {
                       prompt += `\nINSTRUCCIONES OBLIGATORIAS PARA SOFTWARE:
-                    - Debes buscar e incluir el nombre de la herramienta, si es gratuita o de pago, y una lista de "Cómo empezar".`;
+                    - Debes buscar e incluir el nombre de la herramienta, si es gratuita o de pago, y una lista de "Cómo empezar" (How to start).`;
                     }
                     
                     const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
@@ -71,6 +70,7 @@ Deno.serve(async (req) => {
                             properties: {
                                 es: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
                                 pt: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
+                                en: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
                                 image_prompt: { type: "string" }
                             }
                         }
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
                     
                     let esArticle = null;
                     
-                    for (const lang of ['es', 'pt']) {
+                    for (const lang of ['es', 'pt', 'en']) {
                         const langData = llmResponse[lang];
                         if (!langData || !langData.title) continue;
                         
@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
                         if (lang === 'es') esArticle = createdArticle;
                     }
 
-                    // Envio automático para o Telegram (apenas versão ES por agora)
+                    // Envio automático para o Telegram (versão ES mantida conforme original)
                     try {
                         const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
                         const TELEGRAM_CHAT_ID = Deno.env.get("TELEGRAM_CHAT_ID");
