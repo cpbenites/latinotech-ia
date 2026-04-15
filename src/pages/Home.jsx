@@ -4,7 +4,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es, ptBR, enUS } from 'date-fns/locale';
 
-// LAZY LOADING AGRESSIVO PARA OTIMIZAR O PAGESPEED
 const SmoothImage = ({ src, alt, className, priority = false }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
@@ -13,13 +12,13 @@ const SmoothImage = ({ src, alt, className, priority = false }) => {
   useEffect(() => {
     if (priority || isInView) return;
     
-    // Só acorda a imagem quando estiver a 300px de aparecer no ecrã
+    // MUDANÇA AQUI: de 300px para 50px. Só carrega no último momento!
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         setIsInView(true);
         observer.disconnect();
       }
-    }, { rootMargin: '300px' });
+    }, { rootMargin: '50px' });
 
     if (containerRef.current) {
       observer.observe(containerRef.current);
