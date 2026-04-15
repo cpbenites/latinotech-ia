@@ -4,7 +4,6 @@ import { Link, useSearchParams, useParams, useLocation } from 'react-router-dom'
 import { format } from 'date-fns';
 import { es, ptBR, enUS } from 'date-fns/locale';
 
-// LAZY LOADING AGRESSIVO
 const SmoothImage = ({ src, alt, className }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
@@ -13,12 +12,13 @@ const SmoothImage = ({ src, alt, className }) => {
   useEffect(() => {
     if (isInView) return;
     
+    // MUDANÇA AQUI: de 300px para 50px.
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         setIsInView(true);
         observer.disconnect();
       }
-    }, { rootMargin: '300px' });
+    }, { rootMargin: '50px' });
 
     if (containerRef.current) {
       observer.observe(containerRef.current);
