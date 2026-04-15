@@ -144,8 +144,14 @@ export default function Home({ lang = 'es' }) {
     </div>
   );
 
-  const featured = (page === 1 && !category) ? articles[0] : null;
-  const gridArticles = (page === 1 && !category) ? articles.slice(1) : articles;
+  // --- A CORREÇÃO ESTÁ AQUI: ISOLAMOS A LIMPEZA ANTES DE RENDERIZAR ---
+  const rawFeatured = (page === 1 && !category && articles.length > 0) ? articles[0] : null;
+  const featured = (rawFeatured && rawFeatured.id) ? rawFeatured : null;
+  
+  const rawGridArticles = (page === 1 && !category) ? articles.slice(1) : articles;
+  
+  // Criamos uma lista 100% blindada que não quebra o editor do Base44
+  const safeGridArticles = rawGridArticles.filter(article => article && article.id != null);
   
   // FUNÇÃO DE ROTEAMENTO SEO
   const getArticlePath = (slug) => {
@@ -187,24 +193,24 @@ export default function Home({ lang = 'es' }) {
         </Link>
       )}
 
-      {gridArticles.length > 0 && (
+      {safeGridArticles.length > 0 && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
-          {gridArticles.filter(article => article && article.id).slice(0, 12).map((article, index) => (
-            <Link key={article?.id} to={getArticlePath(article?.slug || article?.id)} className="group flex flex-col content-auto">
-              <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative rounded-xl">
-                {article?.image_url ? (
-                  <SmoothImage priority={false} src={article?.image_url} alt={article?.title} className="group-hover:scale-105" />
+          {safeGridArticles.slice(0, 12).map((article) => (
+            <Link key={String(article.id)} to={getArticlePath(article.slug || article.id)} className="group flex flex-col content-auto w-full">
+              <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative rounded-xl w-full">
+                {article.image_url ? (
+                  <SmoothImage priority={false} src={article.image_url} alt={article.title} className="group-hover:scale-105" />
                 ) : (
                   <div className="absolute inset-0 bg-slate-200"></div>
                 )}
               </div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-green-600 font-bold text-[10px] uppercase tracking-widest">{article?.category}</span>
+                <span className="text-green-600 font-bold text-[10px] uppercase tracking-widest">{article.category}</span>
                 <span className="text-slate-300 text-[10px]">•</span>
-                <span className="text-slate-500 text-[10px] font-medium">{format(new Date(article?.published_date || article?.created_date || new Date()), "d MMM", { locale: currentLocale })}</span>
+                <span className="text-slate-500 text-[10px] font-medium">{format(new Date(article.published_date || article.created_date || new Date()), "d MMM", { locale: currentLocale })}</span>
               </div>
-              <h3 className="text-xl font-black tracking-tight mb-3 group-hover:text-green-600 transition-colors leading-snug">{article?.title}</h3>
-              <p className="text-sm text-slate-600 line-clamp-2 mt-auto leading-relaxed">{article?.summary}</p>
+              <h3 className="text-xl font-black tracking-tight mb-3 group-hover:text-green-600 transition-colors leading-snug">{article.title}</h3>
+              <p className="text-sm text-slate-600 line-clamp-2 mt-auto leading-relaxed">{article.summary}</p>
             </Link>
           ))}
         </div>
