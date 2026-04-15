@@ -5,13 +5,13 @@ const parser = new Parser();
 
 function generateSlug(text) {
     return text.toString().toLowerCase()
-        .normalize("NFD") // Normaliza para separar os acentos das letras (ex: 'ñ' -> 'n' e '~')
-        .replace(/[\u0300-\u036f]/g, "") // Elimina os acentos e diacríticos
-        .replace(/[^a-z0-9 -]/g, "") // Elimina caracteres não alfanuméricos exceto espaços e hifens
-        .replace(/\s+/g, "-") // Substitui espaços por hifens
-        .replace(/-+/g, "-") // Elimina hifens repetidos
-        .replace(/^-+/, "") // Elimina hifens no início
-        .replace(/-+$/, ""); // Elimina hifens no fim
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9 -]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
 }
 
 Deno.serve(async (req) => {
@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
                     if (existing.length > 0) continue;
                     
                     let prompt = `Actúa como un periodista experto en tecnología y SEO para LatinoTech IA, un sitio top de noticias estilo TechCrunch.
-                    Genera DOS versiones de la siguiente noticia: una en ESPAÑOL (orientada a LATAM) y otra en PORTUGUÉS (orientada a BRASIL).
+                    Genera TRES versiones de la siguiente noticia: una en ESPAÑOL (orientada a LATAM), una en PORTUGUÉS (orientada a BRASIL) y una en INGLÉS (orientada a audiencia GLOBAL).
                     El tono debe ser profesional, dinámico, limpio y atractivo. Usa excelente redacción.
                     
                     Noticia original:
@@ -56,6 +56,7 @@ Deno.serve(async (req) => {
                     Devuelve EXCLUSIVAMENTE un JSON válido con la siguiente estructura:
                     - "es": Objeto con { title, summary, content, category, seo_keywords } (en Español)
                     - "pt": Objeto con { title, summary, content, category, seo_keywords } (en Portugués)
+                    - "en": Objeto con { title, summary, content, category, seo_keywords } (en Inglés)
                     - "image_prompt": Un prompt de máximo 20 palabras en inglés para generar una imagen sobre este tema.
                     `;
 
@@ -71,6 +72,7 @@ Deno.serve(async (req) => {
                             properties: {
                                 es: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
                                 pt: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
+                                en: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
                                 image_prompt: { type: "string" }
                             }
                         }
@@ -88,7 +90,8 @@ Deno.serve(async (req) => {
                     
                     let esArticle = null;
                     
-                    for (const lang of ['es', 'pt']) {
+                    // AQUI ESTÁ A MÁGICA: O LOOP AGORA CRIA AS 3 VERSÕES!
+                    for (const lang of ['es', 'pt', 'en']) {
                         const langData = llmResponse[lang];
                         if (!langData || !langData.title) continue;
                         
