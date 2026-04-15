@@ -4,6 +4,24 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es, ptBR, enUS } from 'date-fns/locale';
 
+// NOVO: Componente para evitar que a imagem carregue por partes
+const SmoothImage = ({ src, alt, className, priority = false }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  return (
+    <>
+      {!isLoaded && <div className="absolute inset-0 bg-slate-100 animate-pulse z-0"></div>}
+      <img
+        src={src}
+        alt={alt}
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
+        onLoad={() => setIsLoaded(true)}
+        className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} relative z-10 transition-opacity duration-700 ease-in-out`}
+      />
+    </>
+  );
+};
+
 export default function Home({ lang = 'es' }) {
   const [articles, setArticles] = useState([]);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -64,7 +82,10 @@ export default function Home({ lang = 'es' }) {
 
   if (loading) return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
-      <div className="text-center py-20 text-slate-400">Carregando...</div>
+      <div className="text-center py-20 text-slate-400">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
+        {lang === 'pt' ? 'Carregando...' : lang === 'en' ? 'Loading...' : 'Cargando...'}
+      </div>
     </div>
   );
 
@@ -85,9 +106,9 @@ export default function Home({ lang = 'es' }) {
       {!category && featured && (
         <Link to={`${langPrefix}/noticia/${featured.slug || featured.id}`} className="block mb-16 group">
           <div className="grid md:grid-cols-5 gap-8 items-center">
-            <div className="md:col-span-3 aspect-[16/10] bg-slate-100 overflow-hidden relative">
+            <div className="md:col-span-3 aspect-[16/10] bg-slate-100 overflow-hidden relative rounded-xl">
               {featured.image_url ? (
-                <img fetchpriority="high" src={featured.image_url} alt={featured.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" />
+                <SmoothImage priority={true} src={featured.image_url} alt={featured.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" />
               ) : (
                 <div className="w-full h-full bg-slate-200"></div>
               )}
@@ -109,9 +130,9 @@ export default function Home({ lang = 'es' }) {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
           {gridArticles.slice(0, 12).map(article => (
             <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col content-auto">
-              <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative">
+              <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative rounded-xl">
                 {article.image_url ? (
-                  <img loading="lazy" src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />
+                  <SmoothImage priority={false} src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />
                 ) : (
                   <div className="w-full h-full bg-slate-200"></div>
                 )}
