@@ -16,33 +16,29 @@ const TelegramIcon = ({ className }) => (
 export default function MainLayout() {
   const { user } = useAuth();
   const location = useLocation();
-  
-  // NOVA LÓGICA DE DETECÇÃO DE IDIOMA
   const isPt = location.pathname.startsWith('/br');
-  const isEn = location.pathname.startsWith('/en');
-  const langPrefix = isPt ? '/br' : isEn ? '/en' : '';
-  const currentLang = isPt ? 'pt' : isEn ? 'en' : 'es';
-  
+  const langPrefix = isPt ? '/br' : '';
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   useEffect(() => {
     setIsMobileSearchOpen(false);
   }, [location.pathname]);
 
-  // NOVA LÓGICA DE TROCA DE IDIOMA (Suporta 3 idiomas)
   const handleLangSwitch = (newLang) => {
-    if (newLang === currentLang) return;
-    
-    let pathWithoutLang = location.pathname;
-    if (pathWithoutLang.startsWith('/br')) pathWithoutLang = pathWithoutLang.replace('/br', '');
-    else if (pathWithoutLang.startsWith('/en')) pathWithoutLang = pathWithoutLang.replace('/en', '');
-    if (pathWithoutLang === '') pathWithoutLang = '/';
-    
-    let newPrefix = '';
-    if (newLang === 'pt') newPrefix = '/br';
-    else if (newLang === 'en') newPrefix = '/en';
-
-    window.location.href = newPrefix + pathWithoutLang + location.search;
+    if (newLang === 'pt' && !isPt) {
+      if (location.pathname.startsWith('/noticia/')) {
+        window.location.href = '/br';
+      } else {
+        window.location.href = '/br' + (location.pathname === '/' ? '' : location.pathname) + location.search;
+      }
+    } else if (newLang === 'es' && isPt) {
+      if (location.pathname.startsWith('/br/noticia/')) {
+        window.location.href = '/';
+      } else {
+        const newPath = location.pathname.replace('/br', '') || '/';
+        window.location.href = newPath + location.search;
+      }
+    }
   };
 
   useEffect(() => {
@@ -98,11 +94,9 @@ export default function MainLayout() {
           </nav>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 mr-2 bg-slate-100 px-3 py-1.5 rounded-full">
-              <button onClick={() => handleLangSwitch('es')} className={`text-xs font-black transition-colors ${!isPt && !isEn ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>ES</button>
+              <button onClick={() => handleLangSwitch('es')} className={`text-xs font-black transition-colors ${!isPt ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>ES</button>
               <span className="text-slate-300 text-xs">|</span>
               <button onClick={() => handleLangSwitch('pt')} className={`text-xs font-black transition-colors ${isPt ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>PT-BR</button>
-              <span className="text-slate-300 text-xs">|</span>
-              <button onClick={() => handleLangSwitch('en')} className={`text-xs font-black transition-colors ${isEn ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>EN</button>
             </div>
             <div className="hidden md:block mr-2">
               <SearchBar lang={isPt ? 'pt' : 'es'} />

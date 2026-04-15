@@ -55,8 +55,7 @@
       "type": "string",
       "enum": [
         "es",
-        "pt",
-        "en"
+        "pt"
       ],
       "default": "es"
     }
