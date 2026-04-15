@@ -9,6 +9,17 @@
     content-visibility: auto;
     contain-intrinsic-size: 1px 300px;
   }
+  .aspect-video {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+  }
+  .aspect-\[16\/10\] {
+    aspect-ratio: 16 / 10;
+    width: 100%;
+  }
+  .min-h-screen-content {
+    min-height: calc(100vh - 200px);
+  }
 }
 
 @layer base {

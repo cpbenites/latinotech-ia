@@ -106,10 +106,25 @@ export default function Category() {
   };
 
   if (loading) return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl">
-      <div className="text-center py-20 text-slate-400">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin mx-auto mb-4"></div>
-        {currentLang === 'pt' ? 'Carregando...' : currentLang === 'en' ? 'Loading...' : 'Cargando...'}
+    <div className="container mx-auto px-4 py-12 max-w-6xl min-h-screen-content">
+      <div className="flex items-center gap-4 mb-12 border-b border-slate-200 pb-4">
+        <div className="h-10 w-48 bg-slate-200 rounded-xl animate-pulse"></div>
+        <div className="h-6 w-24 bg-slate-200 rounded-full animate-pulse"></div>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-3 w-full">
+            <div className="aspect-video bg-slate-200 rounded-xl animate-pulse w-full"></div>
+            <div className="flex gap-2">
+              <div className="h-3 w-12 bg-slate-200 rounded animate-pulse"></div>
+              <div className="h-3 w-16 bg-slate-200 rounded animate-pulse"></div>
+            </div>
+            <div className="h-7 w-full bg-slate-200 rounded-lg animate-pulse"></div>
+            <div className="h-7 w-4/5 bg-slate-200 rounded-lg animate-pulse mb-2"></div>
+            <div className="h-4 w-full bg-slate-200 rounded animate-pulse mt-auto"></div>
+            <div className="h-4 w-2/3 bg-slate-200 rounded animate-pulse"></div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -122,7 +137,7 @@ export default function Category() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl">
+    <div className="container mx-auto px-4 py-12 max-w-6xl min-h-screen-content">
       <input type="text" name="website_url" style={{display: 'none'}} tabIndex="-1" autoComplete="off" onChange={handleHoneypot} aria-hidden="true" />
       
       <div className="flex items-center gap-4 mb-12 border-b border-slate-200 pb-4">
