@@ -12,7 +12,6 @@ const SmoothImage = ({ src, alt, className }) => {
   useEffect(() => {
     if (isInView) return;
     
-    // MUDANÇA AQUI: de 300px para 50px.
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         setIsInView(true);
@@ -55,7 +54,6 @@ export default function Category() {
   
   const currentLang = location.pathname.includes('/br') ? 'pt' : location.pathname.includes('/en') ? 'en' : 'es';
   const currentLocale = currentLang === 'pt' ? ptBR : currentLang === 'en' ? enUS : es;
-  const langPrefix = currentLang === 'pt' ? '/br' : currentLang === 'en' ? '/en' : '';
   
   const category = categoryId;
   const page = parseInt(searchParams.get('page') || '1', 10);
@@ -116,6 +114,13 @@ export default function Category() {
     </div>
   );
 
+  // FUNÇÃO DE ROTEAMENTO SEO
+  const getArticlePath = (slug) => {
+    if (currentLang === 'en') return `/en/news/${slug}`;
+    if (currentLang === 'pt') return `/br/noticia/${slug}`;
+    return `/noticia/${slug}`;
+  };
+
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
       <input type="text" name="website_url" style={{display: 'none'}} tabIndex="-1" autoComplete="off" onChange={handleHoneypot} aria-hidden="true" />
@@ -130,7 +135,7 @@ export default function Category() {
       {articles.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
           {articles.slice(0, 12).map(article => (
-            <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col content-auto">
+            <Link key={article.id} to={getArticlePath(article.slug || article.id)} className="group flex flex-col content-auto">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative rounded-xl">
                 {article.image_url ? (
                   <SmoothImage src={article.image_url} alt={article.title} className="group-hover:scale-105" />
