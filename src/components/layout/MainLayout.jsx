@@ -24,6 +24,22 @@ export default function MainLayout() {
   
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
+  // Mapeamento dinâmico dos Links do Telegram
+  const telegramLinks = {
+    es: "https://t.me/latinotech",
+    pt: "https://t.me/latinotechbr",
+    en: "https://t.me/latinotechen"
+  };
+
+  const telegramTitles = {
+    es: "Únete a nuestro canal de Telegram",
+    pt: "Junte-se ao nosso canal no Telegram",
+    en: "Join our Telegram channel"
+  };
+
+  const activeTelegramLink = telegramLinks[currentLang];
+  const activeTelegramTitle = telegramTitles[currentLang];
+
   useEffect(() => {
     setIsMobileSearchOpen(false);
   }, [location.pathname]);
@@ -114,11 +130,11 @@ export default function MainLayout() {
               {isMobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
             </button>
             <a 
-              href="https://t.me/latinotech" 
+              href={activeTelegramLink} 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-slate-400 hover:text-[#0088cc] transition-colors flex items-center justify-center w-9 h-9 rounded-full hover:bg-[#0088cc]/10"
-              title="Únete a nuestro canal de Telegram"
+              title={activeTelegramTitle}
             >
               <TelegramIcon className="w-5 h-5" />
             </a>
@@ -145,7 +161,7 @@ export default function MainLayout() {
               {currentLang === 'pt' ? 'Comunidade' : currentLang === 'en' ? 'Community' : 'Comunidad'}
             </h4>
             <a 
-              href="https://t.me/latinotech" 
+              href={activeTelegramLink} 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center gap-3 bg-white border border-slate-200 px-6 py-3 rounded-full text-slate-700 font-bold hover:text-[#0088cc] hover:border-[#0088cc]/30 hover:bg-[#0088cc]/5 transition-all shadow-sm hover:shadow-md"
