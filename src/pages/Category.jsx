@@ -1,23 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es, ptBR, enUS } from 'date-fns/locale';
 
-// NOVO: Componente para evitar que a imagem carregue por partes
+// LAZY LOADING AGRESSIVO
 const SmoothImage = ({ src, alt, className }) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (isInView) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setIsInView(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '300px' });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, [isInView]);
+
   return (
-    <>
-      {!isLoaded && <div className="absolute inset-0 bg-slate-100 animate-pulse z-0"></div>}
-      <img
-        src={src}
-        alt={alt}
-        loading="lazy"
-        onLoad={() => setIsLoaded(true)}
-        className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} relative z-10 transition-opacity duration-700 ease-in-out`}
-      />
-    </>
+    <div ref={containerRef} className="absolute inset-0 w-full h-full">
+      {!isLoaded && <div className="absolute inset-0 bg-slate-200 animate-pulse z-0"></div>}
+      {isInView && (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          fetchPriority="low"
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} relative z-10 transition-opacity duration-700 ease-in-out w-full h-full object-cover`}
+        />
+      )}
+    </div>
   );
 };
 
@@ -110,9 +133,9 @@ export default function Category() {
             <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col content-auto">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative rounded-xl">
                 {article.image_url ? (
-                  <SmoothImage src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />
+                  <SmoothImage src={article.image_url} alt={article.title} className="group-hover:scale-105" />
                 ) : (
-                  <div className="w-full h-full bg-slate-200"></div>
+                  <div className="absolute inset-0 bg-slate-200"></div>
                 )}
               </div>
               <div className="flex items-center gap-2 mb-3">
