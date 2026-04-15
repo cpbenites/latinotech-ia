@@ -1,24 +1,48 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es, ptBR, enUS } from 'date-fns/locale';
 
-// NOVO: Componente para evitar que a imagem carregue por partes
+// LAZY LOADING AGRESSIVO PARA OTIMIZAR O PAGESPEED
 const SmoothImage = ({ src, alt, className, priority = false }) => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isInView, setIsInView] = useState(priority);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (priority || isInView) return;
+    
+    // Só acorda a imagem quando estiver a 300px de aparecer no ecrã
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        setIsInView(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '300px' });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, [priority, isInView]);
+
   return (
-    <>
-      {!isLoaded && <div className="absolute inset-0 bg-slate-100 animate-pulse z-0"></div>}
-      <img
-        src={src}
-        alt={alt}
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
-        onLoad={() => setIsLoaded(true)}
-        className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} relative z-10 transition-opacity duration-700 ease-in-out`}
-      />
-    </>
+    <div ref={containerRef} className="absolute inset-0 w-full h-full">
+      {!isLoaded && <div className="absolute inset-0 bg-slate-200 animate-pulse z-0"></div>}
+      {isInView && (
+        <img
+          src={src}
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "low"}
+          decoding={priority ? "sync" : "async"}
+          onLoad={() => setIsLoaded(true)}
+          className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} relative z-10 transition-opacity duration-700 ease-in-out w-full h-full object-cover`}
+        />
+      )}
+    </div>
   );
 };
 
@@ -108,9 +132,9 @@ export default function Home({ lang = 'es' }) {
           <div className="grid md:grid-cols-5 gap-8 items-center">
             <div className="md:col-span-3 aspect-[16/10] bg-slate-100 overflow-hidden relative rounded-xl">
               {featured.image_url ? (
-                <SmoothImage priority={true} src={featured.image_url} alt={featured.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-700 ease-out" />
+                <SmoothImage priority={true} src={featured.image_url} alt={featured.title} className="group-hover:scale-105" />
               ) : (
-                <div className="w-full h-full bg-slate-200"></div>
+                <div className="absolute inset-0 bg-slate-200"></div>
               )}
             </div>
             <div className="md:col-span-2 pr-4">
@@ -132,9 +156,9 @@ export default function Home({ lang = 'es' }) {
             <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col content-auto">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative rounded-xl">
                 {article.image_url ? (
-                  <SmoothImage priority={false} src={article.image_url} alt={article.title} className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out" />
+                  <SmoothImage priority={false} src={article.image_url} alt={article.title} className="group-hover:scale-105" />
                 ) : (
-                  <div className="w-full h-full bg-slate-200"></div>
+                  <div className="absolute inset-0 bg-slate-200"></div>
                 )}
               </div>
               <div className="flex items-center gap-2 mb-3">
