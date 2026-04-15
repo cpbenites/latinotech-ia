@@ -16,8 +16,12 @@ const TelegramIcon = ({ className }) => (
 export default function MainLayout() {
   const { user } = useAuth();
   const location = useLocation();
+  
   const isPt = location.pathname.startsWith('/br');
-  const langPrefix = isPt ? '/br' : '';
+  const isEn = location.pathname.startsWith('/en');
+  const langPrefix = isPt ? '/br' : isEn ? '/en' : '';
+  const currentLang = isPt ? 'pt' : isEn ? 'en' : 'es';
+  
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   useEffect(() => {
@@ -25,28 +29,28 @@ export default function MainLayout() {
   }, [location.pathname]);
 
   const handleLangSwitch = (newLang) => {
-    if (newLang === 'pt' && !isPt) {
-      if (location.pathname.startsWith('/noticia/')) {
-        window.location.href = '/br';
-      } else {
-        window.location.href = '/br' + (location.pathname === '/' ? '' : location.pathname) + location.search;
-      }
-    } else if (newLang === 'es' && isPt) {
-      if (location.pathname.startsWith('/br/noticia/')) {
-        window.location.href = '/';
-      } else {
-        const newPath = location.pathname.replace('/br', '') || '/';
-        window.location.href = newPath + location.search;
-      }
-    }
+    if (newLang === currentLang) return;
+    
+    let pathWithoutLang = location.pathname;
+    if (pathWithoutLang.startsWith('/br')) pathWithoutLang = pathWithoutLang.replace('/br', '');
+    else if (pathWithoutLang.startsWith('/en')) pathWithoutLang = pathWithoutLang.replace('/en', '');
+    
+    if (pathWithoutLang === '') pathWithoutLang = '/';
+
+    let newPrefix = '';
+    if (newLang === 'pt') newPrefix = '/br';
+    else if (newLang === 'en') newPrefix = '/en';
+
+    let newUrl = newPrefix + pathWithoutLang + location.search;
+    if (newUrl === '/br/' || newUrl === '/en/') newUrl = newPrefix;
+    if (newUrl === '') newUrl = '/';
+
+    window.location.href = newUrl;
   };
 
   useEffect(() => {
     async function trackVisitor() {
-      // 1. Ignorar rotas Admin
-      if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/br/admin')) return;
-      
-      // 2. Ignorar Sessão de Administrador
+      if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/br/admin') || location.pathname.startsWith('/en/admin')) return;
       if (user?.role === 'admin') return;
 
       try {
@@ -94,12 +98,14 @@ export default function MainLayout() {
           </nav>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 mr-2 bg-slate-100 px-3 py-1.5 rounded-full">
-              <button onClick={() => handleLangSwitch('es')} className={`text-xs font-black transition-colors ${!isPt ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>ES</button>
+              <button onClick={() => handleLangSwitch('es')} className={`text-xs font-black transition-colors ${currentLang === 'es' ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>ES</button>
               <span className="text-slate-300 text-xs">|</span>
-              <button onClick={() => handleLangSwitch('pt')} className={`text-xs font-black transition-colors ${isPt ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>PT-BR</button>
+              <button onClick={() => handleLangSwitch('pt')} className={`text-xs font-black transition-colors ${currentLang === 'pt' ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>PT-BR</button>
+              <span className="text-slate-300 text-xs">|</span>
+              <button onClick={() => handleLangSwitch('en')} className={`text-xs font-black transition-colors ${currentLang === 'en' ? 'text-green-600' : 'text-slate-400 hover:text-slate-600'}`}>EN</button>
             </div>
             <div className="hidden md:block mr-2">
-              <SearchBar lang={isPt ? 'pt' : 'es'} />
+              <SearchBar lang={currentLang} />
             </div>
             <button
               onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
@@ -125,7 +131,7 @@ export default function MainLayout() {
         </div>
         {isMobileSearchOpen && (
           <div className="md:hidden border-t border-slate-100 bg-white px-4 py-3 shadow-inner">
-            <SearchBar lang={isPt ? 'pt' : 'es'} />
+            <SearchBar lang={currentLang} />
           </div>
         )}
       </header>
@@ -136,7 +142,7 @@ export default function MainLayout() {
         <div className="container mx-auto px-4 text-center">
           <div className="mb-10">
             <h4 className="text-sm font-black uppercase tracking-widest text-slate-900 mb-4">
-              {isPt ? 'Comunidade' : 'Comunidad'}
+              {currentLang === 'pt' ? 'Comunidade' : currentLang === 'en' ? 'Community' : 'Comunidad'}
             </h4>
             <a 
               href="https://t.me/latinotech" 
@@ -145,18 +151,18 @@ export default function MainLayout() {
               className="inline-flex items-center gap-3 bg-white border border-slate-200 px-6 py-3 rounded-full text-slate-700 font-bold hover:text-[#0088cc] hover:border-[#0088cc]/30 hover:bg-[#0088cc]/5 transition-all shadow-sm hover:shadow-md"
             >
               <TelegramIcon className="w-5 h-5 text-[#0088cc]" />
-              {isPt ? 'Junte-se ao nosso canal para notícias em tempo real' : 'Únete a nuestro canal para noticias en tiempo real'}
+              {currentLang === 'pt' ? 'Junte-se ao nosso canal para notícias' : currentLang === 'en' ? 'Join our channel for live news' : 'Únete a nuestro canal para noticias'}
             </a>
           </div>
           <p className="text-slate-500 text-sm font-medium mb-4">
-            © {new Date().getFullYear()} LatinoTech IA. {isPt ? 'Notícias curadas e impulsionadas por Inteligência Artificial.' : 'Noticias curadas e impulsadas por Inteligencia Artificial.'}
+            © {new Date().getFullYear()} LatinoTech IA. {currentLang === 'pt' ? 'Notícias curadas por IA.' : currentLang === 'en' ? 'AI-curated Tech News.' : 'Noticias curadas por IA.'}
           </p>
           <div className="flex justify-center gap-6 text-xs text-slate-400">
             <Link to={`${langPrefix}/privacidad`} className="hover:text-slate-600 transition-colors">
-              {isPt ? 'Política de Privacidade' : 'Política de Privacidad'}
+              {currentLang === 'pt' ? 'Privacidade' : currentLang === 'en' ? 'Privacy Policy' : 'Privacidad'}
             </Link>
             <Link to={`${langPrefix}/terminos`} className="hover:text-slate-600 transition-colors">
-              {isPt ? 'Termos de Uso' : 'Términos de Uso'}
+              {currentLang === 'pt' ? 'Termos' : currentLang === 'en' ? 'Terms of Use' : 'Términos'}
             </Link>
           </div>
         </div>
