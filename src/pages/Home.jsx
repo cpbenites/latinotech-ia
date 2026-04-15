@@ -112,7 +112,7 @@ export default function Home({ lang = 'es' }) {
 
   const featured = (page === 1 && !category) ? articles[0] : null;
   const gridArticles = (page === 1 && !category) ? articles.slice(1) : articles;
-  const langPrefix = lang === 'pt' ? '/br' : '';
+  const langPrefix = lang === 'pt' ? '/br' : lang === 'en' ? '/en' : '';
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
