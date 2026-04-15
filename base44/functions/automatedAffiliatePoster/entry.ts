@@ -34,24 +34,29 @@ Deno.serve(async (req) => {
             affiliate = allActive[0];
         }
 
-        const prompt = `Você é um redator especialista em Marketing de Conteúdo e SEO para um portal de tecnologia chamado LatinoTech IA.
-        
-Escreva um artigo de blog de alta qualidade, educativo e em formato de tutorial (Native Advertising) sobre a ferramenta: "${affiliate.name}".
+        const prompt = `Atue como um Jornalista de Tecnologia Sênior e Especialista em Copywriting B2B.
+A sua missão é escrever um artigo de "Publicidade Nativa" disfarçado de um tutorial/guia prático de altíssimo valor sobre a plataforma "${affiliate.name}". O artigo não pode parecer um anúncio. Deve focar-se em resolver um problema real do leitor, mostrando como esta ferramenta é a solução ideal.
 ${affiliate.description ? `Contexto da ferramenta: ${affiliate.description}` : ''}
 
-O artigo deve:
-1. Ter um título atrativo e otimizado para SEO
-2. Apresentar 3 casos de uso práticos e reais
-3. Ser educativo e genuinamente útil para o leitor
-4. Incluir OBRIGATORIAMENTE o link de afiliado "${affiliate.affiliate_url}" em DOIS momentos distintos:
-   - No meio do artigo, dentro de um contexto natural
-   - No final, com um CTA forte e convincente
-5. Ter entre 600 e 800 palavras por versão
-6. Tom profissional, mas acessível
+Gere TRES versões deste artigo: ESPAÑOL, PORTUGUÉS e INGLÉS.
 
-Gere o artigo em 3 idiomas: Espanhol (es), Português (pt) e Inglês (en).
+REGRAS ESTRITAS DE ESTRUTURA E PERSUASÃO:
+1. Título (Clickbait Educacional): Deve focar-se no resultado. Ex: "Como clonar a sua voz com IA em 2 minutos" ou "O segredo para automatizar vídeos sem aparecer".
+2. Introdução (Problema & Agitação): Comece descrevendo a dor do leitor relacionada ao problema que a ferramenta resolve.
+3. O Tutorial (Solução): Apresente "${affiliate.name}" como a revolução. Dê 3 exemplos práticos de como usar a ferramenta no dia a dia.
+4. Inserção do Link de Afiliado: Insira a URL "${affiliate.affiliate_url}" exatamente 2 vezes no texto usando Markdown.
+   - A primeira vez no meio do texto, de forma natural (ex: "Você pode [testar gratuitamente aqui](${affiliate.affiliate_url})").
+   - A segunda vez no final, num bloco de Conclusão/Call-to-Action forte e direto.
+5. Formatação: Use Markdown com subtítulos (##), listas e negritos para facilitar a leitura.
+6. Categoria: Use "Tutoriales" ou "Software" conforme mais adequado.
 
-IMPORTANTE: Use Markdown para formatação (## para subtítulos, **negrito**, listas com -).`;
+Devolva EXCLUSIVAMENTE um objeto JSON válido com a seguinte estrutura:
+{
+  "es": { "title": "", "summary": "", "content": "", "category": "", "seo_keywords": "" },
+  "pt": { "title": "", "summary": "", "content": "", "category": "", "seo_keywords": "" },
+  "en": { "title": "", "summary": "", "content": "", "category": "", "seo_keywords": "" },
+  "image_prompt": "Prompt em inglês, max 20 palavras, estilo hiper-realista, focado no uso de tecnologia/software relacionado ao tema."
+}`;
 
         const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
             prompt,
