@@ -139,9 +139,14 @@ export default function MainLayout() {
               <TelegramIcon className="w-5 h-5" />
             </a>
             {user?.role === 'admin' && (
-              <Link to={`${langPrefix}/admin`} className="hidden sm:block">
-                <Button variant="ghost" size="sm" className="font-bold text-slate-800 hover:bg-slate-100">Panel Admin</Button>
-              </Link>
+              <div className="hidden sm:flex items-center gap-1">
+                <Link to={`${langPrefix}/admin`}>
+                  <Button variant="ghost" size="sm" className="font-bold text-slate-800 hover:bg-slate-100">Admin</Button>
+                </Link>
+                <Link to={`${langPrefix}/afiliados`}>
+                  <Button variant="ghost" size="sm" className="font-bold text-green-600 hover:bg-green-50">Afiliados</Button>
+                </Link>
+              </div>
             )}
           </div>
         </div>

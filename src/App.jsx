@@ -11,6 +11,7 @@ const Home = React.lazy(() => import('@/pages/Home'));
 const Category = React.lazy(() => import('@/pages/Category'));
 const Article = React.lazy(() => import('@/pages/Article'));
 const Admin = React.lazy(() => import('@/pages/Admin'));
+const AffiliateAdmin = React.lazy(() => import('@/pages/AffiliateAdmin'));
 const Privacy = React.lazy(() => import('@/pages/Privacy'));
 const Terms = React.lazy(() => import('@/pages/Terms'));
 const PageNotFound = React.lazy(() => import('./lib/PageNotFound'));
@@ -50,6 +51,7 @@ const AuthenticatedApp = () => {
           <Route path="/categoria/:id" element={<Category lang="es" />} />
           <Route path="/noticia/:slug" element={<Article />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/afiliados" element={<AffiliateAdmin />} />
           <Route path="/privacidad" element={<Privacy />} />
           <Route path="/terminos" element={<Terms />} />
 
@@ -58,6 +60,7 @@ const AuthenticatedApp = () => {
           <Route path="/br/categoria/:id" element={<Category lang="pt" />} />
           <Route path="/br/noticia/:slug" element={<Article />} />
           <Route path="/br/admin" element={<Admin />} />
+          <Route path="/br/afiliados" element={<AffiliateAdmin />} />
           <Route path="/br/privacidad" element={<Privacy />} />
           <Route path="/br/terminos" element={<Terms />} />
 
@@ -66,6 +69,7 @@ const AuthenticatedApp = () => {
           <Route path="/en/categoria/:id" element={<Category lang="en" />} />
           <Route path="/en/news/:slug" element={<Article />} />
           <Route path="/en/admin" element={<Admin />} />
+          <Route path="/en/afiliados" element={<AffiliateAdmin />} />
           <Route path="/en/privacidad" element={<Privacy />} />
           <Route path="/en/terminos" element={<Terms />} />
         </Route>
