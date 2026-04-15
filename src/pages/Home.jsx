@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, ptBR, enUS } from 'date-fns/locale';
 
 export default function Home({ lang = 'es' }) {
+  const isPt = lang === 'pt';
+  const isEn = lang === 'en';
+  const currentLocale = isPt ? ptBR : isEn ? enUS : es;
   const [articles, setArticles] = useState([]);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -135,7 +138,7 @@ export default function Home({ lang = 'es' }) {
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-green-600 font-bold text-xs uppercase tracking-widest">{featured.category}</span>
                 <span className="text-slate-300 text-xs">•</span>
-                <span className="text-slate-500 text-xs font-medium">{format(new Date(featured.published_date || featured.created_date), "d MMM yyyy", { locale: es })}</span>
+                <span className="text-slate-500 text-xs font-medium">{format(new Date(featured.published_date || featured.created_date), "d MMM yyyy", { locale: currentLocale })}</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 group-hover:text-green-600 transition-colors leading-[1.1]">{featured.title}</h2>
               <p className="text-lg text-slate-600 line-clamp-3 leading-relaxed">{featured.summary}</p>
@@ -158,7 +161,7 @@ export default function Home({ lang = 'es' }) {
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-green-600 font-bold text-[10px] uppercase tracking-widest">{article.category}</span>
                 <span className="text-slate-300 text-[10px]">•</span>
-                <span className="text-slate-500 text-[10px] font-medium">{format(new Date(article.published_date || article.created_date), "d MMM", { locale: es })}</span>
+                <span className="text-slate-500 text-[10px] font-medium">{format(new Date(article.published_date || article.created_date), "d MMM", { locale: currentLocale })}</span>
               </div>
               <h3 className="text-xl font-black tracking-tight mb-3 group-hover:text-green-600 transition-colors leading-snug">{article.title}</h3>
               <p className="text-sm text-slate-600 line-clamp-2 mt-auto leading-relaxed">{article.summary}</p>
@@ -169,8 +172,8 @@ export default function Home({ lang = 'es' }) {
       
       {articles.length === 0 && (
         <div className="text-center py-20">
-          <p className="text-2xl font-bold tracking-tight text-slate-400 mb-2">Aún no hay noticias.</p>
-          <p className="text-slate-500">Los artículos publicados aparecerán aquí.</p>
+          <p className="text-2xl font-bold tracking-tight text-slate-400 mb-2">{isPt ? 'Ainda não há notícias.' : isEn ? 'No news yet.' : 'Aún no hay noticias.'}</p>
+          <p className="text-slate-500">{isPt ? 'Os artigos publicados aparecerão aqui.' : isEn ? 'Published articles will appear here.' : 'Los artículos publicados aparecerán aquí.'}</p>
         </div>
       )}
 
@@ -181,17 +184,17 @@ export default function Home({ lang = 'es' }) {
             disabled={page === 1}
             className="px-4 py-2 border border-slate-200 rounded-md font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            &lt; Anterior
+            {isPt ? '< Anterior' : isEn ? '< Previous' : '< Anterior'}
           </button>
           <span className="text-sm font-medium text-slate-500">
-            Página {page}
+            {isPt ? 'Página' : isEn ? 'Page' : 'Página'} {page}
           </span>
           <button 
             onClick={() => handlePageChange(page + 1)}
             disabled={!hasNextPage}
             className="px-4 py-2 border border-slate-200 rounded-md font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Próxima &gt;
+            {isPt ? 'Próxima >' : isEn ? 'Next >' : 'Próxima >'}
           </button>
         </div>
       )}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, ptBR, enUS } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { Copy, Check, Zap } from 'lucide-react';
@@ -164,6 +164,8 @@ export default function Article() {
   const { slug } = useParams();
   const location = useLocation();
   const isPt = location.pathname.includes('/br');
+  const isEn = location.pathname.includes('/en');
+  const currentLocale = isPt ? ptBR : isEn ? enUS : es;
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -225,7 +227,7 @@ export default function Article() {
       <div className="w-8 h-8 border-4 border-slate-200 border-t-green-600 rounded-full animate-spin"></div>
     </div>
   );
-  if (!article) return <div className="p-12 text-center text-slate-500 font-bold text-2xl">Artículo no encontrado</div>;
+  if (!article) return <div className="p-12 text-center text-slate-500 font-bold text-2xl">{isPt ? 'Artigo não encontrado' : isEn ? 'Article not found' : 'Artículo no encontrado'}</div>;
 
   return (
     <article className="container mx-auto px-4 py-12 max-w-4xl relative">
@@ -238,7 +240,7 @@ export default function Article() {
         <div className="flex items-center justify-center gap-3 mb-6">
           <span className="text-green-600 font-bold text-xs uppercase tracking-widest">{article.category}</span>
           <span className="text-slate-300 text-xs">•</span>
-          <span className="text-slate-500 text-xs font-medium">{format(new Date(article.published_date || article.created_date), "d 'de' MMMM, yyyy", { locale: es })}</span>
+          <span className="text-slate-500 text-xs font-medium">{format(new Date(article.published_date || article.created_date), isEn ? "MMM d, yyyy" : "d 'de' MMMM, yyyy", { locale: currentLocale })}</span>
         </div>
         <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-[1.1] text-slate-900">{article.title}</h1>
         <p className="text-xl text-slate-600 font-medium leading-relaxed">{article.summary}</p>
@@ -285,10 +287,10 @@ export default function Article() {
           </div>
           <div className="flex-1 text-center md:text-left">
             <h4 className="font-black text-green-900 text-lg mb-1">
-              {isPt ? 'Dica LatinoTech' : 'Consejo LatinoTech'}
+              {isPt ? 'Dica LatinoTech' : isEn ? 'LatinoTech Tip' : 'Consejo LatinoTech'}
             </h4>
             <p className="text-green-800 font-medium text-sm">
-              {isPt ? 'Queres criar o teu próprio portal de IA ou SaaS sem programar? Usa a plataforma que nós usamos.' : '¿Quieres crear tu propio portal de IA o SaaS sin programar? Usa la plataforma que nosotros usamos.'}
+              {isPt ? 'Queres criar o teu próprio portal de IA ou SaaS sem programar? Usa a plataforma que nós usamos.' : isEn ? 'Want to build your own AI portal or SaaS without coding? Use the platform we use.' : '¿Quieres crear tu propio portal de IA o SaaS sin programar? Usa la plataforma que nosotros usamos.'}
             </p>
           </div>
           <a
@@ -297,14 +299,14 @@ export default function Article() {
             rel="nofollow sponsored noopener noreferrer"
             className="shrink-0 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-sm shadow-md"
           >
-            {isPt ? 'Conhecer a Base44 (No-Code)' : 'Conocer Base44 (No-Code)'}
+            {isPt ? 'Conhecer a Base44 (No-Code)' : isEn ? 'Discover Base44 (No-Code)' : 'Conocer Base44 (No-Code)'}
           </a>
         </div>
         
         <div className="mt-16 pt-8 border-t border-slate-200 bg-slate-50 p-6 rounded-xl">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-6">
             <div>
-              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">{isPt ? 'INFORMAÇÕES META (SEO)' : 'INFORMACIÓN META (SEO)'}</h3>
+              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">{isPt ? 'INFORMAÇÕES META (SEO)' : isEn ? 'META INFORMATION (SEO)' : 'INFORMACIÓN META (SEO)'}</h3>
               <div className="flex flex-wrap gap-2">
                 {article.seo_keywords?.split(',').map((kw, i) => (
                   <span key={i} className="bg-white border border-slate-200 text-slate-600 text-xs px-2 py-1 rounded">{kw.trim()}</span>
@@ -312,13 +314,13 @@ export default function Article() {
               </div>
             </div>
             <div className="shrink-0">
-              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">{isPt ? 'PARTILHAR ARTIGO' : 'COMPARTIR ARTÍCULO'}</h3>
+              <h3 className="text-xs font-black text-slate-900 mb-3 uppercase tracking-widest">{isPt ? 'PARTILHAR ARTIGO' : isEn ? 'SHARE ARTICLE' : 'COMPARTIR ARTÍCULO'}</h3>
               <ShareButtons title={article.title} />
             </div>
           </div>
           {article.original_url && (
             <a href={article.original_url} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-green-600 hover:text-green-700 transition-colors inline-block">
-              {isPt ? 'Ver notícia original no' : 'Ver noticia original en'} {article.source_name || (isPt ? 'fonte' : 'la fuente')} &rarr;
+              {isPt ? 'Ver notícia original no' : isEn ? 'View original news on' : 'Ver noticia original en'} {article.source_name || (isPt ? 'fonte' : isEn ? 'the source' : 'la fuente')} &rarr;
             </a>
           )}
         </div>
