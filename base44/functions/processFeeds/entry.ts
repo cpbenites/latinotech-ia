@@ -167,3 +167,58 @@ Deno.serve(async (req) => {
         return Response.json({ error: error.message }, { status: 500 });
     }
 });
+// DISPARO AUTOMÁTICO MULTILÍNGUE PARA O TELEGRAM
+try {
+    const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+    
+    // Mapeamento dos Chat IDs por idioma
+    const chatIds = {
+        es: Deno.env.get("TELEGRAM_CHAT_ID_ES") || Deno.env.get("TELEGRAM_CHAT_ID"), // Fallback para o antigo
+        pt: Deno.env.get("TELEGRAM_CHAT_ID_PT"),
+        en: Deno.env.get("TELEGRAM_CHAT_ID_EN")
+    };
+    
+    if (TELEGRAM_BOT_TOKEN) {
+        for (const lang of ['es', 'pt', 'en']) {
+            const langData = llmResponse[lang];
+            const chatId = chatIds[lang];
+            
+            // Só envia se existir um Chat ID configurado para este idioma e se a notícia foi gerada
+            if (chatId && langData && langData.title) {
+                const shortSummary = langData.summary.length > 150 ? langData.summary.substring(0, 147) + "..." : langData.summary;
+                
+                // Prefixo da URL baseado no idioma
+                const urlPrefix = lang === 'pt' ? '/br' : lang === 'en' ? '/en' : '';
+                // Slug da notícia (simplificado da mesma forma que gerou no BD)
+                const articleSlug = generateSlug(langData.title);
+                
+                const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${lang === 'pt' ? 'Leia a notícia completa aqui:' : lang === 'en' ? 'Read the full story here:' : 'Lee la noticia completa aquí:'}\nhttps://latinotechia.com${urlPrefix}/noticia/${articleSlug}`;
+                
+                if (image_url) {
+                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            photo: image_url,
+                            caption: telegramMessage,
+                            parse_mode: 'HTML'
+                        })
+                    });
+                } else {
+                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: telegramMessage,
+                            parse_mode: 'HTML'
+                        })
+                    });
+                }
+            }
+        }
+    }
+} catch (telegramError) {
+    console.error("Error al enviar mensaje a Telegram:", telegramError);
+}
