@@ -18,18 +18,16 @@ Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
         
-        // Ejecutamos como admin/serviceRole porque correrá en background (Cron)
         const feeds = await base44.asServiceRole.entities.RssFeed.list();
         const activeFeeds = feeds.filter(f => f.is_active);
         
         let processedCount = 0;
-        const MAX_ITEMS_PER_RUN = 2; // Limite total por execução para evitar Timeout
+        const MAX_ITEMS_PER_RUN = 2; 
         
         for (const feed of activeFeeds) {
             if (processedCount >= MAX_ITEMS_PER_RUN) break;
             try {
                 const feedData = await parser.parseURL(feed.url);
-                // Procesamos solo las 2 más recientes por fuente para optimizar tiempos y créditos
                 const items = feedData.items.slice(0, 2);
                 
                 for (const item of items) {
@@ -80,8 +78,9 @@ Deno.serve(async (req) => {
                     
                     let image_url = "";
                     try {
+                        // MUDANÇA AQUI: Tirámos o 8k e pedimos 1080p optimizado web
                         const imgResponse = await base44.asServiceRole.integrations.Core.GenerateImage({
-                            prompt: llmResponse.image_prompt + ", highly detailed, tech news editorial photography, clean white background, modern tech style, 8k resolution, minimalist"
+                            prompt: llmResponse.image_prompt + ", highly detailed, tech news editorial photography, clean white background, modern tech style, 1080p, highly compressed web resolution, minimalist"
                         });
                         image_url = imgResponse.url;
                     } catch (e) {
@@ -90,7 +89,6 @@ Deno.serve(async (req) => {
                     
                     let esArticle = null;
                     
-                    // AQUI ESTÁ A MÁGICA: O LOOP AGORA CRIA AS 3 VERSÕES!
                     for (const lang of ['es', 'pt', 'en']) {
                         const langData = llmResponse[lang];
                         if (!langData || !langData.title) continue;
@@ -122,7 +120,6 @@ Deno.serve(async (req) => {
                         if (lang === 'es') esArticle = createdArticle;
                     }
 
-                    // Envio automático para o Telegram (apenas versão ES por agora)
                     try {
                         const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
                         const TELEGRAM_CHAT_ID = Deno.env.get("TELEGRAM_CHAT_ID");
