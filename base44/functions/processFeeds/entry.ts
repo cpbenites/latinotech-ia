@@ -78,7 +78,6 @@ Deno.serve(async (req) => {
                     
                     let image_url = "";
                     try {
-                        // MUDANÇA AQUI: Tirámos o 8k e pedimos 1080p optimizado web
                         const imgResponse = await base44.asServiceRole.integrations.Core.GenerateImage({
                             prompt: llmResponse.image_prompt + ", highly detailed, tech news editorial photography, clean white background, modern tech style, 1080p, highly compressed web resolution, minimalist"
                         });
@@ -87,7 +86,8 @@ Deno.serve(async (req) => {
                         console.error("Image generation failed:", e);
                     }
                     
-                    let esArticle = null;
+                    // Removido a tipagem estrita Record<string, any> para evitar erro no linter
+                    const createdArticles = {};
                     
                     for (const lang of ['es', 'pt', 'en']) {
                         const langData = llmResponse[lang];
@@ -117,38 +117,56 @@ Deno.serve(async (req) => {
                             published_date: new Date().toISOString()
                         });
                         
-                        if (lang === 'es') esArticle = createdArticle;
+                        createdArticles[lang] = createdArticle;
                     }
 
+                    // DISPARO AUTOMÁTICO PARA OS 3 CANAIS DO TELEGRAM
                     try {
                         const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
-                        const TELEGRAM_CHAT_ID = Deno.env.get("TELEGRAM_CHAT_ID");
                         
-                        if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID && esArticle) {
-                            const shortSummary = llmResponse.es.summary.length > 150 ? llmResponse.es.summary.substring(0, 147) + "..." : llmResponse.es.summary;
-                            const telegramMessage = `<b>${llmResponse.es.title}</b>\n\n${shortSummary}\n\n🚀 Lee la noticia completa aquí:\nhttps://latinotechia.com/noticia/${esArticle.slug}`;
-                            
-                            if (image_url) {
-                                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        chat_id: TELEGRAM_CHAT_ID,
-                                        photo: image_url,
-                                        caption: telegramMessage,
-                                        parse_mode: 'HTML'
-                                    })
-                                });
-                            } else {
-                                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        chat_id: TELEGRAM_CHAT_ID,
-                                        text: telegramMessage,
-                                        parse_mode: 'HTML'
-                                    })
-                                });
+                        // Removido a tipagem estrita Record<string, string>
+                        const chatIds = {
+                            es: Deno.env.get("TELEGRAM_CHAT_ID") || "@latinotech",
+                            pt: "@latinotechbr", 
+                            en: "@latinotechen"  
+                        };
+                        
+                        if (TELEGRAM_BOT_TOKEN) {
+                            for (const lang of ['es', 'pt', 'en']) {
+                                const article = createdArticles[lang];
+                                const langData = llmResponse[lang];
+                                const chatId = chatIds[lang];
+                                
+                                if (chatId && article && langData) {
+                                    const shortSummary = langData.summary.length > 150 ? langData.summary.substring(0, 147) + "..." : langData.summary;
+                                    
+                                    const urlPrefix = lang === 'pt' ? '/br' : lang === 'en' ? '/en' : '';
+                                    
+                                    const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${lang === 'pt' ? 'Leia a notícia completa aqui:' : lang === 'en' ? 'Read the full story here:' : 'Lee la noticia completa aquí:'}\nhttps://latinotechia.com${urlPrefix}/noticia/${article.slug}`;
+                                    
+                                    if (image_url) {
+                                        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                chat_id: chatId,
+                                                photo: image_url,
+                                                caption: telegramMessage,
+                                                parse_mode: 'HTML'
+                                            })
+                                        });
+                                    } else {
+                                        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                chat_id: chatId,
+                                                text: telegramMessage,
+                                                parse_mode: 'HTML'
+                                            })
+                                        });
+                                    }
+                                }
                             }
                         }
                     } catch (telegramError) {
@@ -167,58 +185,3 @@ Deno.serve(async (req) => {
         return Response.json({ error: error.message }, { status: 500 });
     }
 });
-// DISPARO AUTOMÁTICO MULTILÍNGUE PARA O TELEGRAM
-try {
-    const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
-    
-    // Mapeamento dos Chat IDs por idioma
-    const chatIds = {
-        es: Deno.env.get("TELEGRAM_CHAT_ID_ES") || Deno.env.get("TELEGRAM_CHAT_ID"), // Fallback para o antigo
-        pt: Deno.env.get("TELEGRAM_CHAT_ID_PT"),
-        en: Deno.env.get("TELEGRAM_CHAT_ID_EN")
-    };
-    
-    if (TELEGRAM_BOT_TOKEN) {
-        for (const lang of ['es', 'pt', 'en']) {
-            const langData = llmResponse[lang];
-            const chatId = chatIds[lang];
-            
-            // Só envia se existir um Chat ID configurado para este idioma e se a notícia foi gerada
-            if (chatId && langData && langData.title) {
-                const shortSummary = langData.summary.length > 150 ? langData.summary.substring(0, 147) + "..." : langData.summary;
-                
-                // Prefixo da URL baseado no idioma
-                const urlPrefix = lang === 'pt' ? '/br' : lang === 'en' ? '/en' : '';
-                // Slug da notícia (simplificado da mesma forma que gerou no BD)
-                const articleSlug = generateSlug(langData.title);
-                
-                const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${lang === 'pt' ? 'Leia a notícia completa aqui:' : lang === 'en' ? 'Read the full story here:' : 'Lee la noticia completa aquí:'}\nhttps://latinotechia.com${urlPrefix}/noticia/${articleSlug}`;
-                
-                if (image_url) {
-                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: chatId,
-                            photo: image_url,
-                            caption: telegramMessage,
-                            parse_mode: 'HTML'
-                        })
-                    });
-                } else {
-                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            chat_id: chatId,
-                            text: telegramMessage,
-                            parse_mode: 'HTML'
-                        })
-                    });
-                }
-            }
-        }
-    }
-} catch (telegramError) {
-    console.error("Error al enviar mensaje a Telegram:", telegramError);
-}
