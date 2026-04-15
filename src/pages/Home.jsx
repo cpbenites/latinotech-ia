@@ -127,7 +127,7 @@ export default function Home({ lang = 'es' }) {
         </div>
       )}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
-        {Array.from({ length: 6 }).map((_, i) => (
+        {[1, 2, 3, 4, 5, 6].map((i) => (
           <div key={i} className="flex flex-col gap-3 w-full">
             <div className="aspect-video bg-slate-200 rounded-xl animate-pulse w-full"></div>
             <div className="flex gap-2">
