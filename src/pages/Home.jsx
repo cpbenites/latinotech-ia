@@ -12,7 +12,6 @@ const SmoothImage = ({ src, alt, className, priority = false }) => {
   useEffect(() => {
     if (priority || isInView) return;
     
-    // MUDANÇA AQUI: de 300px para 50px. Só carrega no último momento!
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) {
         setIsInView(true);
@@ -114,7 +113,13 @@ export default function Home({ lang = 'es' }) {
 
   const featured = (page === 1 && !category) ? articles[0] : null;
   const gridArticles = (page === 1 && !category) ? articles.slice(1) : articles;
-  const langPrefix = lang === 'pt' ? '/br' : lang === 'en' ? '/en' : '';
+  
+  // FUNÇÃO DE ROTEAMENTO SEO
+  const getArticlePath = (slug) => {
+    if (lang === 'en') return `/en/news/${slug}`;
+    if (lang === 'pt') return `/br/noticia/${slug}`;
+    return `/noticia/${slug}`;
+  };
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -127,7 +132,7 @@ export default function Home({ lang = 'es' }) {
       )}
       
       {!category && featured && (
-        <Link to={`${langPrefix}/noticia/${featured.slug || featured.id}`} className="block mb-16 group">
+        <Link to={getArticlePath(featured.slug || featured.id)} className="block mb-16 group">
           <div className="grid md:grid-cols-5 gap-8 items-center">
             <div className="md:col-span-3 aspect-[16/10] bg-slate-100 overflow-hidden relative rounded-xl">
               {featured.image_url ? (
@@ -152,7 +157,7 @@ export default function Home({ lang = 'es' }) {
       {gridArticles.length > 0 && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 border-t border-slate-200 pt-12">
           {gridArticles.slice(0, 12).map(article => (
-            <Link key={article.id} to={`${langPrefix}/noticia/${article.slug || article.id}`} className="group flex flex-col content-auto">
+            <Link key={article.id} to={getArticlePath(article.slug || article.id)} className="group flex flex-col content-auto">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative rounded-xl">
                 {article.image_url ? (
                   <SmoothImage priority={false} src={article.image_url} alt={article.title} className="group-hover:scale-105" />
