@@ -86,7 +86,6 @@ Deno.serve(async (req) => {
                         console.error("Image generation failed:", e);
                     }
                     
-                    // Removido a tipagem estrita Record<string, any> para evitar erro no linter
                     const createdArticles = {};
                     
                     for (const lang of ['es', 'pt', 'en']) {
@@ -120,11 +119,9 @@ Deno.serve(async (req) => {
                         createdArticles[lang] = createdArticle;
                     }
 
-                    // DISPARO AUTOMÁTICO PARA OS 3 CANAIS DO TELEGRAM
                     try {
                         const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
                         
-                        // Removido a tipagem estrita Record<string, string>
                         const chatIds = {
                             es: Deno.env.get("TELEGRAM_CHAT_ID") || "@latinotech",
                             pt: "@latinotechbr", 
@@ -140,9 +137,12 @@ Deno.serve(async (req) => {
                                 if (chatId && article && langData) {
                                     const shortSummary = langData.summary.length > 150 ? langData.summary.substring(0, 147) + "..." : langData.summary;
                                     
-                                    const urlPrefix = lang === 'pt' ? '/br' : lang === 'en' ? '/en' : '';
+                                    // URL Dinâmica baseada no Idioma para o SEO perfeito
+                                    let urlPath = `/noticia/${article.slug}`;
+                                    if (lang === 'pt') urlPath = `/br/noticia/${article.slug}`;
+                                    if (lang === 'en') urlPath = `/en/news/${article.slug}`;
                                     
-                                    const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${lang === 'pt' ? 'Leia a notícia completa aqui:' : lang === 'en' ? 'Read the full story here:' : 'Lee la noticia completa aquí:'}\nhttps://latinotechia.com${urlPrefix}/noticia/${article.slug}`;
+                                    const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${lang === 'pt' ? 'Leia a notícia completa aqui:' : lang === 'en' ? 'Read the full story here:' : 'Lee la noticia completa aquí:'}\nhttps://latinotechia.com${urlPath}`;
                                     
                                     if (image_url) {
                                         await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
