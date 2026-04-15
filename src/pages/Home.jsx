@@ -58,7 +58,7 @@ export default function Home({ lang = 'es' }) {
       }
     }
     fetchArticles();
-  }, [category, page]);
+  }, [category, page, lang]);
 
   const handlePageChange = (newPage) => {
     if (newPage < 1) return;
