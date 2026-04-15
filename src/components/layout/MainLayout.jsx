@@ -32,26 +32,17 @@ export default function MainLayout() {
   // NOVA LÓGICA DE TROCA DE IDIOMA (Suporta 3 idiomas)
   const handleLangSwitch = (newLang) => {
     if (newLang === currentLang) return;
-
+    
     let pathWithoutLang = location.pathname;
     if (pathWithoutLang.startsWith('/br')) pathWithoutLang = pathWithoutLang.replace('/br', '');
     else if (pathWithoutLang.startsWith('/en')) pathWithoutLang = pathWithoutLang.replace('/en', '');
-    
     if (pathWithoutLang === '') pathWithoutLang = '/';
-
+    
     let newPrefix = '';
     if (newLang === 'pt') newPrefix = '/br';
     else if (newLang === 'en') newPrefix = '/en';
 
-    let newUrl = newPrefix + pathWithoutLang + location.search;
-    
-    // Evita coisas como /en/ ou /br/ (fica só /en ou /br)
-    if (newUrl === '/br/' || newUrl === '/en/') {
-        newUrl = newPrefix;
-    }
-    if (newUrl === '') newUrl = '/';
-
-    window.location.href = newUrl;
+    window.location.href = newPrefix + pathWithoutLang + location.search;
   };
 
   useEffect(() => {

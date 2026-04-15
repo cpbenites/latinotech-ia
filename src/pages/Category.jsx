@@ -58,7 +58,7 @@ export default function Category({ lang = 'es' }) {
       }
     }
     fetchArticles();
-  }, [category, page, currentLang, categoryId]);
+  }, [category, page, currentLang, categoryId, lang]);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE) || 1;
 
