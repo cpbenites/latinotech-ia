@@ -64,7 +64,7 @@ const AuthenticatedApp = () => {
           {/* Rotas EN */}
           <Route path="/en" element={<Home lang="en" />} />
           <Route path="/en/categoria/:id" element={<Category lang="en" />} />
-          <Route path="/en/noticia/:slug" element={<Article />} />
+          <Route path="/en/news/:slug" element={<Article />} />
           <Route path="/en/admin" element={<Admin />} />
           <Route path="/en/privacidad" element={<Privacy />} />
           <Route path="/en/terminos" element={<Terms />} />
