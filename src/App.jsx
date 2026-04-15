@@ -7,7 +7,6 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import MainLayout from '@/components/layout/MainLayout';
 
-// Lazy Loading das páginas para acelerar o Mobile
 const Home = React.lazy(() => import('@/pages/Home'));
 const Category = React.lazy(() => import('@/pages/Category'));
 const Article = React.lazy(() => import('@/pages/Article'));
@@ -42,23 +41,33 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // O Suspense divide o Javascript e usa o novo Loader limpo
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
         <Route element={<MainLayout />}>
+          {/* Rotas ES (Padrão) */}
           <Route path="/" element={<Home lang="es" />} />
-          <Route path="/br" element={<Home lang="pt" />} />
           <Route path="/categoria/:id" element={<Category lang="es" />} />
-          <Route path="/br/categoria/:id" element={<Category lang="pt" />} />
           <Route path="/noticia/:slug" element={<Article />} />
-          <Route path="/br/noticia/:slug" element={<Article />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path="/br/admin" element={<Admin />} />
           <Route path="/privacidad" element={<Privacy />} />
-          <Route path="/br/privacidad" element={<Privacy />} />
           <Route path="/terminos" element={<Terms />} />
+
+          {/* Rotas PT-BR */}
+          <Route path="/br" element={<Home lang="pt" />} />
+          <Route path="/br/categoria/:id" element={<Category lang="pt" />} />
+          <Route path="/br/noticia/:slug" element={<Article />} />
+          <Route path="/br/admin" element={<Admin />} />
+          <Route path="/br/privacidad" element={<Privacy />} />
           <Route path="/br/terminos" element={<Terms />} />
+
+          {/* Rotas EN */}
+          <Route path="/en" element={<Home lang="en" />} />
+          <Route path="/en/categoria/:id" element={<Category lang="en" />} />
+          <Route path="/en/noticia/:slug" element={<Article />} />
+          <Route path="/en/admin" element={<Admin />} />
+          <Route path="/en/privacidad" element={<Privacy />} />
+          <Route path="/en/terminos" element={<Terms />} />
         </Route>
         <Route path="*" element={<PageNotFound />} />
       </Routes>
