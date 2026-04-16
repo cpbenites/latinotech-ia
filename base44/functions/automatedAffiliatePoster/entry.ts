@@ -35,27 +35,29 @@ Deno.serve(async (req) => {
         }
 
         const prompt = `Atue como um Jornalista de Tecnologia Sênior e Especialista em Copywriting B2B.
-A sua missão é escrever um artigo de "Publicidade Nativa" disfarçado de um tutorial/guia prático de altíssimo valor sobre a plataforma "${affiliate.name}". O artigo não pode parecer um anúncio. Deve focar-se em resolver um problema real do leitor, mostrando como esta ferramenta é a solução ideal.
+A sua missão é escrever um artigo de "Publicidade Nativa" disfarçado de um guia definitivo (Long-form content, mínimo de 600 a 800 palavras) sobre a plataforma ${affiliate.name}.
 ${affiliate.description ? `Contexto da ferramenta: ${affiliate.description}` : ''}
 
 Gere TRES versões deste artigo: ESPAÑOL, PORTUGUÉS e INGLÉS.
 
 REGRAS ESTRITAS DE ESTRUTURA E PERSUASÃO:
-1. Título (Clickbait Educacional): Deve focar-se no resultado. Ex: "Como clonar a sua voz com IA em 2 minutos" ou "O segredo para automatizar vídeos sem aparecer".
-2. Introdução (Problema & Agitação): Comece descrevendo a dor do leitor relacionada ao problema que a ferramenta resolve.
-3. O Tutorial (Solução): Apresente "${affiliate.name}" como a revolução. Dê 3 exemplos práticos de como usar a ferramenta no dia a dia.
-4. Inserção do Link de Afiliado: Insira a URL "${affiliate.affiliate_url}" exatamente 2 vezes no texto usando Markdown.
-   - A primeira vez no meio do texto, de forma natural (ex: "Você pode [testar gratuitamente aqui](${affiliate.affiliate_url})").
-   - A segunda vez no final, num bloco de Conclusão/Call-to-Action forte e direto.
-5. Formatação: Use Markdown com subtítulos (##), listas e negritos para facilitar a leitura.
-6. Categoria: Use "Tutoriales" ou "Software" conforme mais adequado.
+1. Links Embutidos (CRÍTICO): Sempre que escrever o nome da ferramenta (${affiliate.name}) no meio do texto, OBRIGATORIAMENTE transforme-o num link clicável usando Markdown: [${affiliate.name}](${affiliate.affiliate_url}). Faça isso pelo menos 4 vezes ao longo do texto.
+2. Profundidade: O artigo deve ser longo e detalhado. Não faça resumos curtos.
+3. Estrutura Obrigatória:
+   - Introdução: Qual é o grande problema que o mercado enfrenta hoje?
+   - O que é a ${affiliate.name}: Uma explicação técnica mas acessível.
+   - 3 Casos de Uso Reais: Como usar no dia a dia (seja muito específico).
+   - Prós e Contras: Mostre imparcialidade para gerar confiança.
+   - Veredicto/Conclusão: Um Call-to-Action forte final, usando novamente o link [${affiliate.name}](${affiliate.affiliate_url}).
+4. Formatação: Use Markdown rico (subtítulos ##, listas, negritos em palavras-chave).
+5. Categoria: Defina como "Tutoriales" ou "Software".
 
 Devolva EXCLUSIVAMENTE um objeto JSON válido com a seguinte estrutura:
 {
   "es": { "title": "", "summary": "", "content": "", "category": "", "seo_keywords": "" },
   "pt": { "title": "", "summary": "", "content": "", "category": "", "seo_keywords": "" },
   "en": { "title": "", "summary": "", "content": "", "category": "", "seo_keywords": "" },
-  "image_prompt": "Prompt em inglês, max 20 palavras, estilo hiper-realista, focado no uso de tecnologia/software relacionado ao tema."
+  "image_prompt": "Prompt em inglês, max 20 palavras, estilo hiper-realista, focado no uso desta tecnologia de software, 1080p."
 }`;
 
         const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
