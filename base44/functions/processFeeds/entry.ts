@@ -35,33 +35,32 @@ Deno.serve(async (req) => {
                     const existing = await base44.asServiceRole.entities.NewsArticle.filter({ original_url: item.link });
                     if (existing.length > 0) continue;
                     
-                    let prompt = `Actúa como un periodista experto en tecnología y SEO para LatinoTech IA, un sitio top de noticias estilo TechCrunch.
-                    Genera TRES versiones de la siguiente noticia: una en ESPAÑOL (orientada a LATAM), una en PORTUGUÉS (orientada a BRASIL) y una en INGLÉS (orientada a audiencia GLOBAL).
-                    El tono debe ser profesional, dinámico, limpio y atractivo. Usa excelente redacción.
-                    
-                    Noticia original:
-                    Título: ${item.title}
-                    Resumen original: ${item.contentSnippet || item.content || ''}
-                    
-                    REGLAS ESTRICTAS PARA EL CONTENIDO:
-                    1. Tamaño y Profundidad: Escribe artículos completos, profundos y detallados con al menos 5 a 7 párrafos bien desarrollados.
-                    2. Estructura Periodística: El artículo DEBE contener al menos dos o tres subtítulos (usa Markdown ## o ###).
-                    3. Contextualización: Expande la noticia. Explica "por qué esto importa".
-                    4. Formato: Markdown usando párrafos, subtítulos y negritas (**).
-                    5. Tutoriales de IA: Si la noticia es sobre IA, incluye al final una sección de Tutorial & Prompts (en el idioma respectivo). IMPORTANTE: Cuando generes los prompts de ejemplo, TIENEN QUE SER AMPLIOS Y DETALLADOS. Cada prompt debe tener obligatoriamente entre 3 y 5 líneas de longitud, explicando un contexto, una acción y un formato deseado. No escribas prompts de una sola frase.
-                    6. Categorías Estrictas: La categoría del artículo DEBE OBLIGATORIAMENTE ser una de estas (exactamente con esta ortografía, independientemente del idioma): "IA", "Startups", "Gadgets", "Software", "Gaming", o "Tutoriales". NO inventes categorías nuevas ni las traduzcas.
-                    
-                    Devuelve EXCLUSIVAMENTE un JSON válido con la siguiente estructura:
-                    - "es": Objeto con { title, summary, content, category, seo_keywords } (en Español)
-                    - "pt": Objeto con { title, summary, content, category, seo_keywords } (en Portugués)
-                    - "en": Objeto con { title, summary, content, category, seo_keywords } (en Inglés)
-                    - "image_prompt": Un prompt de máximo 20 palabras en inglés para generar una imagen sobre este tema.
-                    `;
+                    const prompt = `Atue como um Jornalista Investigativo Sênior da LatinoTech IA.
+Acabamos de receber a seguinte notícia bruta:
+TÍTULO: ${item.title}
+CONTEÚDO/RESUMO: ${item.contentSnippet || item.content || ''}
 
-                    if (feed.category === 'Software') {
-                      prompt += `\nINSTRUCCIONES OBLIGATORIAS PARA SOFTWARE:
-                    - Debes buscar e incluir el nombre de la herramienta, si es gratuita o de pago, y una lista de "Cómo empezar".`;
-                    }
+A sua missão é expandir esta informação e criar uma matéria jornalística completa, profunda e de alta qualidade (mínimo de 500 palavras).
+
+Gere TRES versões do artigo: ESPAÑOL, PORTUGUÉS e INGLÉS.
+
+REGRAS DE ESCRITA:
+1. Profundidade: Não se limite a repetir a notícia. Expanda o contexto. Explique o "Porquê" e o "Impacto" desta notícia no mercado de tecnologia, IA ou startups.
+2. Estrutura:
+   - Título Chamativo e SEO-friendly.
+   - Introdução forte (o que aconteceu).
+   - O Contexto (porque é que isto importa agora).
+   - O Futuro (quais os próximos passos ou consequências disto).
+3. Formatação: O texto deve ser rico em formatação Markdown. Use vários subtítulos (##), listas (se aplicável) e coloque os termos técnicos em negrito.
+4. Categoria: Escolha a mais adequada entre: IA, Startups, Gadgets, Software, Gaming.
+
+Devolva EXCLUSIVAMENTE um objeto JSON válido:
+{
+  "es": { "title": "", "summary": "Resumo de 2 linhas", "content": "Texto longo em Markdown", "category": "", "seo_keywords": "" },
+  "pt": { "title": "", "summary": "Resumo de 2 linhas", "content": "Texto longo em Markdown", "category": "", "seo_keywords": "" },
+  "en": { "title": "", "summary": "Resumo de 2 linhas", "content": "Texto longo em Markdown", "category": "", "seo_keywords": "" },
+  "image_prompt": "Prompt de imagem descritivo em inglês, max 20 palavras, focado no tema da notícia."
+}`;
                     
                     const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
                         prompt: prompt,
