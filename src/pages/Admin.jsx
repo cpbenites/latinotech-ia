@@ -8,7 +8,8 @@ import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
 import ReactMarkdown from 'react-markdown';
 import { Navigate } from 'react-router-dom';
-import { FileText, Rss, Users, MapPin, Download, Video, Copy, Loader2 } from 'lucide-react';
+import { FileText, Rss, Video, Copy, Loader2 } from 'lucide-react';
+import AudienceDashboard from '@/components/admin/AudienceDashboard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Admin() {
@@ -19,7 +20,7 @@ export default function Admin() {
   
   const [pendingArticles, setPendingArticles] = useState([]);
   const [feeds, setFeeds] = useState([]);
-  const [visitorLogs, setVisitorLogs] = useState([]);
+  const [visitorLogs, setVisitorLogs] = useState([]); // kept for fetchAudience compat
   const [newFeed, setNewFeed] = useState({ url: '', name: '', category: 'Tech' });
   const [isProcessing, setIsProcessing] = useState(false);
   const [scriptModalOpen, setScriptModalOpen] = useState(false);
@@ -39,11 +40,6 @@ export default function Admin() {
   const fetchAudience = async () => {
     const data = await base44.entities.VisitorLog.list('-access_date', 50);
     setVisitorLogs(data);
-  };
-
-  const handleExportLogs = () => {
-    console.log("Exporting Visitor Logs (Full Data):", visitorLogs);
-    toast({ title: "Logs exportados", description: "Revisa la consola del navegador para ver los datos completos.", duration: 4000 });
   };
 
   useEffect(() => {
@@ -275,113 +271,7 @@ export default function Admin() {
         </div>
       )}
 
-      {activeTab === 'audience' && (
-        <div className="space-y-8">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-2xl font-black tracking-tight text-slate-900">Análisis de Tráfico</h2>
-            <Button onClick={handleExportLogs} variant="outline" className="flex items-center gap-2 font-bold text-slate-600">
-              <Download className="w-4 h-4" /> Exportar Logs
-            </Button>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><Users className="w-4 h-4" /> Visitas (Top 50)</h3>
-              <p className="text-4xl font-black text-slate-900">{visitorLogs.length}</p>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><MapPin className="w-4 h-4" /> Top 3 Países</h3>
-              <div className="flex flex-col gap-3">
-                {(() => {
-                  const countryCounts = visitorLogs.reduce((acc, log) => {
-                    const c = log.country || 'Desconocido';
-                    acc[c] = (acc[c] || 0) + 1;
-                    return acc;
-                  }, {});
-                  const topCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
-                  if (topCountries.length === 0) return <p className="text-slate-400 font-medium text-sm">No hay datos.</p>;
-                  return topCountries.map(([country, count], i) => (
-                    <div key={country} className="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 shadow-sm text-sm">
-                      <span className="font-bold text-slate-800 truncate pr-2">{i + 1}. {country}</span>
-                      <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-bold">{count}</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            </div>
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><MapPin className="w-4 h-4" /> Top 3 Ciudades</h3>
-              <div className="flex flex-col gap-3">
-                {(() => {
-                  const cityCounts = visitorLogs.reduce((acc, log) => {
-                    const c = log.city || 'Desconocido';
-                    acc[c] = (acc[c] || 0) + 1;
-                    return acc;
-                  }, {});
-                  const topCities = Object.entries(cityCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
-                  if (topCities.length === 0) return <p className="text-slate-400 font-medium text-sm">No hay datos.</p>;
-                  return topCities.map(([city, count], i) => (
-                    <div key={city} className="flex justify-between items-center bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 shadow-sm text-sm">
-                      <span className="font-bold text-slate-800 truncate pr-2">{i + 1}. {city}</span>
-                      <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-bold">{count}</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
-                  <tr>
-                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Fecha y Hora</th>
-                    <th className="px-6 py-4 font-bold uppercase tracking-wider">País / Ciudad</th>
-                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Tipo</th>
-                    <th className="px-6 py-4 font-bold uppercase tracking-wider">IP / Detalles</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {visitorLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 font-medium">
-                        {log.access_date ? format(new Date(log.access_date), 'dd MMM yyyy, HH:mm') : 'N/A'}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          {log.country_code && log.country_code !== 'XX' && (
-                            <img src={`https://flagcdn.com/24x18/${log.country_code.toLowerCase()}.png`} alt={log.country_code} className="rounded-sm border border-slate-200 shadow-sm" />
-                          )}
-                          <span className="font-bold text-slate-800">{log.country}</span>
-                          <span className="text-slate-400 font-medium">• {log.city}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold ${log.is_bot ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-                          {log.is_bot ? '🤖 Bot' : '👤 Humano'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 font-mono text-slate-500 text-xs">
-                        {user?.role === 'super_admin' ? log.ip_address : (log.ip_address?.includes('Oculto') ? log.ip_address : (log.ip_address?.includes(':') ? log.ip_address.split(':').slice(0, 4).join(':') + ':xxxx:xxxx:xxxx:xxxx' : log.ip_address?.split('.').map((p, i) => i < 2 ? p : 'xxx').join('.')))}
-                        {log.user_agent && (
-                          <div className="mt-1 text-[10px] text-slate-400 truncate max-w-[200px]" title={log.user_agent}>
-                            {log.user_agent}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                  {visitorLogs.length === 0 && (
-                    <tr>
-                      <td colSpan="4" className="px-6 py-12 text-center text-slate-500 font-medium">No se han registrado visitas todavía.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+      {activeTab === 'audience' && <AudienceDashboard />}
 
       <Dialog open={scriptModalOpen} onOpenChange={setScriptModalOpen}>
         <DialogContent className="sm:max-w-2xl bg-white">

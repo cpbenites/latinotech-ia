@@ -28,6 +28,23 @@
     "consent_given": {
       "type": "boolean",
       "default": false
+    },
+    "page_url": {
+      "type": "string",
+      "description": "URL da p\u00e1gina visitada"
+    },
+    "referrer": {
+      "type": "string",
+      "description": "URL de origem/refer\u00eancia"
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "mobile",
+        "desktop",
+        "tablet"
+      ],
+      "description": "Tipo de dispositivo"
     }
   },
   "required": [

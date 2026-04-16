@@ -77,15 +77,23 @@ export default function MainLayout() {
         
         const hasConsent = localStorage.getItem('cookieConsent') === 'true';
         
+        const ua = navigator.userAgent || '';
+        let device_type = 'desktop';
+        if (/tablet|ipad/i.test(ua)) device_type = 'tablet';
+        else if (/mobile|android|iphone/i.test(ua)) device_type = 'mobile';
+
         const log = await base44.entities.VisitorLog.create({
           ip_address: hasConsent ? (data.ip || 'Desconocido') : 'Oculto (Sin Consentimiento)',
           country: data.country_name || 'Desconocido',
           country_code: data.country_code || 'XX',
           city: data.city || 'Desconocido',
           access_date: new Date().toISOString(),
-          user_agent: navigator.userAgent || 'Desconocido',
+          user_agent: ua || 'Desconocido',
           is_bot: false,
-          consent_given: hasConsent
+          consent_given: hasConsent,
+          page_url: window.location.href,
+          referrer: document.referrer || 'direct',
+          device_type
         });
         
         sessionStorage.setItem('tracked_visit', 'true');
