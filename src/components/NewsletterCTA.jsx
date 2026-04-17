@@ -5,32 +5,68 @@ import { Input } from '@/components/ui/input';
 import { Mail, CheckCircle2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
-export default function NewsletterCTA() {
+const translations = {
+  pt: {
+    title: 'Domine a Inteligência Artificial antes da concorrência.',
+    sub: 'Junte-se a milhares de profissionais. Receba as 5 melhores notícias e ferramentas de IA da semana, diretamente na sua caixa de entrada.',
+    placeholder: 'O seu e-mail...',
+    btn: 'Inscrever-se 🚀',
+    loading: 'A subscrever...',
+    success: 'Obrigado por subscrever!',
+    successSub: 'Adicionámos o seu e-mail à lista VIP. Em breve receberá as melhores notícias tecnológicas.',
+    spam: 'Zero spam. Cancele a qualquer momento.',
+    error: 'Ocorreu um erro. Tente novamente.',
+  },
+  es: {
+    title: 'Domina la Inteligencia Artificial antes que tu competencia.',
+    sub: 'Únete a miles de profesionales. Recibe las 5 mejores noticias y herramientas de IA de la semana, directamente en tu bandeja de entrada.',
+    placeholder: 'Tu correo electrónico...',
+    btn: 'Suscribirme 🚀',
+    loading: 'Suscribiendo...',
+    success: '¡Gracias por suscribirte!',
+    successSub: 'Te hemos añadido a la lista VIP. Pronto recibirás las mejores noticias tecnológicas.',
+    spam: 'Cero spam. Cancela tu suscripción en cualquier momento.',
+    error: 'Ocurrió un error. Inténtalo de nuevo.',
+  },
+  en: {
+    title: 'Master Artificial Intelligence before your competition.',
+    sub: 'Join thousands of professionals. Get the 5 best AI news and tools of the week, straight to your inbox.',
+    placeholder: 'Your email address...',
+    btn: 'Subscribe 🚀',
+    loading: 'Subscribing...',
+    success: 'Thanks for subscribing!',
+    successSub: "We added your email to the VIP list. You'll soon receive the best tech news.",
+    spam: 'Zero spam. Unsubscribe at any time.',
+    error: 'An error occurred. Please try again.',
+  }
+};
+
+export default function NewsletterCTA({ lang }) {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+  const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const location = useLocation();
-  const isPt = location.pathname.includes('/br');
+
+  const currentLang = lang || (location.pathname.startsWith('/br') ? 'pt' : location.pathname.startsWith('/en') ? 'en' : 'es');
+  const copy = translations[currentLang] || translations['es'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
-
     setStatus('loading');
     setMessage('');
-
     try {
-      const response = await base44.functions.invoke('subscribeNewsletter', { email });
+      const response = await base44.functions.invoke('subscribeNewsletter', { email, language: currentLang });
       if (response.data.error) {
         setStatus('error');
         setMessage(response.data.error);
       } else {
         setStatus('success');
-        setMessage(isPt ? 'Obrigado por subscrever!' : '¡Gracias por suscribirte!');
+        setMessage(copy.success);
       }
-    } catch (error) {
+    } catch (err) {
       setStatus('error');
-      setMessage(error.response?.data?.error || (isPt ? 'Ocorreu um erro ao processar o seu pedido.' : 'Hubo un error al procesar tu solicitud.'));
+      setMessage(copy.error);
     }
   };
 
