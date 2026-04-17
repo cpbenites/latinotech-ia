@@ -7,16 +7,14 @@ Deno.serve(async (req) => {
         }
         
         const payload = await req.json();
-        const { email } = payload;
+        const { email, language } = payload;
         
-        // Validação de formato básica de email
         if (!email || !email.includes('@') || !email.includes('.')) {
             return Response.json({ error: 'Por favor, introduce un correo electrónico válido.' }, { status: 400 });
         }
 
         const base44 = createClientFromRequest(req);
         
-        // Usamos asServiceRole para ignorar RLS (utilizadores não autenticados também se podem inscrever)
         const existing = await base44.asServiceRole.entities.Subscriber.filter({ email: email });
         
         if (existing.length > 0) {
@@ -25,7 +23,8 @@ Deno.serve(async (req) => {
         
         await base44.asServiceRole.entities.Subscriber.create({
             email: email,
-            status: "active"
+            language: language || 'es',
+            active: true
         });
 
         return Response.json({ success: true, message: '¡Gracias por suscribirte!' });

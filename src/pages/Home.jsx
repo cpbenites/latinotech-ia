@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es, ptBR, enUS } from 'date-fns/locale';
+import NewsletterCTA from '@/components/NewsletterCTA';
 
 const SmoothImage = ({ src, alt, className, priority = false }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -248,6 +249,10 @@ export default function Home({ lang = 'es' }) {
           </button>
         </div>
       )}
+
+      <div className="mt-8 mb-4">
+        <NewsletterCTA lang={lang} />
+      </div>
     </div>
   );
 }

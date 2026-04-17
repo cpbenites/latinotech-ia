@@ -4,15 +4,23 @@
   "properties": {
     "email": {
       "type": "string",
-      "format": "email"
+      "format": "email",
+      "description": "E-mail do subscritor"
     },
-    "status": {
+    "language": {
       "type": "string",
       "enum": [
-        "active",
-        "unsubscribed"
+        "pt",
+        "es",
+        "en"
       ],
-      "default": "active"
+      "default": "es",
+      "description": "Idioma da p\u00e1gina onde se inscreveu"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o subscritor est\u00e1 ativo"
     }
   },
   "required": [
