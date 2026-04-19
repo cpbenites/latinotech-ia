@@ -21,10 +21,16 @@ Deno.serve(async (req) => {
         const feeds = await base44.asServiceRole.entities.RssFeed.list();
         const activeFeeds = feeds.filter(f => f.is_active);
         
-        let processedCount = 0;
-        const MAX_ITEMS_PER_RUN = 2; 
+        // 1. Cria uma cópia segura da lista e embaralha
+        const shuffledFeeds = [...activeFeeds].sort(() => Math.random() - 0.5);
         
-        for (const feed of activeFeeds) {
+        let processedCount = 0;
+        
+        // 2. Reduzimos para 1 item por rodada para evitar o Timeout
+        const MAX_ITEMS_PER_RUN = 1; 
+        
+        // 3. APENAS UM LOOP usando a lista embaralhada
+        for (const feed of shuffledFeeds) {
             if (processedCount >= MAX_ITEMS_PER_RUN) break;
             try {
                 const feedData = await parser.parseURL(feed.url);
