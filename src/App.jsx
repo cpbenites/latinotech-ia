@@ -73,11 +73,17 @@ const AuthenticatedApp = () => {
           <Route path="/en/privacidad" element={<Privacy />} />
           <Route path="/en/terminos" element={<Terms />} />
         </Route>
-        {/* Redirects para rotas com maiúsculas detetadas pelo Google */}
+        {/* Redirects para rotas base sem slug detetadas pelo Google */}
         <Route path="/Article" element={<Navigate to="/" replace />} />
         <Route path="/Article/*" element={<Navigate to="/" replace />} />
         <Route path="/Privacy" element={<Navigate to="/privacidad" replace />} />
         <Route path="/Terms" element={<Navigate to="/terminos" replace />} />
+        <Route path="/Category" element={<Navigate to="/" replace />} />
+        <Route path="/category" element={<Navigate to="/" replace />} />
+        <Route path="/Category/*" element={<Navigate to="/" replace />} />
+        <Route path="/category/*" element={<Navigate to="/" replace />} />
+        <Route path="/noticia" element={<Navigate to="/" replace />} />
+        <Route path="/news" element={<Navigate to="/" replace />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Suspense>
