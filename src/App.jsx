@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import MainLayout from '@/components/layout/MainLayout';
@@ -73,6 +73,11 @@ const AuthenticatedApp = () => {
           <Route path="/en/privacidad" element={<Privacy />} />
           <Route path="/en/terminos" element={<Terms />} />
         </Route>
+        {/* Redirects para rotas com maiúsculas detetadas pelo Google */}
+        <Route path="/Article" element={<Navigate to="/" replace />} />
+        <Route path="/Article/*" element={<Navigate to="/" replace />} />
+        <Route path="/Privacy" element={<Navigate to="/privacidad" replace />} />
+        <Route path="/Terms" element={<Navigate to="/terminos" replace />} />
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </Suspense>
