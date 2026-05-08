@@ -64,55 +64,59 @@ Deno.serve(async (req) => {
                     }
                     // --- FIM DA PESQUISA ---
 
-                    // --- O MEGA PROMPT DEFINITIVO (NÍVEL WHITEPAPER TÉCNICO) ---
-                    const prompt = `Atue simultaneamente como um Engenheiro de Software Staff, Analista de Dados Sênior, Especialista em SEO e Editor-Chefe da LatinoTech IA.
+                    // --- O MEGA PROMPT ABSOLUTO (MAXIMIZAÇÃO SERPAPI + ENGENHARIA DE VALOR) ---
+                    const prompt = `Atue simultaneamente como um Engenheiro de Prompt Staff, Analista de Dados Sênior, Especialista em SEO Técnico e Editor-Chefe da LatinoTech IA.
 
-O seu objetivo não é relatar uma notícia, mas sim dissecar uma tecnologia, framework ou evento de mercado com profundidade cirúrgica, criando um "Guia Definitivo" ou "Whitepaper Prático" de no MÍNIMO 1500 palavras.
+O seu objetivo é criar um "Whitepaper Prático" ou "Guia Definitivo" épico (Mínimo absoluto de 1500 a 2000 palavras). O leitor B2B exige profundidade técnica, dados reais e aplicabilidade imediata.
 
-FONTES DE DADOS (Considere como fatos absolutos):
+FONTES DE DADOS OBRIGATÓRIAS:
 - PAUTA ORIGINAL (Feed RSS): ${item.title} | ${item.contentSnippet || item.content || ''}
 - DADOS DE PESQUISA EM TEMPO REAL (Google News via SerpApi): ${extraContext}
 
-REGRAS ESTILÍSTICAS E PROIBIÇÕES (ANTI-FLUFF):
-- PROIBIDO usar adjetivos vazios (ex: "inovador", "revolucionário", "divisor de águas", "game changer"). Substitua por métricas ou fatos concretos extraídos da pesquisa.
-- PROIBIDO fazer parágrafos de transição genéricos. Cada frase deve entregar informação nova.
-- OBRIGATÓRIO usar o formato Markdown avançado: listas encadeadas, negrito para termos técnicos, blocos de citação (>) para insights de mercado, e tabelas.
-- OBRIGATÓRIO manter a coerência de idiomas nativos. NUNCA misture espanhol com português. Use os jargões corretos de TI para cada idioma (ex: 'deployment', 'framework', 'OPEX', 'ROI' são aceitos universalmente).
+REGRAS DE OURO (MAXIMIZAÇÃO DA SERPAPI E ANTI-FLUFF):
+1. CITAÇÃO NOMINAL OBRIGATÓRIA: Você DEVE mencionar as fontes presentes nos "DADOS DE PESQUISA EM TEMPO REAL". Use frases como "Segundo o [Nome da Fonte]...", "Conforme relatado hoje pelo [Nome da Fonte]...". Se não houver fontes, analise o mercado.
+2. EXTRAÇÃO DE MÉTRICAS: Vasculhe a pesquisa do Google e destaque números, porcentagens, valores em dólares, datas ou versões de software. Nunca diga "muito rápido", diga "reduziu a latência em X% segundo a fonte Y".
+3. PROIBIDO ADJETIVOS VAZIOS: Sem "inovador", "revolucionário" ou "divisor de águas". Mostre os fatos e deixe o leitor concluir que é inovador.
+4. COERÊNCIA NATIVA: As versões 'es', 'pt' e 'en' devem usar jargões nativos de TI e negócios impecáveis. Nunca misture idiomas.
 
-ESTRUTURA DE TÓPICOS OBRIGATÓRIA (Siga exatamente esta arquitetura e expansão):
+ESTRUTURA DE TÓPICOS OBRIGATÓRIA E INFLEXÍVEL:
 
 1. H1: TÍTULO MAGNÉTICO E ORIENTADO A SEO
-(Crie um título que inclua a palavra-chave principal e uma promessa clara de valor técnico ou de negócios).
+(Título com a palavra-chave principal + promessa de valor/resolução de problema).
 
-2. RESUMO EXECUTIVO (TL;DR)
-(Mínimo de 3 parágrafos curtos e densos. Resuma o problema, a solução apresentada na notícia e o impacto imediato. Vá direto aos fatos e números encontrados no Google News).
+2. RESUMO EXECUTIVO & DADOS-CHAVE (TL;DR)
+(Mínimo de 3 parágrafos. Resuma a notícia, cruze com as informações da SerpApi e crie uma lista de "bullet points" apenas com os números e dados mais críticos extraídos da pesquisa).
 
-3. ANÁLISE ARQUITETURAL E TÉCNICA (O "Deep Dive")
-(Mínimo de 400 palavras. Desmonte a tecnologia.
-- Se for software/IA/API: Explique a topologia provável, como os dados fluem, latência esperada, linguagens suportadas e potenciais gargalos de infraestrutura.
-- Se for negócios/mercado: Analise os modelos de receita, aquisições, fusões, impacto nas ações e barreiras de entrada).
+3. O CONTEXTO: POR QUE ISSO IMPORTA AGORA?
+(Explique o cenário de mercado ou o problema legado que forçou este lançamento ou notícia a acontecer. O que estava dando errado antes?).
 
-4. TABELA DE BENCHMARKING OU MATRIZ DE DECISÃO
-(OBRIGATÓRIO: Crie uma tabela Markdown complexa com pelo menos 4 linhas e 3 colunas. Compare a tecnologia/notícia atual com a alternativa legada ou principal concorrente com base em: Custos, Curva de Aprendizado, Escalabilidade, e Integração).
+4. ANÁLISE ARQUITETURAL E TÉCNICA (O "Deep Dive")
+(Mínimo de 400 palavras. Dissecação total.
+- Se for IA/Software/API: Topologia, fluxo de dados, latência, integração e infraestrutura necessária.
+- Se for Negócios/Hardware: Modelos de receita, aquisições, cadeia de suprimentos e impacto no ecossistema).
 
-5. LABORATÓRIO LATINOTECH: COMO IMPLEMENTAR NA PRÁTICA
-(Mínimo de 300 palavras. O leitor precisa sair daqui com um material "copiar e colar".
-- Exigência: Crie um bloco de código (JSON, Python, JavaScript, Bash) ou um Mega Prompt de IA pronto para uso. O código ou prompt DEVE resolver um problema empresarial real, ser comentado passo a passo e ser realista).
+5. TABELA DE BENCHMARKING (SEO Visual)
+(Crie uma tabela Markdown robusta (4x3). Compare a novidade com seu concorrente direto ou com o padrão da indústria baseando-se em: Custo, Curva de Aprendizado, Escalabilidade e Integração).
 
-6. IMPACTO NO OPEX/CAPEX E ESTRATÉGIA B2B
-(Mínimo de 250 palavras. Responda: Como isso afeta o bolso das empresas? Analise os custos de licenciamento, economia de tempo, redução de equipe ou necessidade de treinamento. Cite como startups versus empresas Enterprise devem lidar com isso).
+6. LABORATÓRIO LATINOTECH: ENGENHARIA DE PROMPT E APLICAÇÃO
+(Mínimo de 350 palavras. OBRIGATÓRIO gerar um "Mega Prompt" avançado e copiável (em bloco de código) para ChatGPT/Claude/Gemini, focado em aplicar o conceito da notícia no dia a dia corporativo.
+- O Prompt gerado deve usar a estrutura: [Persona] + [Contexto] + [Tarefa com Restrições] + [Formato de Saída]. 
+- Inclua a técnica de 'Chain of Thought' (Cadeia de Raciocínio).
+- Explique tecnicamente por que este prompt economiza tempo/dinheiro).
 
-7. OS "CALCANHARES DE AQUILES" (Riscos e Limitações Reais)
-(Seja um crítico severo. Liste 3 defeitos, desafios de segurança (compliance, vazamento de dados), ou limitações técnicas da tecnologia abordada. Nada é perfeito; exponha a realidade).
+7. IMPACTO NO OPEX/CAPEX E ESTRATÉGIA B2B
+(Mínimo de 250 palavras. Análise de bolso. Custos de licenciamento, economia de tempo, substituição de ferramentas antigas e como startups vs empresas Enterprise devem reagir).
 
-8. BLUEPRINT DE AÇÃO (Os 3 Passos Imediatos)
-(Substitua a conclusão tradicional. Forneça 3 passos táticos, técnicos ou de gestão que um CTO ou CEO deve executar nas próximas 48 horas para se posicionar frente a esta novidade).
+8. OS "CALCANHARES DE AQUILES" (Riscos e Limitações)
+(Liste 3 defeitos severos, desafios de compliance, vazamento de dados ou limitações técnicas reais).
 
-9. FAQ PARA SNIPPETS DO GOOGLE (SEO Master)
-(Crie 3 perguntas comuns (H3) baseadas na intenção de busca do usuário sobre o tema e responda a cada uma em exatamente um parágrafo direto e objetivo).
+9. BLUEPRINT DE AÇÃO (Plano de 48 Horas)
+(Forneça 3 passos táticos e técnicos exatos que um CTO, Desenvolvedor ou CEO deve executar hoje para se posicionar frente a esta novidade).
+
+10. FAQ (As Pessoas Também Perguntam)
+(Para dominar os Snippets do Google: 3 perguntas exatas de cauda longa (H3) com respostas diretas de 1 parágrafo cada).
 
 SAÍDA OBRIGATÓRIA:
-Gere as versões completas para 'es', 'pt', e 'en'.
 Devolva EXCLUSIVAMENTE o objeto JSON com esta estrutura exata:
 {
   "es": { "title": "...", "summary": "...", "content": "Texto MASSIVO de 1500+ palavras em Markdown", "category": "...", "seo_keywords": "..." },
