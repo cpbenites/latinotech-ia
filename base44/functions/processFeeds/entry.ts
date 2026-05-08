@@ -37,77 +37,59 @@ Deno.serve(async (req) => {
                     const existing = await base44.asServiceRole.entities.NewsArticle.filter({ original_url: item.link });
                     if (existing.length > 0) continue;
 
-                    // ===== PASSO 1: PESQUISA RICA NA SERPAPI (Google Web filtrada por notícias) =====
-                    const serpApiKey = Deno.env.get("SERP_API_KEY");
-                    let extraContext = "Nenhum contexto extra encontrado.";
+                    // ===== PASSO 1: PESQUISA RICA NA EXA.AI (Full Text) =====
+                    const exaApiKey = Deno.env.get("EXA_API_KEY");
+                    let extraContext = "";
 
-                    if (serpApiKey) {
+                    if (exaApiKey) {
                         try {
-                            const searchUrl = `https://serpapi.com/search.json?engine=google&tbm=nws&q=${encodeURIComponent(item.title)}&api_key=${serpApiKey}`;
-                            const serpResponse = await fetch(searchUrl);
-                            const serpData = await serpResponse.json();
+                            const exaResponse = await fetch("https://api.exa.ai/search", {
+                                method: "POST",
+                                headers: {
+                                    "x-api-key": exaApiKey,
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    query: item.title,
+                                    useAutoprompt: true,
+                                    numResults: 2,
+                                    contents: { text: true }
+                                })
+                            });
+                            const exaData = await exaResponse.json();
 
-                            if (serpData.news_results && serpData.news_results.length > 0) {
-                                const topNews = serpData.news_results.slice(0, 5);
-                                extraContext = topNews.map(n =>
-                                    `Fonte: ${n.source || 'Desconhecida'}\nTítulo: ${n.title}\nResumo: ${n.snippet || 'Sem resumo disponível.'}`
+                            if (exaData.results && exaData.results.length > 0) {
+                                extraContext = exaData.results.map(r =>
+                                    `Fonte: ${r.title}\nConteúdo Completo: ${r.text}`
                                 ).join("\n\n---\n\n");
                             }
                         } catch (err) {
-                            console.error("Erro ao buscar contexto na SerpApi:", err);
+                            console.error("Erro ao buscar contexto na Exa:", err);
                         }
                     }
 
                     // ===== PASSO 2: GERAÇÃO DO ARTIGO MESTRE EM PORTUGUÊS =====
-                    const masterPrompt = `Aja como um Consultor Sênior da McKinsey (para Negócios) e um Arquiteto de Soluções Staff (para Tech). O seu objetivo é escrever um Whitepaper de 2000 palavras que seja ÚTIL para um CEO.
+                    const masterPrompt = `Aja como um Jornalista Sênior de Tecnologia e Negócios da revista Wired. Escreva um artigo envolvente, fluido e profundo (aprox. 1000 palavras) em Português do Brasil.
 
-FONTES:
-- Pauta: ${item.title} | ${item.contentSnippet || item.content || ''}
-- Pesquisa Real: ${extraContext}
+PAUTA: ${item.title} | ${item.contentSnippet || item.content || ''}
+TEXTOS COMPLETOS DAS FONTES (Use para aprofundar a matéria com fatos reais): ${extraContext}
 
---- REGRAS DE OURO (LEI ABSOLUTA) ---
-1. ISOLAMENTO DE CONTEXTO: Se a notícia for sobre GESTÃO, ESTRATÉGIA ou FINANÇAS, é PROIBIDO citar linguagens de programação, APIs técnicas ou infraestrutura de nuvem (AWS/Azure), a menos que a notícia fale explicitamente disso.
-   - Para NEGÓCIOS, 'Análise Técnica' significa: Curva de J-Curve, EBITDA, LTV/CAC, Estratégias de Go-to-Market, Tese de Investimento e Governança.
-2. PROIBIDO "CONCORRENTE A": Se não houver concorrentes na pesquisa, use o seu conhecimento para citar nomes REAIS de players do mercado (ex: para a ACE, cite Endeavor, KPMG, Distrito, etc).
-3. PROMPT COPIÁVEL: No 'Laboratório', crie um prompt que resolva um problema real de gestão ou código. Use 500 palavras apenas para este prompt. Ele deve ser longo, detalhado e pronto para uso.
-4. FORMATAÇÃO: Use tabelas Markdown com quebras de linha (\\n) para não quebrar o layout. Use MUITO negrito.
+DIRETRIZES DE ESTILO:
+- Escreva de forma natural, humana e analítica. Evite parecer um robô ou usar jargões corporativos vazios.
+- Use formatação Markdown (##, ###, negritos, bullet points) para tornar a leitura dinâmica.
 
---- ESTRUTURA DO ARTIGO ---
+ESTRUTURA DO ARTIGO:
+1. TÍTULO: Chamativo e direto (H1).
+2. INTRODUÇÃO: Um gancho forte que explique a notícia e o impacto real.
+3. DEEP DIVE: O desenvolvimento da matéria usando os fatos das fontes. (Use 2 ou 3 subtítulos H2).
+4. NA PRÁTICA (Obrigatório): Inclua uma seção mostrando como o leitor pode aplicar isso (um caso de uso B2B, bloco de código simples ou um Prompt copiável).
+5. VEREDICTO FINAL: Uma breve conclusão estratégica.
 
-H1: [Título que prometa um segredo ou método prático]
-
-## I. O Fato e o Impacto (TL;DR)
-(Extraia números e porcentagens reais da pesquisa. Se não houver, analise o impacto financeiro no setor).
-
-## II. Análise de Mercado e Contexto Macro
-(Explique por que esse movimento está a acontecer agora. Cite tendências globais de mercado B2B).
-
-## III. Deep Dive: A "Engenharia" por trás da Estratégia
-(Aqui você deve ser denso. Se for Negócios: fale de processos, funis, teses de investimento e escala. Se for Tech: fale de arquitetura, latência e segurança).
-
-## IV. Matriz Comparativa de Mercado (Tabela)
-(Compare a empresa/tecnologia da notícia com 2 Gigantes Reais do setor. Colunas: Nome | Diferencial | Custo/Barreira | Quando escolher. Use \\n para formatar).
-
-## V. Laboratório LatinoTech: Prompt de Execução Sênior
-(Um Mega Prompt de 500 palavras para o leitor copiar. Ele deve ensinar a IA a agir como um consultor ou engenheiro específico para resolver o problema da notícia).
-
-## VI. Estratégia de Implementação B2B (CAPEX/OPEX)
-(Como o leitor ganha dinheiro com isso? Como reduz custos?).
-
-## VII. Riscos, Desafios e "The Dark Side"
-(Não seja otimista. Fale de falhas de mercado, riscos de execução e problemas de segurança).
-
-## VIII. Blueprint: O que fazer em 48 Horas
-(Passos práticos).
-
-## IX. FAQ Estratégico (Google Snippets)
-(3 perguntas complexas e respostas profundas).
-
-Devolva EXCLUSIVAMENTE o objeto JSON em Português do Brasil:
+Devolva EXCLUSIVAMENTE o objeto JSON:
 {
   "title": "...",
-  "summary": "...",
-  "content": "Texto MASSIVO em Markdown seguindo as 9 seções acima",
+  "summary": "Resumo forte de 2 linhas",
+  "content": "Texto fluido, humano e estruturado em Markdown",
   "category": "Uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales",
   "seo_keywords": "5-8 palavras-chave SEO em PT separadas por vírgula",
   "image_prompt": "Cinematic tech editorial photography, hyper-realistic, 4k"
