@@ -17,57 +17,51 @@ function generateSlug(text) {
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        
+
         const feeds = await base44.asServiceRole.entities.RssFeed.list();
         const activeFeeds = feeds.filter(f => f.is_active);
-        
-        // 1. Cria uma cópia segura da lista e embaralha
         const shuffledFeeds = [...activeFeeds].sort(() => Math.random() - 0.5);
-        
+
         let processedCount = 0;
-        
-        // 2. Reduzimos para 1 item por rodada para evitar o Timeout
-        const MAX_ITEMS_PER_RUN = 1; 
-        
-        // 3. APENAS UM LOOP usando a lista embaralhada
+        const MAX_ITEMS_PER_RUN = 1;
+
         for (const feed of shuffledFeeds) {
             if (processedCount >= MAX_ITEMS_PER_RUN) break;
             try {
                 const feedData = await parser.parseURL(feed.url);
                 const items = feedData.items.slice(0, 2);
-                
+
                 for (const item of items) {
                     if (processedCount >= MAX_ITEMS_PER_RUN) break;
-                    
+
                     const existing = await base44.asServiceRole.entities.NewsArticle.filter({ original_url: item.link });
                     if (existing.length > 0) continue;
-                    
-                    // --- INÍCIO DA PESQUISA NO GOOGLE NEWS (SERPAPI) ---
+
+                    // ===== PASSO 1: PESQUISA RICA NA SERPAPI (Google Web filtrada por notícias) =====
                     const serpApiKey = Deno.env.get("SERP_API_KEY");
                     let extraContext = "Nenhum contexto extra encontrado.";
 
                     if (serpApiKey) {
                         try {
-                            const searchUrl = `https://serpapi.com/search.json?engine=google_news&q=${encodeURIComponent(item.title)}&api_key=${serpApiKey}`;
+                            const searchUrl = `https://serpapi.com/search.json?engine=google&tbm=nws&q=${encodeURIComponent(item.title)}&api_key=${serpApiKey}`;
                             const serpResponse = await fetch(searchUrl);
                             const serpData = await serpResponse.json();
 
                             if (serpData.news_results && serpData.news_results.length > 0) {
-                                const topNews = serpData.news_results.slice(0, 3);
-                                extraContext = topNews.map(n => 
-                                    `Fonte: ${n.source?.name || 'Desconhecida'}\nTítulo: ${n.title}\nResumo do Google: ${n.snippet}`
+                                const topNews = serpData.news_results.slice(0, 5);
+                                extraContext = topNews.map(n =>
+                                    `Fonte: ${n.source || 'Desconhecida'}\nTítulo: ${n.title}\nResumo: ${n.snippet || 'Sem resumo disponível.'}`
                                 ).join("\n\n---\n\n");
                             }
                         } catch (err) {
                             console.error("Erro ao buscar contexto na SerpApi:", err);
                         }
                     }
-                    // --- FIM DA PESQUISA ---
 
-                    // --- O MEGA PROMPT BLINDADO (CONTRA RESUMOS E TEXTOS GENÉRICOS) ---
-                    const prompt = `Atue como um Engenheiro de Prompt Staff, Especialista em SEO Técnico e Editor-Chefe da LatinoTech IA.
+                    // ===== PASSO 2: GERAÇÃO DO ARTIGO MESTRE EM PORTUGUÊS =====
+                    const masterPrompt = `Atue como um Engenheiro de Prompt Staff, Especialista em SEO Técnico e Editor-Chefe da LatinoTech IA.
 
-O seu objetivo é criar um "Guia Definitivo" denso e altamente aplicável. O leitor B2B e os desenvolvedores exigem exemplos reais.
+O seu objetivo é criar um "Guia Definitivo" denso e altamente aplicável EM PORTUGUÊS DO BRASIL. O leitor B2B e os desenvolvedores exigem exemplos reais.
 
 FONTES DE DADOS OBRIGATÓRIAS:
 - PAUTA: ${item.title} | ${item.contentSnippet || item.content || ''}
@@ -110,48 +104,129 @@ ESTRUTURA OBRIGATÓRIA:
 (3 perguntas de cauda longa com respostas de 1 parágrafo cada).
 
 SAÍDA OBRIGATÓRIA:
-Gere as três versões ('es', 'pt', 'en') mantendo a mesma profundidade em todas.
-Devolva EXCLUSIVAMENTE o objeto JSON:
+Devolva EXCLUSIVAMENTE o objeto JSON em PORTUGUÊS:
 {
-  "es": { "title": "...", "summary": "...", "content": "Texto MASSIVO e denso em Markdown", "category": "...", "seo_keywords": "..." },
-  "pt": { "title": "...", "summary": "...", "content": "Texto MASSIVO e denso em Markdown", "category": "...", "seo_keywords": "..." },
-  "en": { "title": "...", "summary": "...", "content": "Texto MASSIVO e denso em Markdown", "category": "...", "seo_keywords": "..." },
-  "image_prompt": "Cinematic tech editorial photography, hyper-realistic, 4k, professional lighting, clean web aesthetic"
+  "title": "Título magnético em PT",
+  "summary": "Resumo executivo em PT (2-3 frases impactantes)",
+  "content": "Texto MASSIVO e denso em Markdown, em PT, seguindo as 10 seções",
+  "category": "Uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales",
+  "seo_keywords": "5-8 palavras-chave SEO em PT separadas por vírgula",
+  "image_prompt": "Cinematic tech editorial photography prompt em INGLÊS, hyper-realistic, 4k, professional lighting, clean web aesthetic"
 }`;
-                    
-                    const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
-                        prompt: prompt,
+
+                    const masterResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
+                        prompt: masterPrompt,
                         response_json_schema: {
                             type: "object",
                             properties: {
-                                es: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
-                                pt: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
-                                en: { type: "object", properties: { title: { type: "string" }, summary: { type: "string" }, content: { type: "string" }, category: { type: "string" }, seo_keywords: { type: "string" } } },
+                                title: { type: "string" },
+                                summary: { type: "string" },
+                                content: { type: "string" },
+                                category: { type: "string" },
+                                seo_keywords: { type: "string" },
                                 image_prompt: { type: "string" }
-                            }
+                            },
+                            required: ["title", "summary", "content", "category", "seo_keywords", "image_prompt"]
                         }
                     });
-                    
+
+                    if (!masterResponse || !masterResponse.title || !masterResponse.content) {
+                        console.error("Falha na geração do artigo mestre PT.");
+                        continue;
+                    }
+
+                    // ===== PASSO 3: TRADUÇÕES NATIVAS (ES e EN) =====
+                    const translationSchema = {
+                        type: "object",
+                        properties: {
+                            title: { type: "string" },
+                            summary: { type: "string" },
+                            content: { type: "string" },
+                            category: { type: "string" },
+                            seo_keywords: { type: "string" }
+                        },
+                        required: ["title", "summary", "content", "category", "seo_keywords"]
+                    };
+
+                    const buildTranslationPrompt = (targetLang, langName) => `Atue como um tradutor nativo profissional especializado em jornalismo de tecnologia B2B.
+
+Sua tarefa é TRADUZIR o seguinte artigo do Português para ${langName} de forma IMPECÁVEL e NATIVA.
+
+REGRAS CRÍTICAS:
+1. NÃO resumir. NÃO encurtar. Mantenha a mesma profundidade e densidade do original.
+2. Preserve TODA a formatação Markdown (títulos ##, tabelas, blocos de código, listas, negritos).
+3. Preserve os nomes próprios de empresas, produtos e tecnologias (ChatGPT, AWS, etc).
+4. Adapte expressões idiomáticas para soarem naturais em ${langName}.
+5. Traduza as palavras-chave SEO para ${langName} (mantendo sentido equivalente, não literal).
+6. A categoria deve permanecer a mesma palavra original (uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales).
+
+ARTIGO ORIGINAL EM PORTUGUÊS:
+TÍTULO: ${masterResponse.title}
+RESUMO: ${masterResponse.summary}
+CATEGORIA: ${masterResponse.category}
+PALAVRAS-CHAVE: ${masterResponse.seo_keywords}
+
+CONTEÚDO:
+${masterResponse.content}
+
+Devolva EXCLUSIVAMENTE o objeto JSON traduzido para ${langName}:
+{
+  "title": "...",
+  "summary": "...",
+  "content": "Markdown completo traduzido",
+  "category": "${masterResponse.category}",
+  "seo_keywords": "..."
+}`;
+
+                    let esResponse = null;
+                    let enResponse = null;
+
+                    try {
+                        esResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
+                            prompt: buildTranslationPrompt('es', 'Espanhol (LATAM neutro)'),
+                            response_json_schema: translationSchema
+                        });
+                    } catch (e) {
+                        console.error("Falha na tradução ES:", e);
+                    }
+
+                    try {
+                        enResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
+                            prompt: buildTranslationPrompt('en', 'Inglês (US)'),
+                            response_json_schema: translationSchema
+                        });
+                    } catch (e) {
+                        console.error("Falha na tradução EN:", e);
+                    }
+
+                    // ===== PASSO 4a: GERAR IMAGEM =====
                     let image_url = "";
                     try {
                         const imgResponse = await base44.asServiceRole.integrations.Core.GenerateImage({
-                            prompt: llmResponse.image_prompt + ", highly detailed, tech news editorial photography, clean white background, modern tech style, 1080p, highly compressed web resolution, minimalist"
+                            prompt: masterResponse.image_prompt + ", highly detailed, tech news editorial photography, clean white background, modern tech style, 1080p, minimalist"
                         });
                         image_url = imgResponse.url;
                     } catch (e) {
                         console.error("Image generation failed:", e);
                     }
-                    
+
+                    // ===== PASSO 4b: SALVAR OS 3 ARTIGOS =====
+                    const allLangs = {
+                        pt: masterResponse,
+                        es: esResponse,
+                        en: enResponse
+                    };
+
                     const createdArticles = {};
-                    
-                    for (const lang of ['es', 'pt', 'en']) {
-                        const langData = llmResponse[lang];
-                        if (!langData || !langData.title) continue;
-                        
+
+                    for (const lang of ['pt', 'es', 'en']) {
+                        const langData = allLangs[lang];
+                        if (!langData || !langData.title || !langData.content) continue;
+
                         let baseSlug = generateSlug(langData.title);
                         let articleSlug = baseSlug;
                         let slugCounter = 2;
-                        
+
                         while ((await base44.asServiceRole.entities.NewsArticle.filter({ slug: articleSlug })).length > 0) {
                             articleSlug = `${baseSlug}-${slugCounter}`;
                             slugCounter++;
@@ -171,55 +246,45 @@ Devolva EXCLUSIVAMENTE o objeto JSON:
                             language: lang,
                             published_date: new Date().toISOString()
                         });
-                        
+
                         createdArticles[lang] = createdArticle;
                     }
 
+                    // ===== PASSO 4c: NOTIFICAR TELEGRAM =====
                     try {
                         const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
                         const chatIds = {
                             es: Deno.env.get("TELEGRAM_CHAT_ID") || "@latinotech",
-                            pt: "@latinotechbr", 
-                            en: "@latinotechen"  
+                            pt: "@latinotechbr",
+                            en: "@latinotechen"
                         };
-                        
+
                         if (TELEGRAM_BOT_TOKEN) {
-                            for (const lang of ['es', 'pt', 'en']) {
+                            for (const lang of ['pt', 'es', 'en']) {
                                 const article = createdArticles[lang];
-                                const langData = llmResponse[lang];
+                                const langData = allLangs[lang];
                                 const chatId = chatIds[lang];
-                                
+
                                 if (chatId && article && langData) {
                                     const shortSummary = langData.summary.length > 150 ? langData.summary.substring(0, 147) + "..." : langData.summary;
-                                    
+
                                     let urlPath = `/noticia/${article.slug}`;
                                     if (lang === 'pt') urlPath = `/br/noticia/${article.slug}`;
                                     if (lang === 'en') urlPath = `/en/news/${article.slug}`;
-                                    
-                                    const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${lang === 'pt' ? 'Leia a notícia completa aqui:' : lang === 'en' ? 'Read the full story here:' : 'Lee la noticia completa aquí:'}\nhttps://latinotechia.com${urlPath}`;
-                                    
-                                    if (image_url) {
-                                        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({
-                                                chat_id: chatId,
-                                                photo: image_url,
-                                                caption: telegramMessage,
-                                                parse_mode: 'HTML'
-                                            })
-                                        });
-                                    } else {
-                                        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({
-                                                chat_id: chatId,
-                                                text: telegramMessage,
-                                                parse_mode: 'HTML'
-                                            })
-                                        });
-                                    }
+
+                                    const cta = lang === 'pt' ? 'Leia a notícia completa aqui:' : lang === 'en' ? 'Read the full story here:' : 'Lee la noticia completa aquí:';
+                                    const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${cta}\nhttps://latinotechia.com${urlPath}`;
+
+                                    const endpoint = image_url ? 'sendPhoto' : 'sendMessage';
+                                    const payload = image_url
+                                        ? { chat_id: chatId, photo: image_url, caption: telegramMessage, parse_mode: 'HTML' }
+                                        : { chat_id: chatId, text: telegramMessage, parse_mode: 'HTML' };
+
+                                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${endpoint}`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify(payload)
+                                    });
                                 }
                             }
                         }
@@ -233,7 +298,7 @@ Devolva EXCLUSIVAMENTE o objeto JSON:
                 console.error(`Error processing feed ${feed.url}:`, e);
             }
         }
-        
+
         return Response.json({ success: true, processed: processedCount });
     } catch (error) {
         return Response.json({ error: error.message || String(error) }, { status: 500 });
