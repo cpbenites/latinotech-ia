@@ -115,9 +115,10 @@ export default function Admin() {
   const runProcessFeeds = async () => {
     setIsProcessing(true);
     try {
-      const res = await base44.functions.invoke('processFeeds', {});
-      toast({ title: "Búsqueda con IA completada", description: `Noticias procesadas: ${res.data.processed}`, duration: 4000 });
-      fetchPending();
+      await base44.functions.invoke('processFeeds', {});
+      toast({ title: "🤖 Geração iniciada!", description: "O artigo está sendo processado em background. Aguarde 2-3 minutos e recarregue os pendentes.", duration: 8000 });
+      // Recarrega pendentes após 3 minutos automaticamente
+      setTimeout(() => fetchPending(), 3 * 60 * 1000);
     } catch (e) {
       console.error("Erro no processFeeds:", e);
       toast({ title: "Error", description: e.message, variant: "destructive", duration: 8000 });

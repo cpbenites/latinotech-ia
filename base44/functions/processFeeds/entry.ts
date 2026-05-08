@@ -14,18 +14,17 @@ function generateSlug(text) {
         .replace(/-+$/, "");
 }
 
-Deno.serve(async (req) => {
-    try {
-        const base44 = createClientFromRequest(req);
+async function runProcessing(req) {
+    const base44 = createClientFromRequest(req);
 
-        const feeds = await base44.asServiceRole.entities.RssFeed.list();
-        const activeFeeds = feeds.filter(f => f.is_active);
-        const shuffledFeeds = [...activeFeeds].sort(() => Math.random() - 0.5);
+    const feeds = await base44.asServiceRole.entities.RssFeed.list();
+    const activeFeeds = feeds.filter(f => f.is_active);
+    const shuffledFeeds = [...activeFeeds].sort(() => Math.random() - 0.5);
 
-        let processedCount = 0;
-        const MAX_ITEMS_PER_RUN = 1;
+    let processedCount = 0;
+    const MAX_ITEMS_PER_RUN = 1;
 
-        for (const feed of shuffledFeeds) {
+    for (const feed of shuffledFeeds) {
             if (processedCount >= MAX_ITEMS_PER_RUN) break;
             try {
                 const feedData = await parser.parseURL(feed.url);
@@ -302,8 +301,19 @@ Devolva EXCLUSIVAMENTE o objeto JSON traduzido para ${langName}:
             }
         }
 
-        return Response.json({ success: true, processed: processedCount });
-    } catch (error) {
-        return Response.json({ error: error.message || String(error) }, { status: 500 });
+        return processedCount;
+}
+
+Deno.serve(async (req) => {
+    // Fire-and-forget: responde imediatamente e processa em background
+    const processingPromise = runProcessing(req).catch(err => {
+        console.error("Erro no processamento em background:", err);
+    });
+
+    // Registra a task para continuar após a resposta (evita timeout do browser)
+    if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
+        EdgeRuntime.waitUntil(processingPromise);
     }
+
+    return Response.json({ success: true, message: "Geração iniciada em background. Verifique os artigos pendentes em alguns minutos." });
 });
