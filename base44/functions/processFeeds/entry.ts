@@ -64,55 +64,39 @@ Deno.serve(async (req) => {
                     }
                     // --- FIM DA PESQUISA ---
 
-                    // --- O SEU NOVO MEGA PROMPT COM DADOS REAIS ---
-                    const prompt = `Atue como um Arquiteto de Software e Jornalista Investigativo de Tecnologia para a LatinoTech IA. 
-Você recebeu uma pauta bruta de um feed RSS E também os resultados de pesquisa em tempo real do Google News sobre o assunto.
+                    // --- O SEU NOVO MEGA PROMPT ADAPTÁVEL ---
+                    const prompt = `Atue como um Jornalista Investigativo de Tecnologia e Analista Sênior de Mercado para a LatinoTech IA. 
+Você recebeu uma pauta bruta de um feed RSS e os resultados de pesquisa do Google News sobre o assunto.
 
 PAUTA RSS (Sua base):
 TÍTULO: ${item.title}
 RESUMO: ${item.contentSnippet || item.content || ''}
 
-INFORMAÇÕES ADICIONAIS DO GOOGLE NEWS (Use isto para aprofundar a matéria e sair da superficialidade):
+INFORMAÇÕES ADICIONAIS DO GOOGLE NEWS (Use isto para aprofundar a matéria e trazer fatos reais):
 ${extraContext}
 
-Sua missão é criar um "Artigo de Autoridade Máxima" (Mínimo de 1000 palavras). O texto deve ser tão denso e técnico que um desenvolvedor sênior sinta que aprendeu algo novo. Use os dados do Google News para citar fontes, adicionar contexto recente e factos reais.
+Sua missão é criar uma matéria jornalística premium e aprofundada (Mínimo de 800 a 1000 palavras). O texto deve ser digno de jornais como TechCrunch ou Wired.
 
-ESTRUTURA OBRIGATÓRIA (Siga à risca):
+REGRAS DE ESTRUTURA E ADAPTAÇÃO (CRÍTICO):
+1. ADAPTAÇÃO AO TEMA: 
+   - SE a notícia for puramente sobre negócios, leis, IA, gadgets ou mercado corporativo: Foque em análise de mercado, impacto estratégico, OPEX/CAPEX, cibersegurança e tendências. NÃO invente blocos de código ou stacks tecnológicas que não existem.
+   - SE a notícia for estritamente sobre uma nova API, linguagem de programação, framework ou ferramenta de desenvolvedor: Aí sim, inclua uma seção "Deep Dive Técnico" com um exemplo de bloco de código Markdown realista.
+2. TÍTULOS E SUBTÍTULOS: NUNCA use as minhas instruções como título (ex: não escreva "Introdução" ou "O Problema Tradicional"). Crie subtítulos jornalísticos, criativos e chamativos (ex: "A Nova Era da Cibersegurança nos Tribunais").
+3. FLUXO JORNALÍSTICO:
+   - Comece com um gancho forte usando os fatos da pesquisa do Google.
+   - Explique o contexto e o problema que levou a esta notícia.
+   - Analise o impacto no mercado B2B, Startups e no mundo corporativo.
+   - Destaque as vantagens e os grandes desafios (seja crítico e honesto).
+4. > CITAÇÃO: Crie uma frase de impacto formatada como citação no Markdown (usando o símbolo >).
+5. VEREDICTO: Termine com "O Veredicto LatinoTech" indicando o que as empresas devem esperar ou fazer a seguir.
 
-1. INTRODUÇÃO SEM CLICHÊS: 
-Comece com um fato, um número ou um problema técnico real extraído da pesquisa. Proibido começar com frases genéricas.
-
-2. ## O Problema da Abordagem Tradicional:
-Explique como as empresas resolviam isso antes. Mostre por que a solução antiga faliu ou é ineficiente.
-
-3. ## Deep Dive: Arquitetura e Funcionamento:
-Esta é a parte mais longa. NÃO seja genérico. 
-- Especule e descreva a stack provável.
-- Explique o passo a passo técnico com base nas informações coletadas.
-- Inclua um bloco de código (Markdown) mostrando um exemplo de como o JSON de saída ou o comando de API deve ser estruturado.
-
-4. ## Impacto no Ecossistema B2B e Startups:
-Analise como isso muda o custo de operação (OPEX). Fale sobre escalabilidade e integração.
-
-5. ## Vantagens, Desafios e "Pegadinhas":
-- Liste as vantagens reais.
-- Liste os DESAFIOS TÉCNICOS (ex: latência de API, custo de tokens, segurança de dados sensíveis). Seja honesto sobre as limitações.
-
-6. > CITAÇÃO DE IMPACTO: Crie uma frase poderosa que resuma a disrupção técnica desta notícia. (Use o formato > do Markdown).
-
-7. ## O Veredicto da LatinoTech:
-Dê uma opinião editorial forte. O que as empresas devem fazer AGORA? Adotar, esperar ou observar?
-
-REGRAS DE OURO:
-- Use termos técnicos avançados.
-- Formatação Markdown rica com muitos subtítulos (## e ###).
-- TRADUÇÃO: Gere versões completas em 'es', 'pt' e 'en'.
+TRADUÇÃO: Gere versões completas e fluídas em Espanhol ('es'), Português ('pt') e Inglês ('en').
 
 Devolva EXCLUSIVAMENTE um objeto JSON válido:
 {
-  "es": { "title": "", "summary": "2 linhas fortes e diretas", "content": "Texto MASSIVO, longo e TÉCNICO em Markdown", "category": "", "seo_keywords": "" },
-  "pt": { "title": "", "summary": "2 linhas fortes e diretas", "content": "Texto MASSIVO, longo e TÉCNICO em Markdown", "category": "", "seo_keywords": "" },
-  "en": { "title": "", "summary": "2 linhas fortes e diretas", "content": "Texto MASSIVO, longo e TÉCNICO em Markdown", "category": "", "seo_keywords": "" },
+  "es": { "title": "", "summary": "Resumo forte de 2 linhas", "content": "Texto jornalístico MASSIVO e fluido em Markdown", "category": "", "seo_keywords": "" },
+  "pt": { "title": "", "summary": "Resumo forte de 2 linhas", "content": "Texto jornalístico MASSIVO e fluido em Markdown", "category": "", "seo_keywords": "" },
+  "en": { "title": "", "summary": "Resumo forte de 2 linhas", "content": "Texto jornalístico MASSIVO e fluido em Markdown", "category": "", "seo_keywords": "" },
   "image_prompt": "Cinematic tech editorial photography, hyper-realistic, 8k."
 }`;
                     
