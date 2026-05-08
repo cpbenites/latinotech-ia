@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
                     }
                     // --- FIM DA PESQUISA ---
 
-                    // --- O SEU NOVO MEGA PROMPT ADAPTÁVEL ---
+                    // --- O SEU NOVO MEGA PROMPT ADAPTÁVEL E POLIGLOTA ---
                     const prompt = `Atue como um Jornalista Investigativo de Tecnologia e Analista Sênior de Mercado para a LatinoTech IA. 
 Você recebeu uma pauta bruta de um feed RSS e os resultados de pesquisa do Google News sobre o assunto.
 
@@ -90,7 +90,10 @@ REGRAS DE ESTRUTURA E ADAPTAÇÃO (CRÍTICO):
 4. > CITAÇÃO: Crie uma frase de impacto formatada como citação no Markdown (usando o símbolo >).
 5. VEREDICTO: Termine com "O Veredicto LatinoTech" indicando o que as empresas devem esperar ou fazer a seguir.
 
-TRADUÇÃO: Gere versões completas e fluídas em Espanhol ('es'), Português ('pt') e Inglês ('en').
+REGRAS DE OURO:
+- Use termos técnicos avançados.
+- Formatação Markdown rica com muitos subtítulos (## e ###).
+- TRADUÇÃO NATIVA E IMPECÁVEL: As versões em Espanhol ('es'), Português ('pt') e Inglês ('en') devem ser geradas de forma estrita. NUNCA misture idiomas (proibido usar palavras em espanhol no texto em português e vice-versa). Atenção ao contexto das palavras (Ex: "toothbrush/cepillo" é "escova de dentes" em PT, nunca "pincel"). O texto deve soar escrito por um nativo fluente.
 
 Devolva EXCLUSIVAMENTE um objeto JSON válido:
 {
