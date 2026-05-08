@@ -70,10 +70,7 @@ FONTES:
    - Para NEGÓCIOS, 'Análise Técnica' significa: Curva de J-Curve, EBITDA, LTV/CAC, Estratégias de Go-to-Market, Tese de Investimento e Governança.
 2. PROIBIDO "CONCORRENTE A": Se não houver concorrentes na pesquisa, use o seu conhecimento para citar nomes REAIS de players do mercado (ex: para a ACE, cite Endeavor, KPMG, Distrito, etc).
 3. PROMPT COPIÁVEL: No 'Laboratório', crie um prompt que resolva um problema real de gestão ou código. Use 500 palavras apenas para este prompt. Ele deve ser longo, detalhado e pronto para uso.
-4. FORMATAÇÃO (LEI ABSOLUTA):
-   - TABELAS À PROVA DE FALHAS: NUNCA use o formato Markdown com pipes (|) para tabelas, pois o JSON quebra as linhas. Você DEVE obrigatoriamente usar tags HTML com tags <table>, <tr>, <th> e <td> para construir a matriz comparativa.
-   - O MEGA PROMPT: Deve ser um texto contínuo, em PRIMEIRA PESSOA, escrito dentro de um bloco de código Markdown (três backticks). Proibido gerar listas de dicas.
-   - Use MUITO negrito no restante do texto.
+4. FORMATAÇÃO: Use tabelas Markdown com quebras de linha (\\n) para não quebrar o layout. Use MUITO negrito.
 
 --- ESTRUTURA DO ARTIGO ---
 
@@ -88,11 +85,11 @@ H1: [Título que prometa um segredo ou método prático]
 ## III. Deep Dive: A "Engenharia" por trás da Estratégia
 (Aqui você deve ser denso. Se for Negócios: fale de processos, funis, teses de investimento e escala. Se for Tech: fale de arquitetura, latência e segurança).
 
-## IV. Matriz Comparativa de Mercado
-(OBRIGATÓRIO: Crie a tabela usando EXCLUSIVAMENTE HTML com as tags table, tr, th e td. Compare a novidade com 2 ferramentas reais do setor. Colunas: Empresa | Diferencial | Barreira de Entrada | Cenário Ideal).
+## IV. Matriz Comparativa de Mercado (Tabela)
+(Compare a empresa/tecnologia da notícia com 2 Gigantes Reais do setor. Colunas: Nome | Diferencial | Custo/Barreira | Quando escolher. Use \\n para formatar).
 
-## V. Laboratório LatinoTech: Prompt de Execução (Copiar e Colar)
-(OBRIGATÓRIO: Gere o Mega Prompt dentro de um bloco de código Markdown com três backticks. O texto DEVE começar com "Atue como um especialista em...". Deve ser um comando longo, profissional, com [CONTEXTO], [TAREFA] e [FORMATO], pronto para o leitor enviar para o ChatGPT/Claude. PROIBIDO criar listas de tarefas. Apenas o prompt final).
+## V. Laboratório LatinoTech: Prompt de Execução Sênior
+(Um Mega Prompt de 500 palavras para o leitor copiar. Ele deve ensinar a IA a agir como um consultor ou engenheiro específico para resolver o problema da notícia).
 
 ## VI. Estratégia de Implementação B2B (CAPEX/OPEX)
 (Como o leitor ganha dinheiro com isso? Como reduz custos?).
