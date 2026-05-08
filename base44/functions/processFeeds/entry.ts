@@ -64,64 +64,58 @@ Deno.serve(async (req) => {
                     }
                     // --- FIM DA PESQUISA ---
 
-                    // --- O MEGA PROMPT ABSOLUTO (MAXIMIZAÇÃO SERPAPI + ENGENHARIA DE VALOR) ---
-                    const prompt = `Atue simultaneamente como um Engenheiro de Prompt Staff, Analista de Dados Sênior, Especialista em SEO Técnico e Editor-Chefe da LatinoTech IA.
+                    // --- O MEGA PROMPT BLINDADO (CONTRA RESUMOS E TEXTOS GENÉRICOS) ---
+                    const prompt = `Atue como um Engenheiro de Prompt Staff, Especialista em SEO Técnico e Editor-Chefe da LatinoTech IA.
 
-O seu objetivo é criar um "Whitepaper Prático" ou "Guia Definitivo" épico (Mínimo absoluto de 1500 a 2000 palavras). O leitor B2B exige profundidade técnica, dados reais e aplicabilidade imediata.
+O seu objetivo é criar um "Guia Definitivo" denso e altamente aplicável. O leitor B2B e os desenvolvedores exigem exemplos reais.
 
 FONTES DE DADOS OBRIGATÓRIAS:
-- PAUTA ORIGINAL (Feed RSS): ${item.title} | ${item.contentSnippet || item.content || ''}
-- DADOS DE PESQUISA EM TEMPO REAL (Google News via SerpApi): ${extraContext}
+- PAUTA: ${item.title} | ${item.contentSnippet || item.content || ''}
+- DADOS REAIS DA PESQUISA: ${extraContext}
 
-REGRAS DE OURO (MAXIMIZAÇÃO DA SERPAPI E ANTI-FLUFF):
-1. CITAÇÃO NOMINAL OBRIGATÓRIA: Você DEVE mencionar as fontes presentes nos "DADOS DE PESQUISA EM TEMPO REAL". Use frases como "Segundo o [Nome da Fonte]...", "Conforme relatado hoje pelo [Nome da Fonte]...". Se não houver fontes, analise o mercado.
-2. EXTRAÇÃO DE MÉTRICAS: Vasculhe a pesquisa do Google e destaque números, porcentagens, valores em dólares, datas ou versões de software. Nunca diga "muito rápido", diga "reduziu a latência em X% segundo a fonte Y".
-3. PROIBIDO ADJETIVOS VAZIOS: Sem "inovador", "revolucionário" ou "divisor de águas". Mostre os fatos e deixe o leitor concluir que é inovador.
-4. COERÊNCIA NATIVA: As versões 'es', 'pt' e 'en' devem usar jargões nativos de TI e negócios impecáveis. Nunca misture idiomas.
+REGRAS DE BLOQUEIO ABSOLUTO (PUNIÇÃO SE DESCUMPRIDAS):
+1. PROIBIDO NOMES FALSOS: Na tabela e no texto, é TERMINANTEMENTE PROIBIDO usar "Concorrente A", "Empresa B" ou "Solução X". Se a notícia não citar concorrentes, USE SEU CONHECIMENTO PARA CITAR FERRAMENTAS REAIS DO MERCADO (ex: ChatGPT, AWS, Moodle, Salesforce, SAP, etc).
+2. PROIBIDO TEMPLATES NO PROMPT: No 'Laboratório', NÃO forneça a estrutura do prompt (ex: não escreva "[Persona]: Educador"). Você DEVE fornecer o TEXTO EXATO, em primeira pessoa, pronto para o leitor copiar e colar na IA. (Ex: "Aja como um professor de matemática. O meu objetivo é...").
+3. PROIBIDO RESUMIR: Expanda cada seção. Se os dados da pesquisa forem curtos, use seu conhecimento profundo sobre a tecnologia para explicar o 'como' e o 'porquê'.
 
-ESTRUTURA DE TÓPICOS OBRIGATÓRIA E INFLEXÍVEL:
+ESTRUTURA OBRIGATÓRIA:
 
 1. H1: TÍTULO MAGNÉTICO E ORIENTADO A SEO
-(Título com a palavra-chave principal + promessa de valor/resolução de problema).
 
 2. RESUMO EXECUTIVO & DADOS-CHAVE (TL;DR)
-(Mínimo de 3 parágrafos. Resuma a notícia, cruze com as informações da SerpApi e crie uma lista de "bullet points" apenas com os números e dados mais críticos extraídos da pesquisa).
+(Extraia números reais da pesquisa ou do mercado e crie bullet points de impacto).
 
 3. O CONTEXTO: POR QUE ISSO IMPORTA AGORA?
-(Explique o cenário de mercado ou o problema legado que forçou este lançamento ou notícia a acontecer. O que estava dando errado antes?).
+(Explique o cenário do mercado, a dor das empresas e por que essa tecnologia surgiu).
 
 4. ANÁLISE ARQUITETURAL E TÉCNICA (O "Deep Dive")
-(Mínimo de 400 palavras. Dissecação total.
-- Se for IA/Software/API: Topologia, fluxo de dados, latência, integração e infraestrutura necessária.
-- Se for Negócios/Hardware: Modelos de receita, aquisições, cadeia de suprimentos e impacto no ecossistema).
+(Desmonte a tecnologia. Cite linguagens de programação, tipos de rede neural, integrações de API ou arquitetura de servidores e infraestrutura).
 
-5. TABELA DE BENCHMARKING (SEO Visual)
-(Crie uma tabela Markdown robusta (4x3). Compare a novidade com seu concorrente direto ou com o padrão da indústria baseando-se em: Custo, Curva de Aprendizado, Escalabilidade e Integração).
+5. TABELA DE BENCHMARKING COM FERRAMENTAS REAIS
+(Crie uma tabela Markdown. Compare a novidade com 2 ferramentas/empresas REAIS e famosas do mercado. Colunas: Ferramenta | Custo Estimado | Curva de Aprendizado | Melhor Cenário de Uso).
 
-6. LABORATÓRIO LATINOTECH: ENGENHARIA DE PROMPT E APLICAÇÃO
-(Mínimo de 350 palavras. OBRIGATÓRIO gerar um "Mega Prompt" avançado e copiável (em bloco de código) para ChatGPT/Claude/Gemini, focado em aplicar o conceito da notícia no dia a dia corporativo.
-- O Prompt gerado deve usar a estrutura: [Persona] + [Contexto] + [Tarefa com Restrições] + [Formato de Saída]. 
-- Inclua a técnica de 'Chain of Thought' (Cadeia de Raciocínio).
-- Explique tecnicamente por que este prompt economiza tempo/dinheiro).
+6. LABORATÓRIO LATINOTECH: ENGENHARIA DE PROMPT (COPIAR E COLAR)
+(Gere um Mega Prompt avançado em bloco de código Markdown. Ele deve ser um comando longo e perfeitamente redigido que o leitor possa simplesmente copiar e enviar para o ChatGPT/Claude agora mesmo para obter resultados profissionais sobre o tema da notícia).
 
 7. IMPACTO NO OPEX/CAPEX E ESTRATÉGIA B2B
-(Mínimo de 250 palavras. Análise de bolso. Custos de licenciamento, economia de tempo, substituição de ferramentas antigas e como startups vs empresas Enterprise devem reagir).
+(Como isso reduz custos operacionais ou aumenta receita? Seja específico sobre o bolso das empresas).
 
-8. OS "CALCANHARES DE AQUILES" (Riscos e Limitações)
-(Liste 3 defeitos severos, desafios de compliance, vazamento de dados ou limitações técnicas reais).
+8. OS "CALCANHARES DE AQUILES" (Riscos Reais)
+(Seja técnico. Liste defeitos reais: latência, alucinação, vazamento de dados, custo de tokens de API, etc).
 
 9. BLUEPRINT DE AÇÃO (Plano de 48 Horas)
-(Forneça 3 passos táticos e técnicos exatos que um CTO, Desenvolvedor ou CEO deve executar hoje para se posicionar frente a esta novidade).
+(3 passos exatos que um CTO ou Diretor deve tomar agora).
 
-10. FAQ (As Pessoas Também Perguntam)
-(Para dominar os Snippets do Google: 3 perguntas exatas de cauda longa (H3) com respostas diretas de 1 parágrafo cada).
+10. FAQ PARA SNIPPETS DO GOOGLE
+(3 perguntas de cauda longa com respostas de 1 parágrafo cada).
 
 SAÍDA OBRIGATÓRIA:
-Devolva EXCLUSIVAMENTE o objeto JSON com esta estrutura exata:
+Gere as três versões ('es', 'pt', 'en') mantendo a mesma profundidade em todas.
+Devolva EXCLUSIVAMENTE o objeto JSON:
 {
-  "es": { "title": "...", "summary": "...", "content": "Texto MASSIVO de 1500+ palavras em Markdown", "category": "...", "seo_keywords": "..." },
-  "pt": { "title": "...", "summary": "...", "content": "Texto MASSIVO de 1500+ palavras em Markdown", "category": "...", "seo_keywords": "..." },
-  "en": { "title": "...", "summary": "...", "content": "Texto MASSIVO de 1500+ palavras em Markdown", "category": "...", "seo_keywords": "..." },
+  "es": { "title": "...", "summary": "...", "content": "Texto MASSIVO e denso em Markdown", "category": "...", "seo_keywords": "..." },
+  "pt": { "title": "...", "summary": "...", "content": "Texto MASSIVO e denso em Markdown", "category": "...", "seo_keywords": "..." },
+  "en": { "title": "...", "summary": "...", "content": "Texto MASSIVO e denso em Markdown", "category": "...", "seo_keywords": "..." },
   "image_prompt": "Cinematic tech editorial photography, hyper-realistic, 4k, professional lighting, clean web aesthetic"
 }`;
                     
