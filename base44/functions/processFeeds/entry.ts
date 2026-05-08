@@ -69,27 +69,47 @@ Deno.serve(async (req) => {
                     }
 
                     // ===== PASSO 2: GERAÇÃO DO ARTIGO MESTRE EM PORTUGUÊS =====
-                    const masterPrompt = `Aja como um Jornalista Sênior de Tecnologia e Negócios da revista Wired. Escreva um artigo envolvente, fluido e profundo (aprox. 1000 palavras) em Português do Brasil.
+                    const masterPrompt = `Aja como um Editor-Chefe da Wired e um Especialista em Engenharia de Prompt. Você deve escrever um artigo técnico-jornalístico PROFUNDO de no MÍNIMO 2.000 palavras em Português do Brasil.
 
-PAUTA: ${item.title} | ${item.contentSnippet || item.content || ''}
-TEXTOS COMPLETOS DAS FONTES (Use para aprofundar a matéria com fatos reais): ${extraContext}
+FONTES DISPONÍVEIS (LEITURA OBRIGATÓRIA):
+- Título RSS: ${item.title}
+- Conteúdo Exa.ai (Texto Completo das Fontes): ${extraContext}
 
-DIRETRIZES DE ESTILO:
-- Escreva de forma natural, humana e analítica. Evite parecer um robô ou usar jargões corporativos vazios.
-- Use formatação Markdown (##, ###, negritos, bullet points) para tornar a leitura dinâmica.
+REGRAS DE OURO CONTRA A SUPERFICIALIDADE:
+- PROIBIDO RESUMIR: Se o assunto for complexo, explique cada detalhe técnico. Cada subtópico (H2) deve ter pelo menos 5 parágrafos longos.
+- CITE DADOS: Use os números, nomes de executivos e estatísticas encontrados no texto da Exa.ai.
+- O MEGA PROMPT: Na seção 'Laboratório', você deve criar um Prompt de no mínimo 400 palavras. Ele deve ser um comando complexo, com variáveis, persona e lógica de raciocínio, pronto para copiar. PROIBIDO criar listas de dicas.
 
-ESTRUTURA DO ARTIGO:
-1. TÍTULO: Chamativo e direto (H1).
-2. INTRODUÇÃO: Um gancho forte que explique a notícia e o impacto real.
-3. DEEP DIVE: O desenvolvimento da matéria usando os fatos das fontes. (Use 2 ou 3 subtítulos H2).
-4. NA PRÁTICA (Obrigatório): Inclua uma seção mostrando como o leitor pode aplicar isso (um caso de uso B2B, bloco de código simples ou um Prompt copiável).
-5. VEREDICTO FINAL: Uma breve conclusão estratégica.
+ESTRUTURA EXIGIDA:
 
-Devolva EXCLUSIVAMENTE o objeto JSON:
+# [H1: Título Provocativo e Técnico]
+
+## I. O Fato e a Análise de Impacto (Mínimo 300 palavras)
+(Disseque a notícia. O que aconteceu, quem são os envolvidos e por que isso muda o jogo hoje?)
+
+## II. Deep Dive: A Engenharia e o Modelo de Negócio (Mínimo 500 palavras)
+(Use o texto da Exa.ai para explicar COMO a tecnologia funciona ou como a estratégia financeira foi montada. Seja extremamente detalhista).
+
+## III. Matriz Comparativa (Tabela HTML)
+(Crie uma tabela <table> com ferramentas/empresas REAIS. Compare diferenciais técnicos e barreiras de entrada).
+
+## IV. Laboratório LatinoTech: O Mega Prompt Definitivo
+(Escreva um bloco de código Markdown \`\`\` contendo um prompt GIGANTE e PROFISSIONAL que o leitor pode copiar agora. O prompt deve instruir a IA a resolver o problema exato citado na notícia).
+
+## V. Estratégia B2B e Retorno (OPEX/CAPEX) (Mínimo 400 palavras)
+(Análise para CEOs: quanto custa, quanto economiza e como implementar na empresa).
+
+## VI. Riscos e Limitações (The Dark Side)
+(O que pode dar errado? Fale de segurança, custos de API ou falhas de mercado).
+
+## VII. Plano de Ação 48h e FAQ
+(Passos táticos e 3 perguntas de alto nível para SEO).
+
+Responda APENAS o JSON:
 {
   "title": "...",
   "summary": "Resumo forte de 2 linhas",
-  "content": "Texto fluido, humano e estruturado em Markdown",
+  "content": "Texto MASSIVO e completo em Markdown — mínimo 2000 palavras",
   "category": "Uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales",
   "seo_keywords": "5-8 palavras-chave SEO em PT separadas por vírgula",
   "image_prompt": "Cinematic tech editorial photography, hyper-realistic, 4k"
@@ -98,6 +118,7 @@ Devolva EXCLUSIVAMENTE o objeto JSON:
 
                     const masterResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
                         prompt: masterPrompt,
+                        model: "claude_sonnet_4_6",
                         response_json_schema: {
                             type: "object",
                             properties: {
