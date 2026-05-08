@@ -64,43 +64,43 @@ Deno.serve(async (req) => {
                     }
                     // --- FIM DA PESQUISA ---
 
-                    // --- O SEU NOVO MEGA PROMPT ADAPTÁVEL E POLIGLOTA ---
-                    const prompt = `Atue como um Jornalista Investigativo de Tecnologia e Analista Sênior de Mercado para a LatinoTech IA. 
-Você recebeu uma pauta bruta de um feed RSS e os resultados de pesquisa do Google News sobre o assunto.
+                    // --- O MEGA PROMPT "GOD-TIER" (UTILIDADE PRÁTICA + MASTER SEO) ---
+                    const prompt = `Atue como um Engenheiro de Prompt Sênior, Arquiteto de Soluções, Estrategista B2B e Especialista em SEO Técnico para a LatinoTech IA. 
+Você recebeu uma pauta bruta de um feed RSS e os resultados de pesquisa do Google News.
 
-PAUTA RSS (Sua base):
+PAUTA RSS:
 TÍTULO: ${item.title}
 RESUMO: ${item.contentSnippet || item.content || ''}
 
-INFORMAÇÕES ADICIONAIS DO GOOGLE NEWS (Use isto para aprofundar a matéria e trazer fatos reais):
+CONTEXTO DO GOOGLE NEWS (Fatos reais):
 ${extraContext}
 
-Sua missão é criar uma matéria jornalística premium e aprofundada (Mínimo de 800 a 1000 palavras). O texto deve ser digno de jornais como TechCrunch ou Wired.
+Sua missão é criar um artigo "How-To" (Como Fazer) épico, altamente prático e otimizado para o Google (Mínimo de 1000 a 1200 palavras). O leitor quer saber COMO APLICAR essa novidade no seu negócio ou código.
 
-REGRAS DE ESTRUTURA E ADAPTAÇÃO (CRÍTICO):
-1. ADAPTAÇÃO AO TEMA: 
-   - SE a notícia for puramente sobre negócios, leis, IA, gadgets ou mercado corporativo: Foque em análise de mercado, impacto estratégico, OPEX/CAPEX, cibersegurança e tendências. NÃO invente blocos de código ou stacks tecnológicas que não existem.
-   - SE a notícia for estritamente sobre uma nova API, linguagem de programação, framework ou ferramenta de desenvolvedor: Aí sim, inclua uma seção "Deep Dive Técnico" com um exemplo de bloco de código Markdown realista.
-2. TÍTULOS E SUBTÍTULOS: NUNCA use as minhas instruções como título (ex: não escreva "Introdução" ou "O Problema Tradicional"). Crie subtítulos jornalísticos, criativos e chamativos (ex: "A Nova Era da Cibersegurança nos Tribunais").
-3. FLUXO JORNALÍSTICO:
-   - Comece com um gancho forte usando os fatos da pesquisa do Google.
-   - Explique o contexto e o problema que levou a esta notícia.
-   - Analise o impacto no mercado B2B, Startups e no mundo corporativo.
-   - Destaque as vantagens e os grandes desafios (seja crítico e honesto).
-4. > CITAÇÃO: Crie uma frase de impacto formatada como citação no Markdown (usando o símbolo >).
-5. VEREDICTO: Termine com "O Veredicto LatinoTech" indicando o que as empresas devem esperar ou fazer a seguir.
+ESTRUTURA OBRIGATÓRIA E ACIONÁVEL (Siga a ordem):
 
-REGRAS DE OURO:
-- Use termos técnicos avançados.
-- Formatação Markdown rica com muitos subtítulos (## e ###).
-- TRADUÇÃO NATIVA E IMPECÁVEL: As versões em Espanhol ('es'), Português ('pt') e Inglês ('en') devem ser geradas de forma estrita. NUNCA misture idiomas (proibido usar palavras em espanhol no texto em português e vice-versa). Atenção ao contexto das palavras (Ex: "toothbrush/cepillo" é "escova de dentes" em PT, nunca "pincel"). O texto deve soar escrito por um nativo fluente.
+1. DIRETO AO PONTO (O Gancho): Comece explicando o que é a novidade, o problema exato que ela resolve e o impacto no mercado (sem frases de efeito genéricas).
+2. COMO FUNCIONA (A MECÂNICA): Explique a arquitetura, as integrações ou a lógica por trás da ferramenta/notícia com base nos fatos da pesquisa.
+3. 📊 TABELA DE COMPARAÇÃO / ROI (Obrigatório para SEO): Crie uma tabela em Markdown. Se for software/hardware, compare a novidade com a versão anterior ou com o principal concorrente. Se for uma notícia de mercado, faça uma tabela de "Custo vs. Benefício" ou "Antes vs. Depois".
+4. 🛠️ CASOS DE USO PRÁTICOS: Descreva 2 a 3 cenários reais de como empresas, agências ou desenvolvedores podem usar essa tecnologia no dia a dia para reduzir OPEX ou escalar vendas.
+5. 🚀 MATERIAL PRONTO PARA USO (Obrigatório):
+   - SE for sobre IAs generativas: Crie 2 exemplos de "Mega Prompts" avançados (em blocos de código) prontos para copiar e colar.
+   - SE for sobre programação/APIs: Escreva um bloco de código realista (JSON, Python, JS) mostrando como integrar a novidade.
+   - SE for puramente sobre hardware/mercado: Dê um checklist prático de implementação.
+6. PLANO DE AÇÃO EM 3 PASSOS: Diga ao leitor 3 passos exatos que ele deve fazer hoje para aproveitar esta tecnologia.
+7. ❓ FAQ (As Pessoas Também Perguntam): Crie 3 perguntas curtas e respostas diretas sobre o tema para ranquear nos Snippets do Google.
+
+REGRAS DE OURO (ANTI-FLUFF & SEO):
+- Use termos de LSI (Latent Semantic Indexing) naturalmente pelo texto.
+- Use listas, bullet points e muito **negrito** em conceitos-chave para leitura escaneável.
+- TRADUÇÃO NATIVA E IMPECÁVEL: As versões ('es', 'pt', 'en') não devem parecer traduzidas, mas sim escritas por especialistas locais. Cuidado com falsos cognatos na tecnologia.
 
 Devolva EXCLUSIVAMENTE um objeto JSON válido:
 {
-  "es": { "title": "", "summary": "Resumo forte de 2 linhas", "content": "Texto jornalístico MASSIVO e fluido em Markdown", "category": "", "seo_keywords": "" },
-  "pt": { "title": "", "summary": "Resumo forte de 2 linhas", "content": "Texto jornalístico MASSIVO e fluido em Markdown", "category": "", "seo_keywords": "" },
-  "en": { "title": "", "summary": "Resumo forte de 2 linhas", "content": "Texto jornalístico MASSIVO e fluido em Markdown", "category": "", "seo_keywords": "" },
-  "image_prompt": "Cinematic tech editorial photography, hyper-realistic, 8k."
+  "es": { "title": "Título magnético focado em SEO e Benefício", "summary": "Resumo de 2 linhas focado em CTR", "content": "Texto MASSIVO, estruturado, com tabela e prático em Markdown", "category": "", "seo_keywords": "keyword1, keyword2, long tail keyword 3" },
+  "pt": { "title": "Título magnético focado em SEO e Benefício", "summary": "Resumo de 2 linhas focado em CTR", "content": "Texto MASSIVO, estruturado, com tabela e prático em Markdown", "category": "", "seo_keywords": "keyword1, keyword2, long tail keyword 3" },
+  "en": { "title": "Título magnético focado em SEO e Benefício", "summary": "Resumo de 2 linhas focado em CTR", "content": "Texto MASSIVO, estruturado, com tabela e prático em Markdown", "category": "", "seo_keywords": "keyword1, keyword2, long tail keyword 3" },
+  "image_prompt": "Cinematic tech editorial photography, hyper-realistic, 4k, professional lighting, clean web aesthetic"
 }`;
                     
                     const llmResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
