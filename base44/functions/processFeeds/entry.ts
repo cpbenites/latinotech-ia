@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Parser from 'npm:rss-parser';
 
 const parser = new Parser();
@@ -14,306 +14,321 @@ function generateSlug(text) {
         .replace(/-+$/, "");
 }
 
-async function runProcessing(req) {
+Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
+    const logs = [];
 
-    const feeds = await base44.asServiceRole.entities.RssFeed.list();
-    const activeFeeds = feeds.filter(f => f.is_active);
-    const shuffledFeeds = [...activeFeeds].sort(() => Math.random() - 0.5);
+    try {
+        // STEP 1: Feeds RSS
+        logs.push("STEP 1: Buscando feeds ativos...");
+        const feeds = await base44.asServiceRole.entities.RssFeed.list();
+        const activeFeeds = feeds.filter(f => f.is_active);
+        logs.push(`STEP 1 OK: ${activeFeeds.length} feeds ativos.`);
 
-    let processedCount = 0;
-    const MAX_ITEMS_PER_RUN = 1;
+        if (activeFeeds.length === 0) {
+            return Response.json({ success: false, message: "Nenhum feed ativo.", logs });
+        }
 
-    for (const feed of shuffledFeeds) {
-            if (processedCount >= MAX_ITEMS_PER_RUN) break;
+        const shuffledFeeds = [...activeFeeds].sort(() => Math.random() - 0.5);
+
+        // STEP 2: Encontrar 1 item novo
+        let chosenFeed = null;
+        let chosenItem = null;
+
+        logs.push("STEP 2: Procurando item novo não duplicado...");
+        for (const feed of shuffledFeeds) {
             try {
                 const feedData = await parser.parseURL(feed.url);
-                const items = feedData.items.slice(0, 2);
-
-                for (const item of items) {
-                    if (processedCount >= MAX_ITEMS_PER_RUN) break;
-
+                for (const item of feedData.items.slice(0, 5)) {
+                    if (!item.link) continue;
                     const existing = await base44.asServiceRole.entities.NewsArticle.filter({ original_url: item.link });
-                    if (existing.length > 0) continue;
-
-                    // ===== PASSO 1: PESQUISA RICA NA EXA.AI (Full Text) =====
-                    const exaApiKey = Deno.env.get("EXA_API_KEY");
-                    let extraContext = "";
-
-                    if (exaApiKey) {
-                        try {
-                            const exaResponse = await fetch("https://api.exa.ai/search", {
-                                method: "POST",
-                                headers: {
-                                    "x-api-key": exaApiKey,
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    query: item.title,
-                                    useAutoprompt: true,
-                                    numResults: 2,
-                                    contents: { text: true }
-                                })
-                            });
-                            const exaData = await exaResponse.json();
-
-                            if (exaData.results && exaData.results.length > 0) {
-                                extraContext = exaData.results.map(r =>
-                                    `Fonte: ${r.title}\nConteúdo Completo: ${r.text}`
-                                ).join("\n\n---\n\n");
-                            }
-                        } catch (err) {
-                            console.error("Erro ao buscar contexto na Exa:", err);
-                        }
+                    if (existing.length === 0) {
+                        chosenFeed = feed;
+                        chosenItem = item;
+                        break;
                     }
-
-                    // ===== PASSO 2: GERAÇÃO DO ARTIGO MESTRE EM PORTUGUÊS =====
-                    const masterPrompt = `Aja como um Editor-Chefe da Wired e um Especialista em Engenharia de Prompt. Você deve escrever um artigo técnico-jornalístico PROFUNDO de no MÍNIMO 2.000 palavras em Português do Brasil.
-
-FONTES DISPONÍVEIS (LEITURA OBRIGATÓRIA):
-- Título RSS: ${item.title}
-- Conteúdo Exa.ai (Texto Completo das Fontes): ${extraContext}
-
-REGRAS DE OURO CONTRA A SUPERFICIALIDADE:
-- PROIBIDO RESUMIR: Se o assunto for complexo, explique cada detalhe técnico. Cada subtópico (H2) deve ter pelo menos 5 parágrafos longos.
-- CITE DADOS: Use os números, nomes de executivos e estatísticas encontrados no texto da Exa.ai.
-- O MEGA PROMPT: Na seção 'Laboratório', você deve criar um Prompt de no mínimo 400 palavras. Ele deve ser um comando complexo, com variáveis, persona e lógica de raciocínio, pronto para copiar. PROIBIDO criar listas de dicas.
-
-ESTRUTURA EXIGIDA:
-
-# [H1: Título Provocativo e Técnico]
-
-## I. O Fato e a Análise de Impacto (Mínimo 300 palavras)
-(Disseque a notícia. O que aconteceu, quem são os envolvidos e por que isso muda o jogo hoje?)
-
-## II. Deep Dive: A Engenharia e o Modelo de Negócio (Mínimo 500 palavras)
-(Use o texto da Exa.ai para explicar COMO a tecnologia funciona ou como a estratégia financeira foi montada. Seja extremamente detalhista).
-
-## III. Matriz Comparativa (Tabela HTML)
-(Crie uma tabela <table> com ferramentas/empresas REAIS. Compare diferenciais técnicos e barreiras de entrada).
-
-## IV. Laboratório LatinoTech: O Mega Prompt Definitivo
-(Escreva um bloco de código Markdown \`\`\` contendo um prompt GIGANTE e PROFISSIONAL que o leitor pode copiar agora. O prompt deve instruir a IA a resolver o problema exato citado na notícia).
-
-## V. Estratégia B2B e Retorno (OPEX/CAPEX) (Mínimo 400 palavras)
-(Análise para CEOs: quanto custa, quanto economiza e como implementar na empresa).
-
-## VI. Riscos e Limitações (The Dark Side)
-(O que pode dar errado? Fale de segurança, custos de API ou falhas de mercado).
-
-## VII. Plano de Ação 48h e FAQ
-(Passos táticos e 3 perguntas de alto nível para SEO).
-
-Responda APENAS o JSON:
-{
-  "title": "...",
-  "summary": "Resumo forte de 2 linhas",
-  "content": "Texto MASSIVO e completo em Markdown — mínimo 2000 palavras",
-  "category": "Uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales",
-  "seo_keywords": "5-8 palavras-chave SEO em PT separadas por vírgula",
-  "image_prompt": "Cinematic tech editorial photography, hyper-realistic, 4k"
-}
-`;
-
-                    const masterResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
-                        prompt: masterPrompt,
-                        model: "claude_sonnet_4_6",
-                        response_json_schema: {
-                            type: "object",
-                            properties: {
-                                title: { type: "string" },
-                                summary: { type: "string" },
-                                content: { type: "string" },
-                                category: { type: "string" },
-                                seo_keywords: { type: "string" },
-                                image_prompt: { type: "string" }
-                            },
-                            required: ["title", "summary", "content", "category", "seo_keywords", "image_prompt"]
-                        }
-                    });
-
-                    if (!masterResponse || !masterResponse.title || !masterResponse.content) {
-                        console.error("Falha na geração do artigo mestre PT.");
-                        continue;
-                    }
-
-                    // ===== PASSO 3: TRADUÇÕES NATIVAS (ES e EN) =====
-                    const translationSchema = {
-                        type: "object",
-                        properties: {
-                            title: { type: "string" },
-                            summary: { type: "string" },
-                            content: { type: "string" },
-                            category: { type: "string" },
-                            seo_keywords: { type: "string" }
-                        },
-                        required: ["title", "summary", "content", "category", "seo_keywords"]
-                    };
-
-                    const buildTranslationPrompt = (targetLang, langName) => `Atue como um tradutor nativo profissional especializado em jornalismo de tecnologia B2B.
-
-Sua tarefa é TRADUZIR o seguinte artigo do Português para ${langName} de forma IMPECÁVEL e NATIVA.
-
-REGRAS CRÍTICAS:
-1. NÃO resumir. NÃO encurtar. Mantenha a mesma profundidade e densidade do original.
-2. Preserve TODA a formatação Markdown (títulos ##, tabelas, blocos de código, listas, negritos).
-3. Preserve os nomes próprios de empresas, produtos e tecnologias (ChatGPT, AWS, etc).
-4. Adapte expressões idiomáticas para soarem naturais em ${langName}.
-5. Traduza as palavras-chave SEO para ${langName} (mantendo sentido equivalente, não literal).
-6. A categoria deve permanecer a mesma palavra original (uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales).
-
-ARTIGO ORIGINAL EM PORTUGUÊS:
-TÍTULO: ${masterResponse.title}
-RESUMO: ${masterResponse.summary}
-CATEGORIA: ${masterResponse.category}
-PALAVRAS-CHAVE: ${masterResponse.seo_keywords}
-
-CONTEÚDO:
-${masterResponse.content}
-
-Devolva EXCLUSIVAMENTE o objeto JSON traduzido para ${langName}:
-{
-  "title": "...",
-  "summary": "...",
-  "content": "Markdown completo traduzido",
-  "category": "${masterResponse.category}",
-  "seo_keywords": "..."
-}`;
-
-                    let esResponse = null;
-                    let enResponse = null;
-
-                    try {
-                        esResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
-                            prompt: buildTranslationPrompt('es', 'Espanhol (LATAM neutro)'),
-                            response_json_schema: translationSchema
-                        });
-                    } catch (e) {
-                        console.error("Falha na tradução ES:", e);
-                    }
-
-                    try {
-                        enResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
-                            prompt: buildTranslationPrompt('en', 'Inglês (US)'),
-                            response_json_schema: translationSchema
-                        });
-                    } catch (e) {
-                        console.error("Falha na tradução EN:", e);
-                    }
-
-                    // ===== PASSO 4a: GERAR IMAGEM =====
-                    let image_url = "";
-                    try {
-                        const imgResponse = await base44.asServiceRole.integrations.Core.GenerateImage({
-                            prompt: masterResponse.image_prompt + ", highly detailed, tech news editorial photography, clean white background, modern tech style, 1080p, minimalist"
-                        });
-                        image_url = imgResponse.url;
-                    } catch (e) {
-                        console.error("Image generation failed:", e);
-                    }
-
-                    // ===== PASSO 4b: SALVAR OS 3 ARTIGOS =====
-                    const allLangs = {
-                        pt: masterResponse,
-                        es: esResponse,
-                        en: enResponse
-                    };
-
-                    const createdArticles = {};
-
-                    for (const lang of ['pt', 'es', 'en']) {
-                        const langData = allLangs[lang];
-                        if (!langData || !langData.title || !langData.content) continue;
-
-                        let baseSlug = generateSlug(langData.title);
-                        let articleSlug = baseSlug;
-                        let slugCounter = 2;
-
-                        while ((await base44.asServiceRole.entities.NewsArticle.filter({ slug: articleSlug })).length > 0) {
-                            articleSlug = `${baseSlug}-${slugCounter}`;
-                            slugCounter++;
-                        }
-
-                        const createdArticle = await base44.asServiceRole.entities.NewsArticle.create({
-                            slug: articleSlug,
-                            title: langData.title,
-                            summary: langData.summary,
-                            content: langData.content,
-                            original_url: item.link,
-                            image_url: image_url,
-                            category: langData.category || feed.category,
-                            status: "pending",
-                            seo_keywords: langData.seo_keywords,
-                            source_name: feed.name,
-                            language: lang,
-                            published_date: new Date().toISOString()
-                        });
-
-                        createdArticles[lang] = createdArticle;
-                    }
-
-                    // ===== PASSO 4c: NOTIFICAR TELEGRAM =====
-                    try {
-                        const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
-                        const chatIds = {
-                            es: Deno.env.get("TELEGRAM_CHAT_ID") || "@latinotech",
-                            pt: "@latinotechbr",
-                            en: "@latinotechen"
-                        };
-
-                        if (TELEGRAM_BOT_TOKEN) {
-                            for (const lang of ['pt', 'es', 'en']) {
-                                const article = createdArticles[lang];
-                                const langData = allLangs[lang];
-                                const chatId = chatIds[lang];
-
-                                if (chatId && article && langData) {
-                                    const shortSummary = langData.summary.length > 150 ? langData.summary.substring(0, 147) + "..." : langData.summary;
-
-                                    let urlPath = `/noticia/${article.slug}`;
-                                    if (lang === 'pt') urlPath = `/br/noticia/${article.slug}`;
-                                    if (lang === 'en') urlPath = `/en/news/${article.slug}`;
-
-                                    const cta = lang === 'pt' ? 'Leia a notícia completa aqui:' : lang === 'en' ? 'Read the full story here:' : 'Lee la noticia completa aquí:';
-                                    const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${cta}\nhttps://latinotechia.com${urlPath}`;
-
-                                    const endpoint = image_url ? 'sendPhoto' : 'sendMessage';
-                                    const payload = image_url
-                                        ? { chat_id: chatId, photo: image_url, caption: telegramMessage, parse_mode: 'HTML' }
-                                        : { chat_id: chatId, text: telegramMessage, parse_mode: 'HTML' };
-
-                                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${endpoint}`, {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify(payload)
-                                    });
-                                }
-                            }
-                        }
-                    } catch (telegramError) {
-                        console.error("Error al enviar mensaje a Telegram:", telegramError);
-                    }
-
-                    processedCount++;
                 }
+                if (chosenItem) break;
             } catch (e) {
-                console.error(`Error processing feed ${feed.url}:`, e);
+                logs.push(`STEP 2 WARN: Erro ao ler ${feed.url}: ${e.message}`);
             }
         }
 
-        return processedCount;
-}
+        if (!chosenItem) {
+            logs.push("STEP 2: Nenhum item novo encontrado em todos os feeds.");
+            return Response.json({ success: true, processed: 0, message: "Sem novos itens.", logs });
+        }
+        logs.push(`STEP 2 OK: Item escolhido: "${chosenItem.title}" do feed "${chosenFeed.name}"`);
 
-Deno.serve(async (req) => {
-    // Fire-and-forget: responde imediatamente e processa em background
-    const processingPromise = runProcessing(req).catch(err => {
-        console.error("Erro no processamento em background:", err);
-    });
+        // STEP 3: Exa.ai - contexto rápido (limite de texto para não demorar)
+        const exaApiKey = Deno.env.get("EXA_API_KEY");
+        let extraContext = "";
+        logs.push(`STEP 3: EXA_API_KEY presente: ${!!exaApiKey}`);
 
-    // Registra a task para continuar após a resposta (evita timeout do browser)
-    if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
-        EdgeRuntime.waitUntil(processingPromise);
+        if (exaApiKey) {
+            try {
+                const exaResponse = await fetch("https://api.exa.ai/search", {
+                    method: "POST",
+                    headers: { "x-api-key": exaApiKey, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        query: chosenItem.title,
+                        useAutoprompt: true,
+                        numResults: 2,
+                        contents: { text: { maxCharacters: 2000 } }
+                    })
+                });
+                const exaData = await exaResponse.json();
+                logs.push(`STEP 3: Exa status=${exaResponse.status}, resultados=${exaData.results?.length ?? 0}`);
+
+                if (exaData.results && exaData.results.length > 0) {
+                    extraContext = exaData.results.map(r =>
+                        `[${r.title}]: ${(r.text || '').substring(0, 1500)}`
+                    ).join("\n\n");
+                    logs.push(`STEP 3 OK: ${extraContext.length} chars de contexto.`);
+                }
+            } catch (err) {
+                logs.push(`STEP 3 ERRO Exa: ${err.message}`);
+            }
+        }
+
+        // STEP 4: Gerar artigo PT mestre (Claude) — sem response_json_schema para evitar JSON corrompido
+        logs.push("STEP 4: Chamando Claude para artigo mestre em PT...");
+
+        const masterPrompt = `Você é um jornalista de tecnologia sênior. Escreva um artigo completo em Português do Brasil.
+
+NOTÍCIA:
+Título: ${chosenItem.title}
+Conteúdo: ${chosenItem.contentSnippet || chosenItem.summary || ''}
+
+CONTEXTO ADICIONAL:
+${extraContext || 'Não disponível.'}
+
+INSTRUÇÕES:
+- Mínimo 800 palavras de conteúdo em Markdown
+- Use subtítulos ##, listas, negrito
+- Inclua uma tabela Markdown comparando 3 concorrentes reais
+- Na seção "## Laboratório LatinoTech", inclua um prompt profissional de 150+ palavras
+- Categoria deve ser UMA de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales
+- Palavras-chave SEO: 5 a 8 termos separados por vírgula
+
+FORMATO DE RESPOSTA — retorne EXATAMENTE este XML (substitua os valores):
+<article>
+<title>TÍTULO AQUI</title>
+<summary>RESUMO DE 2 LINHAS AQUI</summary>
+<category>CATEGORIA AQUI</category>
+<seo_keywords>kw1, kw2, kw3</seo_keywords>
+<image_prompt>SHORT ENGLISH PROMPT FOR IMAGE</image_prompt>
+<content>
+CONTEÚDO MARKDOWN COMPLETO AQUI
+</content>
+</article>`;
+
+        let masterData = null;
+        try {
+            const masterRaw = await base44.asServiceRole.integrations.Core.InvokeLLM({
+                prompt: masterPrompt,
+                model: "claude_sonnet_4_6"
+            });
+
+            // masterRaw pode ser string ou { response: string }
+            const masterText = typeof masterRaw === 'string' ? masterRaw : (masterRaw.response || JSON.stringify(masterRaw));
+            logs.push(`STEP 4 RAW len=${masterText.length}, preview="${masterText.substring(0,100)}"`);
+
+            // Parse do XML
+            const extractTag = (tag, text) => {
+                const m = text.match(new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`));
+                if (!m) return '';
+                return m[0].replace(`<${tag}>`, '').replace(`</${tag}>`, '').trim();
+            };
+
+            masterData = {
+                title: extractTag('title', masterText),
+                summary: extractTag('summary', masterText),
+                category: extractTag('category', masterText),
+                seo_keywords: extractTag('seo_keywords', masterText),
+                image_prompt: extractTag('image_prompt', masterText),
+                content: extractTag('content', masterText)
+            };
+
+            logs.push(`STEP 4 OK: title="${masterData.title?.substring(0,50)}", content_len=${masterData.content?.length}`);
+        } catch (e) {
+            logs.push(`STEP 4 ERRO LLM: ${e.message}`);
+            return Response.json({ success: false, error: e.message, logs }, { status: 500 });
+        }
+
+        if (!masterData.title || !masterData.content) {
+            logs.push(`STEP 4 FALHA: campos obrigatórios ausentes. title="${masterData.title}", content_len=${masterData.content?.length}`);
+            return Response.json({ success: false, error: "LLM não retornou título ou conteúdo.", logs });
+        }
+
+        // STEP 5: Traduções ES e EN em paralelo (modelo padrão, mais rápido)
+        logs.push("STEP 5: Traduzindo para ES e EN em paralelo...");
+
+        const buildTransPrompt = (langName) => `Traduza o artigo abaixo do Português para ${langName}. Mantenha toda a formatação Markdown. NÃO resuma. Categoria deve ser uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales.
+
+TÍTULO: ${masterData.title}
+RESUMO: ${masterData.summary}
+CATEGORIA: ${masterData.category}
+PALAVRAS-CHAVE: ${masterData.seo_keywords}
+
+CONTEÚDO:
+${masterData.content}
+
+FORMATO DE RESPOSTA — retorne EXATAMENTE este XML:
+<article>
+<title>TÍTULO TRADUZIDO</title>
+<summary>RESUMO TRADUZIDO</summary>
+<category>${masterData.category}</category>
+<seo_keywords>KWS TRADUZIDAS</seo_keywords>
+<content>
+CONTEÚDO MARKDOWN TRADUZIDO
+</content>
+</article>`;
+
+        const extractTag = (tag, text) => {
+            const m = text.match(new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`));
+            if (!m) return '';
+            return m[0].replace(`<${tag}>`, '').replace(`</${tag}>`, '').trim();
+        };
+
+        let esData = null;
+        let enData = null;
+
+        try {
+            const [esRaw, enRaw] = await Promise.all([
+                base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: buildTransPrompt('Español (LATAM neutro)') }),
+                base44.asServiceRole.integrations.Core.InvokeLLM({ prompt: buildTransPrompt('English (US)') })
+            ]);
+
+            const esText = typeof esRaw === 'string' ? esRaw : (esRaw.response || '');
+            const enText = typeof enRaw === 'string' ? enRaw : (enRaw.response || '');
+
+            esData = {
+                title: extractTag('title', esText),
+                summary: extractTag('summary', esText),
+                category: extractTag('category', esText) || masterData.category,
+                seo_keywords: extractTag('seo_keywords', esText),
+                content: extractTag('content', esText)
+            };
+            enData = {
+                title: extractTag('title', enText),
+                summary: extractTag('summary', enText),
+                category: extractTag('category', enText) || masterData.category,
+                seo_keywords: extractTag('seo_keywords', enText),
+                content: extractTag('content', enText)
+            };
+
+            logs.push(`STEP 5 OK: ES="${esData.title?.substring(0,40)}", EN="${enData.title?.substring(0,40)}"`);
+        } catch (e) {
+            logs.push(`STEP 5 WARN traduções: ${e.message}`);
+        }
+
+        const llmResult = { pt: masterData, es: esData, en: enData };
+
+        // STEP 6: Imagem
+        logs.push("STEP 6: Gerando imagem...");
+        let image_url = "";
+        try {
+            const imgResp = await base44.asServiceRole.integrations.Core.GenerateImage({
+                prompt: (llmResult.pt.image_prompt || "tech editorial photography, modern AI, minimalist, clean") + ", 4k, cinematic"
+            });
+            image_url = imgResp.url || "";
+            logs.push(`STEP 6 OK imagem: ${image_url.substring(0, 60)}`);
+        } catch (e) {
+            logs.push(`STEP 6 WARN imagem: ${e.message}`);
+        }
+
+        // STEP 7: Salvar os 3 artigos
+        logs.push("STEP 7: Salvando artigos no BD...");
+        const now = new Date().toISOString();
+        const createdArticles = {};
+
+        for (const lang of ['pt', 'es', 'en']) {
+            const langData = llmResult[lang];
+            if (!langData || !langData.title || !langData.content) {
+                logs.push(`STEP 7 SKIP ${lang}: dados ausentes.`);
+                continue;
+            }
+
+            let baseSlug = generateSlug(langData.title);
+            let articleSlug = baseSlug;
+            let slugCounter = 2;
+            while ((await base44.asServiceRole.entities.NewsArticle.filter({ slug: articleSlug })).length > 0) {
+                articleSlug = `${baseSlug}-${slugCounter}`;
+                slugCounter++;
+            }
+
+            const created = await base44.asServiceRole.entities.NewsArticle.create({
+                slug: articleSlug,
+                title: langData.title,
+                summary: langData.summary,
+                content: langData.content,
+                original_url: chosenItem.link,
+                image_url,
+                category: langData.category || chosenFeed.category,
+                status: "pending",
+                seo_keywords: langData.seo_keywords,
+                source_name: chosenFeed.name,
+                language: lang,
+                published_date: now
+            });
+
+            createdArticles[lang] = created;
+            logs.push(`STEP 7 OK [${lang}]: id=${created.id}, slug="${articleSlug}"`);
+        }
+
+        // STEP 8: Telegram
+        logs.push("STEP 8: Notificando Telegram...");
+        try {
+            const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+            if (TELEGRAM_BOT_TOKEN) {
+                const chatIds = {
+                    es: Deno.env.get("TELEGRAM_CHAT_ID") || "@latinotech",
+                    pt: "@latinotechbr",
+                    en: "@latinotechen"
+                };
+
+                for (const lang of ['pt', 'es', 'en']) {
+                    const article = createdArticles[lang];
+                    const langData = llmResult[lang];
+                    const chatId = chatIds[lang];
+                    if (!chatId || !article || !langData) continue;
+
+                    const shortSummary = (langData.summary || '').length > 150
+                        ? langData.summary.substring(0, 147) + "..."
+                        : (langData.summary || '');
+
+                    let urlPath = `/noticia/${article.slug}`;
+                    if (lang === 'pt') urlPath = `/br/noticia/${article.slug}`;
+                    if (lang === 'en') urlPath = `/en/news/${article.slug}`;
+
+                    const cta = lang === 'pt' ? 'Leia a notícia completa:' : lang === 'en' ? 'Read the full story:' : 'Lee la noticia completa:';
+                    const telegramMessage = `<b>${langData.title}</b>\n\n${shortSummary}\n\n🚀 ${cta}\nhttps://latinotechia.com${urlPath}`;
+
+                    const endpoint = image_url ? 'sendPhoto' : 'sendMessage';
+                    const payload = image_url
+                        ? { chat_id: chatId, photo: image_url, caption: telegramMessage, parse_mode: 'HTML' }
+                        : { chat_id: chatId, text: telegramMessage, parse_mode: 'HTML' };
+
+                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+                logs.push("STEP 7 OK: Telegram enviado.");
+            } else {
+                logs.push("STEP 7 SKIP: TELEGRAM_BOT_TOKEN não definido.");
+            }
+        } catch (e) {
+            logs.push(`STEP 7 WARN Telegram: ${e.message}`);
+        }
+
+        logs.push("CONCLUÍDO COM SUCESSO.");
+        return Response.json({ success: true, processed: 1, logs });
+
+    } catch (error) {
+        logs.push(`ERRO FATAL: ${error.message}`);
+        return Response.json({ error: error.message, logs }, { status: 500 });
     }
-
-    return Response.json({ success: true, message: "Geração iniciada em background. Verifique os artigos pendentes em alguns minutos." });
 });
