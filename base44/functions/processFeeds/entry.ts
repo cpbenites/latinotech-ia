@@ -59,60 +59,68 @@ Deno.serve(async (req) => {
                     }
 
                     // ===== PASSO 2: GERAÇÃO DO ARTIGO MESTRE EM PORTUGUÊS =====
-                    const masterPrompt = `Atue como um Engenheiro de Prompt Staff, Especialista em SEO Técnico e Editor-Chefe da LatinoTech IA.
+                    const masterPrompt = `Atue como um Analista Sênior de Mercado, Engenheiro de Prompt e Editor-Chefe da LatinoTech IA.
 
-O seu objetivo é criar um "Guia Definitivo" denso e altamente aplicável EM PORTUGUÊS DO BRASIL. O leitor B2B e os desenvolvedores exigem exemplos reais.
+O seu objetivo é criar um "Guia Definitivo" ou "Whitepaper" de no MÍNIMO 1500 palavras em Português do Brasil.
 
 FONTES DE DADOS OBRIGATÓRIAS:
-- PAUTA: ${item.title} | ${item.contentSnippet || item.content || ''}
-- DADOS REAIS DA PESQUISA: ${extraContext}
 
-REGRAS DE BLOQUEIO ABSOLUTO (PUNIÇÃO SE DESCUMPRIDAS):
-1. PROIBIDO NOMES FALSOS: Na tabela e no texto, é TERMINANTEMENTE PROIBIDO usar "Concorrente A", "Empresa B" ou "Solução X". Se a notícia não citar concorrentes, USE SEU CONHECIMENTO PARA CITAR FERRAMENTAS REAIS DO MERCADO (ex: ChatGPT, AWS, Moodle, Salesforce, SAP, etc).
-2. PROIBIDO TEMPLATES NO PROMPT: No 'Laboratório', NÃO forneça a estrutura do prompt (ex: não escreva "[Persona]: Educador"). Você DEVE fornecer o TEXTO EXATO, em primeira pessoa, pronto para o leitor copiar e colar na IA. (Ex: "Aja como um professor de matemática. O meu objetivo é...").
-3. PROIBIDO RESUMIR: Expanda cada seção. Se os dados da pesquisa forem curtos, use seu conhecimento profundo sobre a tecnologia para explicar o 'como' e o 'porquê'.
+PAUTA ORIGINAL: ${item.title} | ${item.contentSnippet || item.content || ''}
 
-ESTRUTURA OBRIGATÓRIA:
+DADOS REAIS DA PESQUISA (Google News): ${extraContext}
 
-1. H1: TÍTULO MAGNÉTICO E ORIENTADO A SEO
+REGRA CONDICIONAL ABSOLUTA (O SEU CÉREBRO):
+Leia a notícia e defina de que mundo ela é:
+CENÁRIO A (NEGÓCIOS / STARTUPS / VC / FINANÇAS): É PROIBIDO inventar stacks de tecnologia (Python, AWS, Redes Neurais). A sua análise deve ser 100% focada no Modelo de Negócios, Valuation, Tamanho do Mercado (TAM/SAM/SOM), Estratégia de Aquisição (CAC/LTV) e tendências de consumo.
+CENÁRIO B (SOFTWARE / IA / HARDWARE / APIS): Foco total em infraestrutura, latência, integrações, linguagens de programação e arquitetura de dados.
 
-2. RESUMO EXECUTIVO & DADOS-CHAVE (TL;DR)
-(Extraia números reais da pesquisa ou do mercado e crie bullet points de impacto).
+REGRAS DE FORMATAÇÃO E VOLUME (LEI):
 
-3. O CONTEXTO: POR QUE ISSO IMPORTA AGORA?
-(Explique o cenário do mercado, a dor das empresas e por que essa tecnologia surgiu).
+EXPANSÃO OBRIGATÓRIA: Cada subtópico (H2) abaixo DEVE conter no mínimo de 3 a 4 parágrafos longos e detalhados. NUNCA resuma.
 
-4. ANÁLISE ARQUITETURAL E TÉCNICA (O "Deep Dive")
-(Desmonte a tecnologia. Cite linguagens de programação, tipos de rede neural, integrações de API ou arquitetura de servidores e infraestrutura).
+TABELAS: Você DEVE usar quebras de linha reais (\\n) nas tabelas Markdown para que elas renderizem corretamente.
 
-5. TABELA DE BENCHMARKING COM FERRAMENTAS REAIS
-(Crie uma tabela Markdown. Compare a novidade com 2 ferramentas/empresas REAIS e famosas do mercado. Colunas: Ferramenta | Custo Estimado | Curva de Aprendizado | Melhor Cenário de Uso).
+ESTRUTURA DO ARTIGO (Siga a ordem e os limites de expansão):
 
-6. LABORATÓRIO LATINOTECH: ENGENHARIA DE PROMPT (COPIAR E COLAR)
-(Gere um Mega Prompt avançado em bloco de código Markdown. Ele deve ser um comando longo e perfeitamente redigido que o leitor possa simplesmente copiar e enviar para o ChatGPT/Claude agora mesmo para obter resultados profissionais sobre o tema da notícia).
+H1: TÍTULO MAGNÉTICO E ORIENTADO A SEO
 
-7. IMPACTO NO OPEX/CAPEX E ESTRATÉGIA B2B
-(Como isso reduz custos operacionais ou aumenta receita? Seja específico sobre o bolso das empresas).
+RESUMO EXECUTIVO & DADOS-CHAVE (TL;DR)
+(Mínimo de 3 parágrafos. Resuma a notícia, cruze com a pesquisa e faça uma lista de métricas/números extraídos dos dados reais).
 
-8. OS "CALCANHARES DE AQUILES" (Riscos Reais)
-(Seja técnico. Liste defeitos reais: latência, alucinação, vazamento de dados, custo de tokens de API, etc).
+O CONTEXTO: O PROBLEMA QUE EXIGIU ESTA SOLUÇÃO
+(Mínimo de 3 parágrafos. Explique o cenário atual. Por que essa empresa/tecnologia/fundo fez esse movimento agora?).
 
-9. BLUEPRINT DE AÇÃO (Plano de 48 Horas)
-(3 passos exatos que um CTO ou Diretor deve tomar agora).
+ANÁLISE PROFUNDA (O "DEEP DIVE" ADAPTÁVEL)
+(Mínimo de 4 parágrafos. Aplique a REGRA CONDICIONAL aqui. Se for negócios: dissecque a estratégia, o mercado-alvo e o impacto financeiro. Se for tech: dissecque a arquitetura, integrações e gargalos técnicos).
 
-10. FAQ PARA SNIPPETS DO GOOGLE
-(3 perguntas de cauda longa com respostas de 1 parágrafo cada).
+TABELA DE BENCHMARKING COM FERRAMENTAS/EMPRESAS REAIS
+(Compare a novidade com 2 concorrentes reais do mercado. Colunas: Empresa/Ferramenta | Diferencial Principal | Ponto Fraco | Melhor Cenário. Garanta a formatação Markdown perfeita com quebras de linha).
 
-SAÍDA OBRIGATÓRIA:
-Devolva EXCLUSIVAMENTE o objeto JSON em PORTUGUÊS:
+LABORATÓRIO LATINOTECH: MEGA PROMPT COPIÁVEL
+(Mínimo de 3 parágrafos. Crie um "Mega Prompt" PROFISSIONAL E EXTENSO em bloco de código para o ChatGPT/Claude, ajudando o leitor a aplicar a estratégia ou tecnologia da notícia no seu próprio negócio. O prompt DEVE ter tags [CONTEXTO], [TAREFA], [RESTRIÇÕES] e [FORMATO DE SAÍDA]. Depois, explique por que este prompt tem alto valor).
+
+IMPACTO ESTRATÉGICO B2B (OPEX E RECEITA)
+(Mínimo de 3 parágrafos. Como startups e grandes empresas podem lucrar com isso ou economizar dinheiro?).
+
+OS "CALCANHARES DE AQUILES" (Riscos Reais)
+(Mínimo de 2 parágrafos. Liste defeitos ou riscos: bolha de mercado, falha de segurança, custos ocultos).
+
+BLUEPRINT DE AÇÃO (Plano de 48 Horas)
+(3 passos táticos exatos e práticos que o leitor deve tomar agora).
+
+FAQ (As Pessoas Também Perguntam)
+(3 perguntas estratégicas com respostas completas).
+
+Devolva EXCLUSIVAMENTE o objeto JSON:
 {
-  "title": "Título magnético em PT",
-  "summary": "Resumo executivo em PT (2-3 frases impactantes)",
-  "content": "Texto MASSIVO e denso em Markdown, em PT, seguindo as 10 seções",
-  "category": "Uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales",
-  "seo_keywords": "5-8 palavras-chave SEO em PT separadas por vírgula",
-  "image_prompt": "Cinematic tech editorial photography prompt em INGLÊS, hyper-realistic, 4k, professional lighting, clean web aesthetic"
-}`;
+"title": "...",
+"summary": "...",
+"content": "Texto GIGANTE em Markdown, seguindo as regras de parágrafos",
+"category": "...",
+"seo_keywords": "...",
+"image_prompt": "Cinematic tech editorial photography, hyper-realistic, 4k"
+}
+`;
 
                     const masterResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
                         prompt: masterPrompt,
