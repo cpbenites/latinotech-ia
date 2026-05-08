@@ -42,25 +42,53 @@ Deno.serve(async (req) => {
                     const existing = await base44.asServiceRole.entities.NewsArticle.filter({ original_url: item.link });
                     if (existing.length > 0) continue;
                     
+                    // --- INÍCIO DA PESQUISA NO GOOGLE NEWS (SERPAPI) ---
+                    const serpApiKey = Deno.env.get("SERP_API_KEY");
+                    let extraContext = "Nenhum contexto extra encontrado.";
+
+                    if (serpApiKey) {
+                        try {
+                            const searchUrl = `https://serpapi.com/search.json?engine=google_news&q=${encodeURIComponent(item.title)}&api_key=${serpApiKey}`;
+                            const serpResponse = await fetch(searchUrl);
+                            const serpData = await serpResponse.json();
+
+                            if (serpData.news_results && serpData.news_results.length > 0) {
+                                const topNews = serpData.news_results.slice(0, 3);
+                                extraContext = topNews.map(n => 
+                                    `Fonte: ${n.source?.name || 'Desconhecida'}\nTítulo: ${n.title}\nResumo do Google: ${n.snippet}`
+                                ).join("\n\n---\n\n");
+                            }
+                        } catch (err) {
+                            console.error("Erro ao buscar contexto na SerpApi:", err);
+                        }
+                    }
+                    // --- FIM DA PESQUISA ---
+
+                    // --- O SEU NOVO MEGA PROMPT COM DADOS REAIS ---
                     const prompt = `Atue como um Arquiteto de Software e Jornalista Investigativo de Tecnologia para a LatinoTech IA. 
-Você recebeu esta pauta bruta:
+Você recebeu uma pauta bruta de um feed RSS E também os resultados de pesquisa em tempo real do Google News sobre o assunto.
+
+PAUTA RSS (Sua base):
 TÍTULO: ${item.title}
 RESUMO: ${item.contentSnippet || item.content || ''}
 
-Sua missão é criar um "Artigo de Autoridade Máxima" (Mínimo de 1000 palavras). O texto deve ser tão denso e técnico que um desenvolvedor sênior sinta que aprendeu algo novo.
+INFORMAÇÕES ADICIONAIS DO GOOGLE NEWS (Use isto para aprofundar a matéria e sair da superficialidade):
+${extraContext}
+
+Sua missão é criar um "Artigo de Autoridade Máxima" (Mínimo de 1000 palavras). O texto deve ser tão denso e técnico que um desenvolvedor sênior sinta que aprendeu algo novo. Use os dados do Google News para citar fontes, adicionar contexto recente e factos reais.
 
 ESTRUTURA OBRIGATÓRIA (Siga à risca):
 
 1. INTRODUÇÃO SEM CLICHÊS: 
-Comece com um fato, um número ou um problema técnico real. Proibido começar com frases genéricas.
+Comece com um fato, um número ou um problema técnico real extraído da pesquisa. Proibido começar com frases genéricas.
 
 2. ## O Problema da Abordagem Tradicional:
 Explique como as empresas resolviam isso antes. Mostre por que a solução antiga faliu ou é ineficiente.
 
 3. ## Deep Dive: Arquitetura e Funcionamento:
 Esta é a parte mais longa. NÃO seja genérico. 
-- Especule e descreva a stack provável (ex: Uso de Whisper para áudio, GPT-4o para estruturação de JSON, modelos de LangChain para orquestração).
-- Explique o passo a passo técnico.
+- Especule e descreva a stack provável.
+- Explique o passo a passo técnico com base nas informações coletadas.
 - Inclua um bloco de código (Markdown) mostrando um exemplo de como o JSON de saída ou o comando de API deve ser estruturado.
 
 4. ## Impacto no Ecossistema B2B e Startups:
