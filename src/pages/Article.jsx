@@ -4,7 +4,6 @@ import { useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
-import rehypeRaw from 'rehype-raw';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { Copy, Check, Zap } from 'lucide-react';
 import ShareButtons from '@/components/ShareButtons';
@@ -258,7 +257,6 @@ export default function Article() {
       <div className="max-w-2xl mx-auto">
         <div className="markdown-content text-lg text-slate-800">
           <ReactMarkdown
-            rehypePlugins={[rehypeRaw]}
             components={{
               pre: PreBlock,
               blockquote: BlockquoteBlock,
