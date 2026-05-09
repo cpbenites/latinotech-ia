@@ -119,27 +119,6 @@
   .markdown-content a {
     @apply text-green-600 font-semibold hover:underline;
   }
-  .noticia-tabela {
-    @apply w-full border-collapse text-sm my-6 rounded-xl overflow-hidden;
-  }
-  .noticia-tabela thead {
-    @apply bg-slate-900 text-white;
-  }
-  .noticia-tabela thead th {
-    @apply px-4 py-3 text-left font-bold text-xs uppercase tracking-wider;
-  }
-  .noticia-tabela tbody tr {
-    @apply border-b border-slate-100 hover:bg-green-50 transition-colors;
-  }
-  .noticia-tabela tbody tr:last-child {
-    @apply border-b-0;
-  }
-  .noticia-tabela tbody td {
-    @apply px-4 py-3 text-slate-700;
-  }
-  .noticia-tabela tbody tr:nth-child(even) {
-    @apply bg-slate-50;
-  }
 }
 
 @layer base {
