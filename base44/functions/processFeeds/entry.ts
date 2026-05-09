@@ -128,7 +128,7 @@ ${extraContext || 'Não disponível.'}
 INSTRUÇÕES:
 - Mínimo 800 palavras de conteúdo em Markdown
 - Use subtítulos ##, listas, negrito
-- Inclua uma tabela Markdown comparando 3 concorrentes reais
+- Inclua uma seção "## III. Matriz Comparativa" com uma tabela Markdown padrão (| Coluna |). REGRAS CRÍTICAS: (1) pule TRÊS linhas em branco antes e depois da tabela; (2) cada linha da tabela deve ser separada por uma quebra de linha real; (3) não use pipes duplos (||) nem espaços colados nos separadores; (4) use 3 concorrentes reais como linhas
 - Na seção "## Laboratório LatinoTech", inclua um prompt profissional de 150+ palavras
 - Categoria deve ser UMA de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales
 - Palavras-chave SEO: 5 a 8 termos separados por vírgula
@@ -160,7 +160,8 @@ CONTEÚDO MARKDOWN COMPLETO AQUI
             const extractTag = (tag, text) => {
                 const m = text.match(new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`));
                 if (!m) return '';
-                return m[0].replace(`<${tag}>`, '').replace(`</${tag}>`, '').trim();
+                // Preserva quebras de linha — não faz trim agressivo
+                return m[0].replace(new RegExp(`^<${tag}>\\s*`), '').replace(new RegExp(`\\s*<\\/${tag}>$`), '');
             };
 
             masterData = {
@@ -210,7 +211,7 @@ CONTEÚDO MARKDOWN TRADUZIDO
         const extractTag = (tag, text) => {
             const m = text.match(new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`));
             if (!m) return '';
-            return m[0].replace(`<${tag}>`, '').replace(`</${tag}>`, '').trim();
+            return m[0].replace(new RegExp(`^<${tag}>\\s*`), '').replace(new RegExp(`\\s*<\\/${tag}>$`), '');
         };
 
         let esData = null;
