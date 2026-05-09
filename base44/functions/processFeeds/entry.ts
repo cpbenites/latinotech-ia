@@ -60,34 +60,21 @@ Deno.serve(async (req) => {
         }
         logs.push(`STEP 2 OK: Item escolhido: "${chosenItem.title}" do feed "${chosenFeed.name}"`);
 
-        // STEP 3: Exa.ai - contexto rápido (limite de texto para não demorar)
-        const exaApiKey = Deno.env.get("EXA_API_KEY");
+        // STEP 3: Jina Reader - extrai conteúdo completo do link original
         let extraContext = "";
-        logs.push(`STEP 3: EXA_API_KEY presente: ${!!exaApiKey}`);
+        logs.push(`STEP 3: Extraindo conteúdo via Jina Reader: ${chosenItem.link}`);
 
-        if (exaApiKey) {
+        if (chosenItem.link) {
             try {
-                const exaResponse = await fetch("https://api.exa.ai/search", {
-                    method: "POST",
-                    headers: { "x-api-key": exaApiKey, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        query: chosenItem.title,
-                        useAutoprompt: true,
-                        numResults: 2,
-                        contents: { text: { maxCharacters: 2000 } }
-                    })
-                });
-                const exaData = await exaResponse.json();
-                logs.push(`STEP 3: Exa status=${exaResponse.status}, resultados=${exaData.results?.length ?? 0}`);
-
-                if (exaData.results && exaData.results.length > 0) {
-                    extraContext = exaData.results.map(r =>
-                        `[${r.title}]: ${(r.text || '').substring(0, 1500)}`
-                    ).join("\n\n");
-                    logs.push(`STEP 3 OK: ${extraContext.length} chars de contexto.`);
+                const jinaResponse = await fetch(`https://r.jina.ai/${chosenItem.link}`);
+                if (jinaResponse.ok) {
+                    extraContext = await jinaResponse.text();
+                    logs.push(`STEP 3 OK: ${extraContext.length} chars extraídos via Jina.`);
+                } else {
+                    logs.push(`STEP 3 WARN: Jina retornou status ${jinaResponse.status}.`);
                 }
             } catch (err) {
-                logs.push(`STEP 3 ERRO Exa: ${err.message}`);
+                logs.push(`STEP 3 ERRO Jina: ${err.message}`);
             }
         }
 
