@@ -177,7 +177,7 @@ export default function Admin() {
                No hay artículos pendientes de revisión en este momento.
              </div>
           ) : pendingArticles.map(article => (
-            <div key={article.id} className="bg-white border border-slate-200 p-8 flex flex-col md:flex-row gap-8">
+            <div key={article.id} className="bg-white border border-slate-200 p-8 flex flex-col md:flex-row gap-8 overflow-hidden">
               {article.image_url && (
                 <div className="md:w-1/3 shrink-0">
                   <img src={article.image_url} alt="" className="w-full object-cover aspect-video bg-slate-100" />
@@ -187,17 +187,17 @@ export default function Admin() {
                   </div>
                 </div>
               )}
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col min-w-0">
                 <div className="flex justify-between items-start mb-3">
                   <span className="text-xs font-bold uppercase tracking-widest text-green-600">{article.category} • {article.source_name}</span>
                   <span className="text-xs font-medium text-slate-400">{format(new Date(article.created_date), 'dd/MM/yyyy HH:mm')}</span>
                 </div>
-                <h2 className="text-3xl font-black tracking-tight mb-3 leading-tight">{article.title}</h2>
-                <p className="text-slate-600 font-medium mb-6 text-lg">{article.summary}</p>
-                <div className="markdown-content text-base text-slate-700 max-h-96 overflow-y-auto mb-6 pr-6 leading-loose space-y-2 bg-slate-50/50 p-6 rounded-xl border border-slate-100">
+                <h2 className="text-3xl font-black tracking-tight mb-3 leading-tight break-words">{article.title}</h2>
+                <p className="text-slate-600 font-medium mb-6 text-lg break-words">{article.summary}</p>
+                <div className="markdown-content text-base text-slate-700 max-h-96 overflow-y-auto overflow-x-hidden mb-6 pr-6 leading-loose space-y-2 bg-slate-50/50 p-6 rounded-xl border border-slate-100 max-w-full [&_*]:max-w-full [&_*]:break-words [&_table]:block [&_table]:overflow-x-auto">
                   <ReactMarkdown>{article.content}</ReactMarkdown>
                 </div>
-                <div className="mt-auto flex flex-col md:flex-row justify-between items-center pt-6 border-t border-slate-100 gap-4">
+                <div className="sticky bottom-0 bg-white border-t border-slate-100 pt-4 pb-2 -mx-8 px-8 mt-auto flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex items-center gap-4">
                     <a href={article.original_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-slate-400 hover:text-slate-800">Ver fuente original &rarr;</a>
                     <Button 
