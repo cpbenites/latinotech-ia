@@ -60,22 +60,54 @@ Deno.serve(async (req) => {
         }
         logs.push(`STEP 2 OK: Item escolhido: "${chosenItem.title}" do feed "${chosenFeed.name}"`);
 
-        // STEP 3: Jina Reader - extrai conteúdo completo do link original
+        // STEP 3: RAG Híbrido — Jina Reader + Exa.ai em paralelo
         let extraContext = "";
-        logs.push(`STEP 3: Extraindo conteúdo via Jina Reader: ${chosenItem.link}`);
+        logs.push("STEP 3: Iniciando extração híbrida (Jina + Exa) em paralelo...");
 
-        if (chosenItem.link) {
-            try {
-                const jinaResponse = await fetch(`https://r.jina.ai/${chosenItem.link}`);
-                if (jinaResponse.ok) {
-                    extraContext = await jinaResponse.text();
-                    logs.push(`STEP 3 OK: ${extraContext.length} chars extraídos via Jina.`);
-                } else {
-                    logs.push(`STEP 3 WARN: Jina retornou status ${jinaResponse.status}.`);
-                }
-            } catch (err) {
-                logs.push(`STEP 3 ERRO Jina: ${err.message}`);
+        try {
+            const fetchPromises = [];
+
+            // 1. Jina Reader — conteúdo completo da fonte original
+            if (chosenItem.link) {
+                fetchPromises.push(
+                    fetch(`https://r.jina.ai/${chosenItem.link}`)
+                        .then(res => res.ok ? res.text() : "")
+                        .then(text => text ? `\n--- CONTEÚDO OFICIAL (JINA) ---\n${text}` : "")
+                        .catch(() => "")
+                );
             }
+
+            // 2. Exa.ai — contexto de mercado
+            const exaApiKey = Deno.env.get("EXA_API_KEY");
+            if (exaApiKey) {
+                fetchPromises.push(
+                    fetch("https://api.exa.ai/search", {
+                        method: "POST",
+                        headers: { "x-api-key": exaApiKey, "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            query: chosenItem.title,
+                            useAutoprompt: true,
+                            numResults: 2,
+                            contents: { text: true }
+                        })
+                    })
+                    .then(res => res.ok ? res.json() : {})
+                    .then(data => {
+                        if (data.results && data.results.length > 0) {
+                            const exaText = data.results.map(r => `Fonte Extra: ${r.title}\n${r.text}`).join("\n\n");
+                            return `\n\n--- CONTEXTO DE MERCADO (EXA) ---\n${exaText}`;
+                        }
+                        return "";
+                    })
+                    .catch(() => "")
+                );
+            }
+
+            const results = await Promise.all(fetchPromises);
+            extraContext = results.join("");
+            logs.push(`STEP 3 OK: ${extraContext.length} chars de contexto híbrido extraídos.`);
+        } catch (err) {
+            logs.push(`STEP 3 ERRO: ${err.message}`);
         }
 
         // STEP 4: Gerar artigo PT mestre (Claude) — sem response_json_schema para evitar JSON corrompido
