@@ -67,10 +67,13 @@ Deno.serve(async (req) => {
         try {
             const fetchPromises = [];
 
-            // 1. Jina Reader — conteúdo completo da fonte original
+            // 1. Jina Reader — conteúdo completo da fonte original (com API Key)
             if (chosenItem.link) {
+                const jinaApiKey = Deno.env.get("JINA_API_KEY");
+                const jinaHeaders = jinaApiKey ? { "Authorization": `Bearer ${jinaApiKey}` } : {};
+
                 fetchPromises.push(
-                    fetch(`https://r.jina.ai/${chosenItem.link}`)
+                    fetch(`https://r.jina.ai/${chosenItem.link}`, { headers: jinaHeaders })
                         .then(res => res.ok ? res.text() : "")
                         .then(text => text ? `\n--- CONTEÚDO OFICIAL (JINA) ---\n${text}` : "")
                         .catch(() => "")
