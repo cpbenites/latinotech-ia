@@ -7,7 +7,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm/index.js';
 import { Navigate } from 'react-router-dom';
 import { FileText, Rss, Video, Copy, Loader2 } from 'lucide-react';
 import AudienceDashboard from '@/components/admin/AudienceDashboard';
@@ -196,7 +195,7 @@ export default function Admin() {
                 <h2 className="text-3xl font-black tracking-tight mb-3 leading-tight break-words">{article.title}</h2>
                 <p className="text-slate-600 font-medium mb-6 text-lg break-words">{article.summary}</p>
                 <div className="markdown-content text-base text-slate-700 max-h-96 overflow-y-auto overflow-x-hidden mb-6 pr-6 leading-loose space-y-2 bg-slate-50/50 p-6 rounded-xl border border-slate-100 max-w-full [&_*]:max-w-full [&_*]:break-words [&_table]:block [&_table]:overflow-x-auto">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
+                  <ReactMarkdown>{article.content}</ReactMarkdown>
                 </div>
                 <div className="sticky bottom-0 bg-white border-t border-slate-100 pt-4 pb-2 -mx-8 px-8 mt-auto flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex items-center gap-4">
