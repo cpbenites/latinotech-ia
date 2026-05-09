@@ -4,7 +4,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import remarkGfm from 'remark-gfm/index.js';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { Copy, Check, Zap } from 'lucide-react';
 import ShareButtons from '@/components/ShareButtons';

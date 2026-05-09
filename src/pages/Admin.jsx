@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format } from 'date-fns';
 import { useToast } from "@/components/ui/use-toast";
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import remarkGfm from 'remark-gfm/index.js';
 import { Navigate } from 'react-router-dom';
 import { FileText, Rss, Video, Copy, Loader2 } from 'lucide-react';
 import AudienceDashboard from '@/components/admin/AudienceDashboard';
