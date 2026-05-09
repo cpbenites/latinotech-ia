@@ -128,7 +128,7 @@ ${extraContext || 'Não disponível.'}
 INSTRUÇÕES:
 - Mínimo 800 palavras de conteúdo em Markdown
 - Use subtítulos ##, listas, negrito
-- Inclua uma tabela Markdown comparando 3 concorrentes reais
+- Inclua uma seção "## III. Matriz Comparativa" com uma tabela HTML (NÃO use pipes Markdown |). Use EXCLUSIVAMENTE tags HTML: <table class="noticia-tabela"><thead><tr><th>...</th></tr></thead><tbody><tr><td>...</td></tr></tbody></table>. Compare pelo menos 3 soluções/produtos reais. Use emojis nos campos de status: ✅ Sim, ❌ Não, ⚠️ Parcial. A tabela DEVE estar dentro do bloco <content> do XML.
 - Na seção "## Laboratório LatinoTech", inclua um prompt profissional de 150+ palavras
 - Categoria deve ser UMA de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales
 - Palavras-chave SEO: 5 a 8 termos separados por vírgula
