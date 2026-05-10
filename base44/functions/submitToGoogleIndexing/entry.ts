@@ -12,42 +12,77 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'URL is required' }, { status: 400 });
     }
 
+    // STEP 1: Parse robusto da variável de ambiente
     const serviceAccountJson = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON');
     if (!serviceAccountJson) {
+      console.error('[Google Indexing] Service account JSON not configured');
       return Response.json({ error: 'Service account not configured' }, { status: 500 });
     }
 
-    const serviceAccount = JSON.parse(serviceAccountJson);
+    let serviceAccount;
+    try {
+      // Fix quebras de linha na chave privada
+      const cleanedJson = serviceAccountJson.replace(/\\n/g, '\n');
+      serviceAccount = JSON.parse(cleanedJson);
+      console.log('[Google Indexing] Service account parsed successfully');
+    } catch (parseError) {
+      console.error('[Google Indexing] JSON parse error:', parseError.message);
+      return Response.json({ 
+        success: false,
+        error: `Failed to parse service account JSON: ${parseError.message}` 
+      }, { status: 500 });
+    }
 
-    const auth = new google.auth.GoogleAuth({
-      credentials: serviceAccount,
-      scopes: ['https://www.googleapis.com/auth/indexing'],
-    });
+    // STEP 2: Try/catch na autenticação e chamada da API Google
+    try {
+      const auth = new google.auth.GoogleAuth({
+        credentials: serviceAccount,
+        scopes: ['https://www.googleapis.com/auth/indexing'],
+      });
 
-    const indexing = google.indexing({
-      version: 'v3',
-      auth,
-    });
+      const indexing = google.indexing({
+        version: 'v3',
+        auth,
+      });
 
-    const response = await indexing.urlNotifications.publish({
-      requestBody: {
+      console.log(`[Google Indexing] Submitting URL: ${url}`);
+
+      const response = await indexing.urlNotifications.publish({
+        requestBody: {
+          url: url,
+          type: 'URL_UPDATED',
+        },
+      });
+
+      console.log(`[Google Indexing] Article ${articleId} submitted successfully: ${url}`);
+
+      return Response.json({
+        success: true,
+        message: 'URL submitted to Google Indexing API',
         url: url,
-        type: 'URL_UPDATED',
-      },
-    });
-
-    console.log(`[Google Indexing] Article ${articleId} submitted: ${url}`);
-
-    return Response.json({
-      success: true,
-      message: 'URL submitted to Google Indexing API',
-      url: url,
-    });
+        articleId: articleId,
+      });
+    } catch (apiError) {
+      console.error('[Google Indexing API Error]', {
+        message: apiError.message,
+        status: apiError.status,
+        code: apiError.code,
+        details: apiError.response?.data || apiError.toString()
+      });
+      return Response.json({
+        success: false,
+        error: `Google API Error: ${apiError.message}`,
+        details: apiError.response?.data || apiError.message,
+      }, { status: 500 });
+    }
   } catch (error) {
-    console.error('[Google Indexing Error]', error.message);
+    console.error('[Google Indexing Fatal Error]', {
+      message: error.message,
+      stack: error.stack
+    });
     return Response.json({
       success: false,
-      error: error.message,
+      error: `Fatal error: ${error.message}`,
     }, { status: 500 });
   }
 });
