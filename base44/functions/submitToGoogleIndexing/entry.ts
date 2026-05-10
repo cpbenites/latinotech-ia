@@ -12,32 +12,62 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    // STEP 1: Parse robusto da variável de ambiente
-    const serviceAccountJson = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON');
-    if (!serviceAccountJson) {
-      console.error('[Google Indexing] Service account JSON not configured');
+    // STEP 1: Validar as 3 variáveis de ambiente necessárias
+    const projectId = Deno.env.get('G_PROJECT_ID');
+    const clientEmail = Deno.env.get('G_CLIENT_EMAIL');
+    const privateKeyRaw = Deno.env.get('G_PRIVATE_KEY');
+
+    if (!projectId) {
+      console.error('[Google Indexing] G_PROJECT_ID não configurada');
       return Response.json({ 
         status_code: 500, 
-        error_message: 'Variável GOOGLE_SERVICE_ACCOUNT_JSON está vazia ou não foi encontrada no servidor.' 
+        error_message: 'Variável G_PROJECT_ID está vazia ou não foi encontrada no servidor.' 
       }, { status: 500 });
     }
 
+    if (!clientEmail) {
+      console.error('[Google Indexing] G_CLIENT_EMAIL não configurada');
+      return Response.json({ 
+        status_code: 500, 
+        error_message: 'Variável G_CLIENT_EMAIL está vazia ou não foi encontrada no servidor.' 
+      }, { status: 500 });
+    }
+
+    if (!privateKeyRaw) {
+      console.error('[Google Indexing] G_PRIVATE_KEY não configurada');
+      return Response.json({ 
+        status_code: 500, 
+        error_message: 'Variável G_PRIVATE_KEY está vazia ou não foi encontrada no servidor.' 
+      }, { status: 500 });
+    }
+
+    // STEP 2: Reconstruir objeto de credenciais com fix de quebras de linha
     let serviceAccount;
     try {
-      // Fix quebras de linha na chave privada
-      const cleanedJson = serviceAccountJson.replace(/\\n/g, '\n');
-      serviceAccount = JSON.parse(cleanedJson);
-      console.log('[Google Indexing] Service account parsed successfully');
-    } catch (parseError) {
-      console.error('[Google Indexing] JSON parse error:', parseError.message);
-      return Response.json({ 
+      const privateKey = privateKeyRaw.replace(/\\n/g, '\n');
+      serviceAccount = {
+        type: 'service_account',
+        project_id: projectId,
+        private_key_id: 'a9320de62e7804732b880c5c10d84a1fc7913327',
+        private_key: privateKey,
+        client_email: clientEmail,
+        client_id: '115726840012809771108',
+        auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+        token_uri: 'https://oauth2.googleapis.com/token',
+        auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+      };
+      console.log('[Google Indexing] Service account credentials mounted successfully');
+      console.log('[Google Indexing] Using client_email:', serviceAccount.client_email);
+    } catch (error) {
+      console.error('[Google Indexing] Error mounting credentials:', error.message);
+      return Response.json({
         status_code: 500,
-        error_message: `Failed to parse service account JSON: ${parseError.message}`,
-        stack: parseError.stack
+        error_message: `Erro ao montar credenciais: ${error.message}`,
+        stack: error.stack
       }, { status: 500 });
     }
 
-    // STEP 2: Try/catch na autenticação e chamada da API Google
+    // STEP 3: Autenticação e envio para Google Indexing API
     try {
       const auth = new google.auth.GoogleAuth({
         credentials: serviceAccount,
@@ -61,10 +91,8 @@ Deno.serve(async (req) => {
       console.log(`[Google Indexing] Article ${articleId} submitted successfully: ${url}`);
 
       return Response.json({
-        success: true,
-        message: 'URL submitted to Google Indexing API',
-        url: url,
-        articleId: articleId,
+        status: 200,
+        message: 'URL enviada ao Google com sucesso!'
       });
     } catch (apiError) {
       console.error('[Google Indexing API Error]', {
