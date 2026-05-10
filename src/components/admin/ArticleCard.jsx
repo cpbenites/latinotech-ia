@@ -19,9 +19,12 @@ export default function ArticleCard({ article, onApprove, onReject, onGenerateSc
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      // Split into two requests to avoid large payload network errors
       await base44.entities.NewsArticle.update(article.id, {
         title: draft.title,
         summary: draft.summary,
+      });
+      await base44.entities.NewsArticle.update(article.id, {
         content: draft.content,
       });
       // Update local article object so view mode shows the new text
