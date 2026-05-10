@@ -16,7 +16,10 @@ Deno.serve(async (req) => {
     const serviceAccountJson = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON');
     if (!serviceAccountJson) {
       console.error('[Google Indexing] Service account JSON not configured');
-      return Response.json({ error: 'Service account not configured' }, { status: 500 });
+      return Response.json({ 
+        status_code: 500, 
+        error_message: 'Variável GOOGLE_SERVICE_ACCOUNT_JSON está vazia ou não foi encontrada no servidor.' 
+      }, { status: 500 });
     }
 
     let serviceAccount;
@@ -28,8 +31,9 @@ Deno.serve(async (req) => {
     } catch (parseError) {
       console.error('[Google Indexing] JSON parse error:', parseError.message);
       return Response.json({ 
-        success: false,
-        error: `Failed to parse service account JSON: ${parseError.message}` 
+        status_code: 500,
+        error_message: `Failed to parse service account JSON: ${parseError.message}`,
+        stack: parseError.stack
       }, { status: 500 });
     }
 
@@ -70,9 +74,10 @@ Deno.serve(async (req) => {
         details: apiError.response?.data || apiError.toString()
       });
       return Response.json({
-        success: false,
-        error: `Google API Error: ${apiError.message}`,
+        status_code: 500,
+        error_message: `Google API Error: ${apiError.message}`,
         details: apiError.response?.data || apiError.message,
+        stack: apiError.stack
       }, { status: 500 });
     }
   } catch (error) {
@@ -81,8 +86,9 @@ Deno.serve(async (req) => {
       stack: error.stack
     });
     return Response.json({
-      success: false,
-      error: `Fatal error: ${error.message}`,
+      status_code: 500,
+      error_message: error.message,
+      stack: error.stack
     }, { status: 500 });
   }
 });
