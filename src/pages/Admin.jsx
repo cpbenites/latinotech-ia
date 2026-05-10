@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import { Navigate } from 'react-router-dom';
 import { FileText, Rss, Video, Copy, Loader2 } from 'lucide-react';
 import AudienceDashboard from '@/components/admin/AudienceDashboard';
+import ArticleCard from '@/components/admin/ArticleCard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function Admin() {
@@ -177,47 +178,14 @@ export default function Admin() {
                No hay artículos pendientes de revisión en este momento.
              </div>
           ) : pendingArticles.map(article => (
-            <div key={article.id} className="bg-white border border-slate-200 p-8 flex flex-col md:flex-row gap-8 overflow-hidden">
-              {article.image_url && (
-                <div className="md:w-1/3 shrink-0">
-                  <img src={article.image_url} alt="" className="w-full object-cover aspect-video bg-slate-100" />
-                  <div className="mt-4 p-4 bg-slate-50 text-xs text-slate-600 font-mono">
-                    <strong>Palabras Clave SEO:</strong><br/>
-                    {article.seo_keywords}
-                  </div>
-                </div>
-              )}
-              <div className="flex-1 flex flex-col min-w-0">
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-xs font-bold uppercase tracking-widest text-green-600">{article.category} • {article.source_name}</span>
-                  <span className="text-xs font-medium text-slate-400">{format(new Date(article.created_date), 'dd/MM/yyyy HH:mm')}</span>
-                </div>
-                <h2 className="text-3xl font-black tracking-tight mb-3 leading-tight break-words">{article.title}</h2>
-                <p className="text-slate-600 font-medium mb-6 text-lg break-words">{article.summary}</p>
-                <div className="markdown-content text-base text-slate-700 max-h-96 overflow-y-auto overflow-x-hidden mb-6 pr-6 leading-loose space-y-2 bg-slate-50/50 p-6 rounded-xl border border-slate-100 max-w-full [&_*]:max-w-full [&_*]:break-words [&_table]:block [&_table]:overflow-x-auto">
-                  <ReactMarkdown>{article.content}</ReactMarkdown>
-                </div>
-                <div className="sticky bottom-0 bg-white border-t border-slate-100 pt-4 pb-2 -mx-8 px-8 mt-auto flex flex-col md:flex-row justify-between items-center gap-4">
-                  <div className="flex items-center gap-4">
-                    <a href={article.original_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-slate-400 hover:text-slate-800">Ver fuente original &rarr;</a>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleGenerateScript(article)}
-                      disabled={generatingScriptId === article.id}
-                      className="border-purple-200 text-purple-700 hover:bg-purple-50 hover:text-purple-800 font-bold flex items-center gap-2 shadow-sm"
-                    >
-                      {generatingScriptId === article.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                      {generatingScriptId === article.id ? 'Generando...' : 'Script Viral'}
-                    </Button>
-                  </div>
-                  <div className="flex gap-4">
-                    <Button variant="outline" size="lg" className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 font-bold" onClick={() => handleReject(article.id)}>Descartar</Button>
-                    <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white font-black shadow-lg shadow-green-600/30 px-8 transition-all hover:scale-105" onClick={() => handleApprove(article.id)}>Aprobar y Publicar ✨</Button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ArticleCard
+              key={article.id}
+              article={article}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onGenerateScript={handleGenerateScript}
+              generatingScriptId={generatingScriptId}
+            />
           ))}
         </div>
       )}
