@@ -72,7 +72,26 @@ export default function Admin() {
   );
 
   const handleApprove = async (id) => {
+    const article = pendingArticles.find(a => a.id === id);
+    if (!article) return;
+
+    // Get the correct base URL for the article
+    let articlePath = `/noticia/${article.slug || id}`;
+    if (article.language === 'pt') articlePath = `/br/noticia/${article.slug || id}`;
+    if (article.language === 'en') articlePath = `/en/news/${article.slug || id}`;
+    
+    const absoluteUrl = `https://latinotechia.com${articlePath}`;
+
+    // Update status
     await base44.entities.NewsArticle.update(id, { status: 'published', published_date: new Date().toISOString() });
+
+    // Submit to Google Indexing API
+    try {
+      await base44.functions.invoke('submitToGoogleIndexing', { url: absoluteUrl, articleId: id });
+    } catch (e) {
+      console.warn('Google Indexing submission failed (non-critical):', e.message);
+    }
+
     toast({ title: "Artículo publicado con éxito", duration: 4000 });
     fetchPending();
   };
