@@ -29,6 +29,31 @@ Deno.serve(async (req) => {
             return Response.json({ success: false, message: "Nenhum feed ativo.", logs });
         }
 
+        // LIMITE DIÁRIO: máximo 3 artigos por idioma (9 total) por dia
+        const DAILY_LIMIT_PER_LANG = 3;
+        const todayStart = new Date();
+        todayStart.setUTCHours(0, 0, 0, 0);
+        const todayStr = todayStart.toISOString();
+
+        const [todayPt, todayEs, todayEn] = await Promise.all([
+            base44.asServiceRole.entities.NewsArticle.filter({ language: 'pt', status: 'pending' }),
+            base44.asServiceRole.entities.NewsArticle.filter({ language: 'es', status: 'pending' }),
+            base44.asServiceRole.entities.NewsArticle.filter({ language: 'en', status: 'pending' }),
+        ]);
+
+        // Contar apenas os criados hoje
+        const countToday = (articles) => articles.filter(a => a.created_date >= todayStr).length;
+        const ptToday = countToday(todayPt);
+        const esToday = countToday(todayEs);
+        const enToday = countToday(todayEn);
+
+        logs.push(`LIMITE DIÁRIO: PT=${ptToday}, ES=${esToday}, EN=${enToday} (limite: ${DAILY_LIMIT_PER_LANG} cada)`);
+
+        if (ptToday >= DAILY_LIMIT_PER_LANG && esToday >= DAILY_LIMIT_PER_LANG && enToday >= DAILY_LIMIT_PER_LANG) {
+            logs.push("LIMITE ATINGIDO: Já foram gerados 3 artigos por idioma hoje. Abortando.");
+            return Response.json({ success: true, processed: 0, message: "Limite diário de 9 artigos atingido.", logs });
+        }
+
         const shuffledFeeds = [...activeFeeds].sort(() => Math.random() - 0.5);
 
         // STEP 2: Encontrar 1 item novo
