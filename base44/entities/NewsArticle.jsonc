@@ -55,7 +55,8 @@
       "type": "string",
       "enum": [
         "es",
-        "pt"
+        "pt",
+        "en"
       ],
       "default": "es"
     }
@@ -63,5 +64,25 @@
   "required": [
     "title",
     "content"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "data.status": "published"
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
 }
