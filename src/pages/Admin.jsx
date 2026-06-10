@@ -106,10 +106,13 @@ export default function Admin() {
     if (!window.confirm(`¿Descartar los ${pendingArticles.length} artículos pendientes?`)) return;
     setIsLoading(true);
     try {
-      const BATCH_SIZE = 10;
+      const BATCH_SIZE = 3;
       for (let i = 0; i < pendingArticles.length; i += BATCH_SIZE) {
         const batch = pendingArticles.slice(i, i + BATCH_SIZE);
         await Promise.all(batch.map(a => base44.entities.NewsArticle.update(a.id, { status: 'rejected' })));
+        if (i + BATCH_SIZE < pendingArticles.length) {
+          await new Promise(res => setTimeout(res, 500));
+        }
       }
       toast({ title: `${pendingArticles.length} artículos descartados`, variant: "destructive", duration: 4000 });
       fetchPending();
