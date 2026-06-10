@@ -106,7 +106,11 @@ export default function Admin() {
     if (!window.confirm(`¿Descartar los ${pendingArticles.length} artículos pendientes?`)) return;
     setIsLoading(true);
     try {
-      await Promise.all(pendingArticles.map(a => base44.entities.NewsArticle.update(a.id, { status: 'rejected' })));
+      const BATCH_SIZE = 10;
+      for (let i = 0; i < pendingArticles.length; i += BATCH_SIZE) {
+        const batch = pendingArticles.slice(i, i + BATCH_SIZE);
+        await Promise.all(batch.map(a => base44.entities.NewsArticle.update(a.id, { status: 'rejected' })));
+      }
       toast({ title: `${pendingArticles.length} artículos descartados`, variant: "destructive", duration: 4000 });
       fetchPending();
     } finally {
