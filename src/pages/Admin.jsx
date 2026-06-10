@@ -102,6 +102,18 @@ export default function Admin() {
     fetchPending();
   };
 
+  const handleRejectAll = async () => {
+    if (!window.confirm(`¿Descartar los ${pendingArticles.length} artículos pendientes?`)) return;
+    setIsLoading(true);
+    try {
+      await Promise.all(pendingArticles.map(a => base44.entities.NewsArticle.update(a.id, { status: 'rejected' })));
+      toast({ title: `${pendingArticles.length} artículos descartados`, variant: "destructive", duration: 4000 });
+      fetchPending();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleAddFeed = async () => {
     if(!newFeed.url || !newFeed.name) return toast({ title: "Faltan campos", variant: "destructive", duration: 4000 });
     await base44.entities.RssFeed.create(newFeed);
@@ -192,6 +204,13 @@ export default function Admin() {
 
       {activeTab === 'pending' && (
         <div className="space-y-8">
+          {pendingArticles.length > 0 && (
+            <div className="flex justify-end mb-4">
+              <button onClick={handleRejectAll} className="text-sm text-red-600 border border-red-200 hover:bg-red-50 px-4 py-2 rounded-lg font-medium">
+                Descartar todos ({pendingArticles.length})
+              </button>
+            </div>
+          )}
           {pendingArticles.length === 0 ? (
              <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-12 text-center text-slate-500 font-medium">
                No hay artículos pendientes de revisión en este momento.
