@@ -41,22 +41,27 @@ Deno.serve(async (req) => {
             return Response.json({ success: false, message: "Nenhum feed ativo.", logs });
         }
 
-        // LIMITE DIÁRIO
+        // LIMITE DIÁRIO — usa created_date com filtro por data de hoje (UTC-4 Asuncion)
         const DAILY_LIMIT_PER_LANG = 3;
-        const todayStart = new Date();
-        todayStart.setUTCHours(0, 0, 0, 0);
-        const todayStr = todayStart.toISOString();
+        const now = new Date();
+        // Início do dia em America/Asuncion (UTC-4)
+        const todayLocalStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' }); // YYYY-MM-DD
+        const todayStartUTC = new Date(todayLocalStr + 'T04:00:00.000Z'); // meia-noite Asuncion = 04:00 UTC
+        const todayStr = todayStartUTC.toISOString();
 
-        const [todayPt, todayEs, todayEn] = await Promise.all([
-            base44.asServiceRole.entities.NewsArticle.filter({ language: 'pt', status: 'pending' }),
-            base44.asServiceRole.entities.NewsArticle.filter({ language: 'es', status: 'pending' }),
-            base44.asServiceRole.entities.NewsArticle.filter({ language: 'en', status: 'pending' }),
+        logs.push(`LIMITE: contando artigos criados após ${todayStr}`);
+
+        // Busca apenas artigos de hoje (pending OU published), para evitar que pendentes antigos distorçam a contagem
+        const [allPt, allEs, allEn] = await Promise.all([
+            base44.asServiceRole.entities.NewsArticle.filter({ language: 'pt' }, '-created_date', 20),
+            base44.asServiceRole.entities.NewsArticle.filter({ language: 'es' }, '-created_date', 20),
+            base44.asServiceRole.entities.NewsArticle.filter({ language: 'en' }, '-created_date', 20),
         ]);
 
-        const countToday = (articles) => articles.filter(a => a.created_date >= todayStr).length;
-        const ptToday = countToday(todayPt);
-        const esToday = countToday(todayEs);
-        const enToday = countToday(todayEn);
+        const countToday = (articles) => articles.filter(a => a.created_date && a.created_date >= todayStr).length;
+        const ptToday = countToday(allPt);
+        const esToday = countToday(allEs);
+        const enToday = countToday(allEn);
 
         logs.push(`LIMITE DIÁRIO: PT=${ptToday}, ES=${esToday}, EN=${enToday} (limite: ${DAILY_LIMIT_PER_LANG} cada)`);
 
@@ -258,7 +263,7 @@ CONTEÚDO MARKDOWN TRADUZIDO
 
         // STEP 7: Salvar os 3 artigos
         logs.push("STEP 7: Salvando artigos...");
-        const now = new Date().toISOString();
+        const saveNow = new Date().toISOString();
         const createdArticles = {};
         const llmResult = { pt: masterData, es: esData, en: enData };
 
@@ -289,7 +294,7 @@ CONTEÚDO MARKDOWN TRADUZIDO
                 seo_keywords: langData.seo_keywords,
                 source_name: chosenFeed.name,
                 language: lang,
-                published_date: now
+                published_date: saveNow
             });
 
             createdArticles[lang] = created;
