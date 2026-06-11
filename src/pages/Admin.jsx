@@ -20,6 +20,7 @@ export default function Admin() {
   const [isLoading, setIsLoading] = useState(true);
   
   const [pendingArticles, setPendingArticles] = useState([]);
+  const [historyArticles, setHistoryArticles] = useState([]);
   const [feeds, setFeeds] = useState([]);
   const [visitorLogs, setVisitorLogs] = useState([]); // kept for fetchAudience compat
   const [newFeed, setNewFeed] = useState({ url: '', name: '', category: 'Tech' });
@@ -31,6 +32,11 @@ export default function Admin() {
   const fetchPending = async () => {
     const data = await base44.entities.NewsArticle.filter({ status: 'pending' }, '-created_date');
     setPendingArticles(data);
+  };
+
+  const fetchHistory = async () => {
+    const data = await base44.entities.NewsArticle.list('-updated_date', 100);
+    setHistoryArticles(data.filter(a => a.status !== 'pending'));
   };
 
   const fetchFeeds = async () => {
@@ -48,7 +54,7 @@ export default function Admin() {
       if (user?.role === 'admin') {
         setIsLoading(true);
         try {
-          await Promise.all([fetchPending(), fetchFeeds(), fetchAudience()]);
+          await Promise.all([fetchPending(), fetchHistory(), fetchFeeds(), fetchAudience()]);
         } catch (error) {
           console.error("Error loading admin data:", error);
           toast({ title: "Error de red", description: "No se pudieron cargar algunos datos. Por favor, recargue la página.", variant: "destructive" });
@@ -94,12 +100,14 @@ export default function Admin() {
 
     toast({ title: "Artículo publicado con éxito", duration: 4000 });
     fetchPending();
+    fetchHistory();
   };
 
   const handleReject = async (id) => {
     await base44.entities.NewsArticle.update(id, { status: 'rejected' });
     toast({ title: "Artículo descartado", variant: "destructive", duration: 4000 });
     fetchPending();
+    fetchHistory();
   };
 
   const handleRejectAll = async () => {
@@ -112,6 +120,7 @@ export default function Admin() {
       }
       toast({ title: `${pendingArticles.length} artículos descartados`, variant: "destructive", duration: 4000 });
       fetchPending();
+      fetchHistory();
     } finally {
       setIsLoading(false);
     }
@@ -202,6 +211,9 @@ export default function Admin() {
           <Button variant={activeTab === 'audience' ? 'default' : 'outline'} onClick={() => setActiveTab('audience')} className={activeTab === 'audience' ? 'bg-slate-900' : ''}>
             Audiencia
           </Button>
+          <Button variant={activeTab === 'history' ? 'default' : 'outline'} onClick={() => setActiveTab('history')} className={activeTab === 'history' ? 'bg-slate-900' : ''}>
+            Historial
+          </Button>
           <Button onClick={runProcessFeeds} disabled={isProcessing} className="bg-green-600 hover:bg-green-700 font-bold ml-4">
             {isProcessing ? '🤖 Generando...' : 'Generar Noticias Ahora'}
           </Button>
@@ -285,6 +297,39 @@ export default function Admin() {
       )}
 
       {activeTab === 'audience' && <AudienceDashboard />}
+
+      {activeTab === 'history' && (
+        <div className="space-y-4">
+          <h3 className="text-xl font-black tracking-tight mb-6">Historial de Artículos (Últimos 100)</h3>
+          {historyArticles.length === 0 ? (
+            <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-12 text-center text-slate-500 font-medium">
+              Aún no hay artículos publicados o descartados.
+            </div>
+          ) : (
+            historyArticles.map(article => (
+              <div key={article.id} className="bg-white border border-slate-200 p-5 rounded-xl flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 shadow-sm">
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${article.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {article.status === 'published' ? 'Publicado' : 'Descartado'}
+                    </span>
+                    <span className="text-xs font-bold text-slate-400">{article.language.toUpperCase()} • {article.category}</span>
+                  </div>
+                  <h4 className="font-bold text-lg text-slate-900 leading-tight">{article.title}</h4>
+                  <p className="text-sm text-slate-500 mt-1">{format(new Date(article.updated_date || article.created_date), 'dd/MM/yyyy HH:mm')} - {article.source_name}</p>
+                </div>
+                {article.status === 'published' && (
+                  <Button variant="outline" size="sm" asChild>
+                    <a href={`/${article.language === 'pt' ? 'br/' : article.language === 'en' ? 'en/' : ''}${article.language === 'en' ? 'news' : 'noticia'}/${article.slug}`} target="_blank" rel="noreferrer">
+                      Ver Artículo
+                    </a>
+                  </Button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       <Dialog open={scriptModalOpen} onOpenChange={setScriptModalOpen}>
         <DialogContent className="sm:max-w-2xl bg-white">
