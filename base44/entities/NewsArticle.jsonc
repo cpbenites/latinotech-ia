@@ -71,19 +71,7 @@
         "role": "admin"
       }
     },
-    "read": {
-      "logic": "or",
-      "conditions": [
-        {
-          "data.status": "published"
-        },
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        }
-      ]
-    },
+    "read": {},
     "update": {
       "user_condition": {
         "role": "admin"

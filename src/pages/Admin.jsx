@@ -150,10 +150,13 @@ export default function Admin() {
   const runProcessFeeds = async () => {
     setIsProcessing(true);
     try {
-      await base44.functions.invoke('processFeeds', {});
-      toast({ title: "🤖 Geração iniciada!", description: "O artigo está sendo processado em background. Aguarde 2-3 minutos e recarregue os pendentes.", duration: 8000 });
-      // Recarrega pendentes após 3 minutos automaticamente
-      setTimeout(() => fetchPending(), 3 * 60 * 1000);
+      const res = await base44.functions.invoke('processFeeds', {});
+      if (res.data?.processed === 0) {
+        toast({ title: "Aviso", description: res.data.message || "No se generaron nuevos artículos (Límite alcanzado o sin noticias nuevas).", duration: 6000 });
+      } else {
+        toast({ title: "¡Generación completada!", description: "Los nuevos artículos ya están disponibles.", duration: 5000 });
+      }
+      fetchPending();
     } catch (e) {
       console.error("Erro no processFeeds:", e);
       toast({ title: "Error", description: e.message, variant: "destructive", duration: 8000 });

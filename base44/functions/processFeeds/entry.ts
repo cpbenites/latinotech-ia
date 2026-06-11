@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
         }
 
         // LIMITE DIÁRIO — usa created_date com filtro por data de hoje (UTC-4 Asuncion)
-        const DAILY_LIMIT_PER_LANG = 3;
+        const DAILY_LIMIT_PER_LANG = 5;
         const now = new Date();
         // Início do dia em America/Asuncion (UTC-4)
         const todayLocalStr = now.toLocaleDateString('en-CA', { timeZone: 'America/Asuncion' }); // YYYY-MM-DD
@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
             base44.asServiceRole.entities.NewsArticle.filter({ language: 'en' }, '-created_date', 20),
         ]);
 
-        const countToday = (articles) => articles.filter(a => a.created_date && a.created_date >= todayStr).length;
+        const countToday = (articles) => articles.filter(a => a.created_date && a.created_date >= todayStr && a.status !== 'rejected').length;
         const ptToday = countToday(allPt);
         const esToday = countToday(allEs);
         const enToday = countToday(allEn);
