@@ -110,6 +110,34 @@ export default function Admin() {
     fetchHistory();
   };
 
+  const handleApproveAll = async () => {
+    if (!window.confirm(`¿Aprobar y publicar los ${pendingArticles.length} artículos pendientes?`)) return;
+    setIsLoading(true);
+    try {
+      const now = new Date().toISOString();
+      for (const a of pendingArticles) {
+        await base44.entities.NewsArticle.update(a.id, { status: 'published', published_date: now });
+        
+        let articlePath = `/noticia/${a.slug || a.id}`;
+        if (a.language === 'pt') articlePath = `/br/noticia/${a.slug || a.id}`;
+        if (a.language === 'en') articlePath = `/en/news/${a.slug || a.id}`;
+        const absoluteUrl = `https://latinotechia.com${articlePath}`;
+        
+        try {
+          await base44.functions.invoke('submitToGoogleIndexing', { url: absoluteUrl, articleId: a.id });
+        } catch (e) {
+          console.warn('Google Indexing submission failed:', e.message);
+        }
+        await new Promise(res => setTimeout(res, 300));
+      }
+      toast({ title: `${pendingArticles.length} artículos publicados con éxito`, duration: 4000 });
+      fetchPending();
+      fetchHistory();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleRejectAll = async () => {
     if (!window.confirm(`¿Descartar los ${pendingArticles.length} artículos pendientes?`)) return;
     setIsLoading(true);
@@ -223,9 +251,12 @@ export default function Admin() {
       {activeTab === 'pending' && (
         <div className="space-y-8">
           {pendingArticles.length > 0 && (
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-end gap-3 mb-4">
               <button onClick={handleRejectAll} className="text-sm text-red-600 border border-red-200 hover:bg-red-50 px-4 py-2 rounded-lg font-medium">
                 Descartar todos ({pendingArticles.length})
+              </button>
+              <button onClick={handleApproveAll} className="text-sm text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-bold shadow-sm">
+                Aprobar todos ({pendingArticles.length})
               </button>
             </div>
           )}
