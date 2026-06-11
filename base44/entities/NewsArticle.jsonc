@@ -72,7 +72,17 @@
       }
     },
     "read": {
-      "data.status": "published"
+      "logic": "or",
+      "conditions": [
+        {
+          "data.status": "published"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     },
     "update": {
       "user_condition": {
