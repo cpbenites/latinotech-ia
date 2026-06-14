@@ -1,0 +1,54 @@
+{
+  "name": "AffiliateProgram",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do programa de afiliado (ex: ElevenLabs)"
+    },
+    "affiliate_url": {
+      "type": "string",
+      "description": "Link de afiliado"
+    },
+    "description": {
+      "type": "string",
+      "description": "Breve descri\u00e7\u00e3o da ferramenta"
+    },
+    "last_published": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data da \u00faltima publica\u00e7\u00e3o de artigo"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o programa est\u00e1 ativo"
+    }
+  },
+  "required": [
+    "name",
+    "affiliate_url"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

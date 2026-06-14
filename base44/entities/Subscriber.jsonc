@@ -1,0 +1,47 @@
+{
+  "name": "Subscriber",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "E-mail do subscritor"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "pt",
+        "es",
+        "en"
+      ],
+      "default": "es",
+      "description": "Idioma da p\u00e1gina onde se inscreveu"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se o subscritor est\u00e1 ativo"
+    }
+  },
+  "required": [
+    "email"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

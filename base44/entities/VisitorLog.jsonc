@@ -1,0 +1,71 @@
+{
+  "name": "VisitorLog",
+  "type": "object",
+  "properties": {
+    "ip_address": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "country_code": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "access_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "user_agent": {
+      "type": "string"
+    },
+    "is_bot": {
+      "type": "boolean",
+      "default": false
+    },
+    "consent_given": {
+      "type": "boolean",
+      "default": false
+    },
+    "page_url": {
+      "type": "string",
+      "description": "URL da p\u00e1gina visitada"
+    },
+    "referrer": {
+      "type": "string",
+      "description": "URL de origem/refer\u00eancia"
+    },
+    "device_type": {
+      "type": "string",
+      "enum": [
+        "mobile",
+        "desktop",
+        "tablet"
+      ],
+      "description": "Tipo de dispositivo"
+    }
+  },
+  "required": [
+    "ip_address"
+  ],
+  "rls": {
+    "create": {},
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

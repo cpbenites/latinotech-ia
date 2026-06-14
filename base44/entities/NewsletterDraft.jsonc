@@ -1,0 +1,70 @@
+{
+  "name": "NewsletterDraft",
+  "type": "object",
+  "properties": {
+    "subject_pt": {
+      "type": "string",
+      "description": "Assunto do e-mail em Portugu\u00eas"
+    },
+    "content_pt": {
+      "type": "string",
+      "description": "Corpo do e-mail em Portugu\u00eas"
+    },
+    "subject_es": {
+      "type": "string",
+      "description": "Asunto del e-mail en Espa\u00f1ol"
+    },
+    "content_es": {
+      "type": "string",
+      "description": "Cuerpo del e-mail en Espa\u00f1ol"
+    },
+    "subject_en": {
+      "type": "string",
+      "description": "Email subject in English"
+    },
+    "content_en": {
+      "type": "string",
+      "description": "Email body in English"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data de cria\u00e7\u00e3o do draft"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent"
+      ],
+      "default": "draft",
+      "description": "Estado do draft"
+    }
+  },
+  "required": [
+    "subject_pt",
+    "content_pt"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
