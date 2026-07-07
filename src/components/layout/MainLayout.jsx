@@ -119,6 +119,9 @@ export default function MainLayout() {
             <Link to={`${langPrefix}/categoria/Software`} className="hover:text-green-600 transition-colors">Software</Link>
             <Link to={`${langPrefix}/categoria/Gaming`} className="hover:text-green-600 transition-colors">Gaming</Link>
             <Link to={`${langPrefix}/categoria/Tutoriales`} className="hover:text-green-600 transition-colors">Tutoriales</Link>
+            <a href="https://www.effectivecpmnetwork.com/dw6z9563?key=cbdd20bc2d3c097fd6bcb989e7405d81" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-700 transition-colors font-bold">
+              {currentLang === 'pt' ? 'Ofertas 🔥' : currentLang === 'en' ? 'Deals 🔥' : 'Ofertas 🔥'}
+            </a>
           </nav>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 mr-2 bg-slate-100 px-3 py-1.5 rounded-full">
@@ -193,6 +196,9 @@ export default function MainLayout() {
             <Link to={`${langPrefix}/terminos`} className="hover:text-slate-600 transition-colors">
               {currentLang === 'pt' ? 'Termos' : currentLang === 'en' ? 'Terms of Use' : 'Términos'}
             </Link>
+            <a href="https://www.effectivecpmnetwork.com/dw6z9563?key=cbdd20bc2d3c097fd6bcb989e7405d81" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 transition-colors">
+              {currentLang === 'pt' ? 'Parceiros' : currentLang === 'en' ? 'Partners' : 'Socios'}
+            </a>
           </div>
         </div>
       </footer>
