@@ -185,7 +185,7 @@ CONTEÚDO MARKDOWN TRADUZIDO
         try {
             const masterRaw = await base44.asServiceRole.integrations.Core.InvokeLLM({
                 prompt: masterPrompt,
-                model: "claude_sonnet_4_6"
+                model: "gemini_3_flash"
             });
             const masterText = typeof masterRaw === 'string' ? masterRaw : (masterRaw.response || JSON.stringify(masterRaw));
             masterData = {
@@ -215,10 +215,12 @@ CONTEÚDO MARKDOWN TRADUZIDO
         try {
             const [esRaw, enRaw] = await Promise.all([
                 base44.asServiceRole.integrations.Core.InvokeLLM({
-                    prompt: translatePrompt('Español (LATAM neutro)', masterData.title, masterData.summary, masterData.category, masterData.seo_keywords, masterData.content)
+                    prompt: translatePrompt('Español (LATAM neutro)', masterData.title, masterData.summary, masterData.category, masterData.seo_keywords, masterData.content),
+                    model: "gemini_3_flash"
                 }),
                 base44.asServiceRole.integrations.Core.InvokeLLM({
-                    prompt: translatePrompt('English (US)', masterData.title, masterData.summary, masterData.category, masterData.seo_keywords, masterData.content)
+                    prompt: translatePrompt('English (US)', masterData.title, masterData.summary, masterData.category, masterData.seo_keywords, masterData.content),
+                    model: "gemini_3_flash"
                 })
             ]);
 
