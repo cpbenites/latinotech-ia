@@ -106,37 +106,69 @@ Deno.serve(async (req) => {
         }
         logs.push(`STEP 2 OK: "${chosenItem.title}" de "${chosenFeed.name}"`);
 
-        // STEP 3: Contexto extra — Jina com timeout curto (10s)
-        logs.push("STEP 3: Buscando contexto com Jina...");
-        let extraContext = "";
+        // STEP 3: Contexto extra — Jina (artigo original completo) + Exa (fontes complementares)
+        logs.push("STEP 3: Buscando artigo original com Jina...");
 
-        extraContext = await fetchWithTimeout(async () => {
+        const jinaContext = await fetchWithTimeout(async () => {
             const jinaApiKey = Deno.env.get("JINA_API_KEY");
             const jinaHeaders = jinaApiKey ? { "Authorization": `Bearer ${jinaApiKey}` } : {};
             const res = await fetch(`https://r.jina.ai/${chosenItem.link}`, { headers: jinaHeaders });
             if (!res.ok) return "";
             const text = await res.text();
-            // Limitar contexto para 3000 chars para não inflar o prompt
-            return text ? `\n--- CONTEÚDO OFICIAL (JINA) ---\n${text.substring(0, 3000)}` : "";
-        }, 10000, "");
+            return text ? `\n--- ARTIGO ORIGINAL COMPLETO ---\n${text.substring(0, 8000)}` : "";
+        }, 12000, "");
 
-        logs.push(`STEP 3 OK: ${extraContext.length} chars de contexto.`);
+        logs.push("STEP 3b: Buscando fontes complementares com Exa...");
+        const exaContext = await fetchWithTimeout(async () => {
+            const exaApiKey = Deno.env.get("EXA_API_KEY");
+            if (!exaApiKey) return "";
+            const res = await fetch("https://api.exa.ai/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "x-api-key": exaApiKey },
+                body: JSON.stringify({
+                    query: chosenItem.title,
+                    numResults: 5,
+                    type: "auto",
+                    contents: { text: { maxCharacters: 2000 } }
+                })
+            });
+            if (!res.ok) return "";
+            const data = await res.json();
+            const results = data.results || [];
+            if (results.length === 0) return "";
+            return "\n--- FONTES COMPLEMENTARES (EXA) ---\n" + results
+                .map((r, i) => `[${i + 1}] ${r.title || ""} (${r.url || ""})\n${(r.text || "").substring(0, 1500)}`)
+                .join("\n\n");
+        }, 15000, "");
+
+        const extraContext = jinaContext + exaContext;
+
+        logs.push(`STEP 3 OK: ${jinaContext.length} chars Jina + ${exaContext.length} chars Exa.`);
 
         // STEP 4: Gerar artigo mestre PT + traduções ES/EN em UM único prompt (Claude)
-        logs.push("STEP 4: Chamando Claude para artigo PT + traduções ES/EN em paralelo...");
+        logs.push("STEP 4: Gerando artigo mestre PT (modelo avançado) + traduções ES/EN...");
 
-        const masterPrompt = `Você é um jornalista de tecnologia sênior. Escreva um artigo completo em Português do Brasil.
+        const masterPrompt = `Você é um jornalista de tecnologia sênior. Escreva um artigo jornalístico completo e aprofundado em Português do Brasil.
 
-NOTÍCIA:
+NOTÍCIA PRINCIPAL:
 Título: ${chosenItem.title}
 Conteúdo: ${chosenItem.contentSnippet || chosenItem.summary || ''}
 
-CONTEXTO ADICIONAL:
+MATERIAL DE APOIO (use para enriquecer o artigo com dados, contexto e detalhes):
 ${extraContext || 'Não disponível.'}
 
 INSTRUÇÕES:
-- Mínimo 600 palavras de conteúdo em Markdown
-- Use subtítulos ##, listas, negrito
+- Escreva entre 1000 e 1400 palavras de conteúdo em Markdown.
+- Estrutura obrigatória:
+  1. Um parágrafo de abertura (lead) que resume o essencial.
+  2. Subtítulos ## organizando o desenvolvimento.
+  3. Contexto e antecedentes: como se chegou a isso e o histórico relevante.
+  4. Números, datas, nomes e dados concretos sempre que disponíveis.
+  5. Impacto para o setor, para os usuários e para o mercado latino-americano.
+  6. Uma seção "## O que esperar a seguir" com as próximas tendências.
+  7. Uma seção "## Perguntas frequentes" com 3 perguntas e respostas curtas.
+- Use listas com marcadores e negrito para destacar pontos-chave.
+- Tom jornalístico, claro e objetivo. Nunca invente fatos: se não houver dado, não invente.
 - Categoria deve ser UMA de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales
 - Palavras-chave SEO: 5 a 8 termos separados por vírgula
 
@@ -185,7 +217,7 @@ CONTEÚDO MARKDOWN TRADUZIDO
         try {
             const masterRaw = await base44.asServiceRole.integrations.Core.InvokeLLM({
                 prompt: masterPrompt,
-                model: "gemini_3_flash"
+                model: "gemini_3_1_pro"
             });
             const masterText = typeof masterRaw === 'string' ? masterRaw : (masterRaw.response || JSON.stringify(masterRaw));
             masterData = {
