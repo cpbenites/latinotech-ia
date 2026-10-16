@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import NewsletterCTA from '@/components/NewsletterCTA';
 import { Copy, Check, Zap } from 'lucide-react';
 import ShareButtons from '@/components/ShareButtons';
+import { optimizeImage } from '@/lib/image';
 
 const PreBlock = ({ children, ...props }) => {
   const [copied, setCopied] = useState(false);
@@ -250,7 +251,15 @@ export default function Article() {
       
       {article.image_url && (
         <div className="aspect-[21/9] bg-slate-100 overflow-hidden mb-12">
-          <img src={article.image_url} alt={article.title} className="object-cover w-full h-full" />
+          <img
+            src={optimizeImage(article.image_url, 1200)}
+            alt={article.title}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onError={(e) => { if (e.currentTarget.src !== article.image_url) e.currentTarget.src = article.image_url; }}
+            className="object-cover w-full h-full"
+          />
         </div>
       )}
       

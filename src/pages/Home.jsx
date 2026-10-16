@@ -4,8 +4,9 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es, ptBR, enUS } from 'date-fns/locale';
 import NewsletterCTA from '@/components/NewsletterCTA';
+import { optimizeImage } from '@/lib/image';
 
-const SmoothImage = ({ src, alt, className, priority = false }) => {
+const SmoothImage = ({ src, alt, className, priority = false, width = 800 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(priority);
   const containerRef = useRef(null);
@@ -32,12 +33,13 @@ const SmoothImage = ({ src, alt, className, priority = false }) => {
       {!isLoaded && <div className="absolute inset-0 bg-slate-200 animate-pulse z-0"></div>}
       {isInView && (
         <img
-          src={src}
+          src={optimizeImage(src, width)}
           alt={alt}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "low"}
-          decoding={priority ? "sync" : "async"}
+          decoding="async"
           onLoad={() => setIsLoaded(true)}
+          onError={(e) => { if (e.currentTarget.src !== src) e.currentTarget.src = src; }}
           className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} relative z-10 transition-opacity duration-700 ease-in-out w-full h-full object-cover`}
         />
       )}
@@ -176,7 +178,7 @@ export default function Home({ lang = 'es' }) {
           <div className="grid md:grid-cols-5 gap-8 items-center">
             <div className="md:col-span-3 aspect-[16/10] bg-slate-100 overflow-hidden relative rounded-xl">
               {featured.image_url ? (
-                <SmoothImage priority={true} src={featured.image_url} alt={featured.title} className="group-hover:scale-105" />
+                <SmoothImage priority={true} width={1200} src={featured.image_url} alt={featured.title} className="group-hover:scale-105" />
               ) : (
                 <div className="absolute inset-0 bg-slate-200"></div>
               )}
@@ -200,7 +202,7 @@ export default function Home({ lang = 'es' }) {
             <Link key={String(article.id)} to={getArticlePath(article.slug || article.id)} className="group flex flex-col content-auto w-full">
               <div className="aspect-video bg-slate-100 overflow-hidden mb-5 relative rounded-xl w-full">
                 {article.image_url ? (
-                  <SmoothImage priority={false} src={article.image_url} alt={article.title} className="group-hover:scale-105" />
+                  <SmoothImage priority={false} width={600} src={article.image_url} alt={article.title} className="group-hover:scale-105" />
                 ) : (
                   <div className="absolute inset-0 bg-slate-200"></div>
                 )}

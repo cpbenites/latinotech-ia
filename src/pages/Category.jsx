@@ -3,8 +3,9 @@ import { base44 } from '@/api/base44Client';
 import { Link, useSearchParams, useParams, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 import { es, ptBR, enUS } from 'date-fns/locale';
+import { optimizeImage } from '@/lib/image';
 
-const SmoothImage = ({ src, alt, className }) => {
+const SmoothImage = ({ src, alt, className, width = 600 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const containerRef = useRef(null);
@@ -30,12 +31,13 @@ const SmoothImage = ({ src, alt, className }) => {
       {!isLoaded && <div className="absolute inset-0 bg-slate-200 animate-pulse z-0"></div>}
       {isInView && (
         <img
-          src={src}
+          src={optimizeImage(src, width)}
           alt={alt}
           loading="lazy"
           fetchPriority="low"
           decoding="async"
           onLoad={() => setIsLoaded(true)}
+          onError={(e) => { if (e.currentTarget.src !== src) e.currentTarget.src = src; }}
           className={`${className} ${isLoaded ? 'opacity-100' : 'opacity-0'} relative z-10 transition-opacity duration-700 ease-in-out w-full h-full object-cover`}
         />
       )}
