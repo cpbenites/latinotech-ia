@@ -145,30 +145,78 @@ Deno.serve(async (req) => {
 
         logs.push(`STEP 3 OK: ${jinaContext.length} chars Jina + ${exaContext.length} chars Exa.`);
 
-        // STEP 4: Gerar artigo mestre PT + traduções ES/EN em UM único prompt (Claude)
+        // STEP 3c: BRIEFING EDITORIAL — análise das fontes ANTES da redação (modelo econômico)
+        logs.push("STEP 3c: Montando briefing editorial a partir das fontes...");
+        let briefing = "";
+        try {
+            const briefingPrompt = `Você é um editor-chefe de tecnologia. Sua tarefa NÃO é escrever o artigo, e sim produzir um BRIEFING EDITORIAL rigoroso que servirá de base para outro redator.
+
+NOTÍCIA:
+Título: ${chosenItem.title}
+Resumo da fonte: ${chosenItem.contentSnippet || chosenItem.summary || 'não informado'}
+
+MATERIAL BRUTO (fonte original + fontes complementares):
+${extraContext || 'Não disponível.'}
+
+Produza o briefing em tópicos, em português, com exatamente estas seções:
+1. FATOS CONFIRMADOS — só o que aparece explicitamente nas fontes, mantendo números, datas e nomes exatos.
+2. NÚMEROS, DATAS E NOMES — lista dos dados concretos disponíveis.
+3. CRONOLOGIA — o que aconteceu antes e leva a este fato.
+4. QUEM É AFETADO — empresas, setores, usuários e de que forma.
+5. CONTRADIÇÕES E DIVERGÊNCIAS — onde as fontes discordam ou não confirmam.
+6. PONTOS EM ABERTO — o que ainda não se sabe e o que falta confirmar.
+7. ÂNGULOS RELEVANTES — de 3 a 5 aspectos que o artigo deve explicar (impacto prático, custo, adoção, regulação, concorrência).
+8. QUALIDADE DO MATERIAL — responda apenas "RICO" ou "LIMITADO", indicando se há dados suficientes para um artigo aprofundado.
+
+Regra absoluta: não invente nada. Se algo não estiver no material, escreva "não informado".`;
+
+            const briefingRaw = await base44.asServiceRole.integrations.Core.InvokeLLM({
+                prompt: briefingPrompt,
+                model: "gemini_3_flash"
+            });
+            briefing = typeof briefingRaw === 'string' ? briefingRaw : (briefingRaw.response || JSON.stringify(briefingRaw));
+            logs.push(`STEP 3c OK: briefing com ${briefing.length} chars.`);
+        } catch (e) {
+            logs.push(`STEP 3c WARN briefing: ${e.message}`);
+        }
+
+        // STEP 4: Gerar artigo mestre PT + traduções ES/EN
         logs.push("STEP 4: Gerando artigo mestre PT (modelo avançado) + traduções ES/EN...");
 
-        const masterPrompt = `Você é um jornalista de tecnologia sênior. Escreva um artigo jornalístico completo e aprofundado em Português do Brasil.
+        const masterPrompt = `Você é um jornalista de tecnologia sênior. Escreva um artigo jornalístico aprofundado em Português do Brasil.
 
 NOTÍCIA PRINCIPAL:
 Título: ${chosenItem.title}
 Conteúdo: ${chosenItem.contentSnippet || chosenItem.summary || ''}
 
-MATERIAL DE APOIO (use para enriquecer o artigo com dados, contexto e detalhes):
+BRIEFING EDITORIAL (base factual já analisada — use como fonte primária de fatos):
+${briefing || 'Não disponível.'}
+
+MATERIAL DE APOIO (fonte original e fontes complementares, para consulta e detalhes adicionais):
 ${extraContext || 'Não disponível.'}
 
-INSTRUÇÕES:
-- Escreva entre 1000 e 1400 palavras de conteúdo em Markdown.
-- Estrutura obrigatória:
-  1. Um parágrafo de abertura (lead) que resume o essencial.
+INSTRUÇÕES DE PROFUNDIDADE (a parte mais importante):
+- Escreva entre 1100 e 1500 palavras em Markdown.
+- Cada parágrafo deve trazer informação concreta. É proibido usar frases genéricas de preenchimento ("a tecnologia está transformando o mundo", "isso muda tudo").
+- Não repita a mesma ideia em parágrafos diferentes.
+- Explique sempre quatro coisas: o que aconteceu, por que importa, quem é afetado e de que forma.
+- Traga exemplos concretos e consequências práticas para o leitor (custo, tempo, adoção, risco, oportunidade).
+- Use exatamente os números, datas, versões, preços e nomes do briefing. Não arredonde nem invente.
+- Onde o briefing apontar contradição ou ponto em aberto, deixe isso explícito no texto em vez de escolher uma versão sem avisar.
+- Se o briefing indicar material LIMITADO, escreva um texto mais curto e preciso — nunca encha linguiça.
+- Nunca invente fatos, números, citações, nomes ou declarações.
+
+ESTRUTURA OBRIGATÓRIA:
+  1. Lead: parágrafo de abertura que resume o essencial.
   2. Subtítulos ## organizando o desenvolvimento.
-  3. Contexto e antecedentes: como se chegou a isso e o histórico relevante.
-  4. Números, datas, nomes e dados concretos sempre que disponíveis.
+  3. Contexto e antecedentes: a cronologia de como se chegou a isso.
+  4. Dados concretos: números, datas, nomes e versões.
   5. Impacto para o setor, para os usuários e para o mercado latino-americano.
-  6. Uma seção "## O que esperar a seguir" com as próximas tendências.
-  7. Uma seção "## Perguntas frequentes" com 3 perguntas e respostas curtas.
+  6. "## O que ainda não se sabe" — pontos em aberto e o que falta confirmar.
+  7. "## O que esperar a seguir" — próximos passos concretos.
+  8. "## Perguntas frequentes" com 3 perguntas e respostas curtas.
 - Use listas com marcadores e negrito para destacar pontos-chave.
-- Tom jornalístico, claro e objetivo. Nunca invente fatos: se não houver dado, não invente.
+- Tom jornalístico, claro e objetivo.
 - Categoria deve ser UMA de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales
 - Palavras-chave SEO: 5 a 8 termos separados por vírgula
 
