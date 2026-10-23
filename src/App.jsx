@@ -14,6 +14,8 @@ const Admin = React.lazy(() => import('@/pages/Admin'));
 const AffiliateAdmin = React.lazy(() => import('@/pages/AffiliateAdmin'));
 const Privacy = React.lazy(() => import('@/pages/Privacy'));
 const Terms = React.lazy(() => import('@/pages/Terms'));
+const ToolsHub = React.lazy(() => import('@/pages/tools/ToolsHub'));
+const ToolPage = React.lazy(() => import('@/pages/tools/ToolPage'));
 const PageNotFound = React.lazy(() => import('./lib/PageNotFound'));
 
 const PageLoader = () => (
@@ -72,6 +74,14 @@ const AuthenticatedApp = () => {
           <Route path="/en/afiliados" element={<AffiliateAdmin />} />
           <Route path="/en/privacidad" element={<Privacy />} />
           <Route path="/en/terminos" element={<Terms />} />
+
+          {/* Ferramentas e calculadoras */}
+          <Route path="/tools" element={<ToolsHub lang="es" />} />
+          <Route path="/tools/:slug" element={<ToolPage lang="es" />} />
+          <Route path="/br/tools" element={<ToolsHub lang="pt" />} />
+          <Route path="/br/tools/:slug" element={<ToolPage lang="pt" />} />
+          <Route path="/en/tools" element={<ToolsHub lang="en" />} />
+          <Route path="/en/tools/:slug" element={<ToolPage lang="en" />} />
         </Route>
         {/* Redirects para rotas base sem slug detetadas pelo Google */}
         <Route path="/Article" element={<Navigate to="/" replace />} />

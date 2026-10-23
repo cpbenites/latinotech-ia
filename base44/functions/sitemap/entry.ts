@@ -28,6 +28,16 @@ export default async function (req) {
       push(`${BASE_URL}/en/categoria/${cat}`, '0.6', 'daily');
     }
 
+    // Ferramentas e calculadoras
+    push(`${BASE_URL}/tools`, '0.7', 'monthly');
+    push(`${BASE_URL}/br/tools`, '0.7', 'monthly');
+    push(`${BASE_URL}/en/tools`, '0.7', 'monthly');
+    for (const slug of ['ai-cost', 'debt-payoff', 'automation-roi']) {
+      push(`${BASE_URL}/tools/${slug}`, '0.7', 'monthly');
+      push(`${BASE_URL}/br/tools/${slug}`, '0.7', 'monthly');
+      push(`${BASE_URL}/en/tools/${slug}`, '0.7', 'monthly');
+    }
+
     // Artículos publicados (paginado)
     let cursor = undefined;
     do {

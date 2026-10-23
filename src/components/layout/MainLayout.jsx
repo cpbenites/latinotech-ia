@@ -113,6 +113,9 @@ export default function MainLayout() {
             LatinoTech IA<span className="text-slate-900">.</span>
           </Link>
           <nav className="hidden lg:flex gap-6 font-semibold text-sm text-slate-600">
+            <Link to={`${langPrefix}/tools`} className="text-green-600 font-black hover:text-green-700 transition-colors">
+              {currentLang === 'pt' ? 'Ferramentas' : currentLang === 'en' ? 'Tools' : 'Herramientas'}
+            </Link>
             <Link to={`${langPrefix}/categoria/IA`} className="hover:text-green-600 transition-colors">IA</Link>
             <Link to={`${langPrefix}/categoria/Startups`} className="hover:text-green-600 transition-colors">Startups</Link>
             <Link to={`${langPrefix}/categoria/Gadgets`} className="hover:text-green-600 transition-colors">Gadgets</Link>
@@ -187,6 +190,9 @@ export default function MainLayout() {
             © {new Date().getFullYear()} LatinoTech IA. {currentLang === 'pt' ? 'Notícias curadas por IA.' : currentLang === 'en' ? 'AI-curated Tech News.' : 'Noticias curadas por IA.'}
           </p>
           <div className="flex justify-center gap-6 text-xs text-slate-400">
+            <Link to={`${langPrefix}/tools`} className="hover:text-green-600 font-bold transition-colors">
+              {currentLang === 'pt' ? 'Ferramentas' : currentLang === 'en' ? 'Tools' : 'Herramientas'}
+            </Link>
             <Link to={`${langPrefix}/privacidad`} className="hover:text-slate-600 transition-colors">
               {currentLang === 'pt' ? 'Privacidade' : currentLang === 'en' ? 'Privacy Policy' : 'Privacidad'}
             </Link>
