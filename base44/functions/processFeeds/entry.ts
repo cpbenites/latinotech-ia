@@ -1,30 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
 import Parser from 'npm:rss-parser';
+import { generateSlug, fetchWithTimeout, extractTag, buildTranslatePrompt } from '../../shared/editorial.ts';
 
 const parser = new Parser({ timeout: 8000 });
-
-function generateSlug(text) {
-    return text.toString().toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9 -]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-+/, "")
-        .replace(/-+$/, "");
-}
-
-async function fetchWithTimeout(fetchFn, timeoutMs, fallback = "") {
-    try {
-        const result = await Promise.race([
-            fetchFn(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), timeoutMs))
-        ]);
-        return result;
-    } catch {
-        return fallback;
-    }
-}
 
 Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
@@ -232,34 +210,6 @@ CONTEÚDO MARKDOWN COMPLETO
 </content>
 </article>`;
 
-        const translatePrompt = (langName, ptTitle, ptSummary, ptCategory, ptKeywords, ptContent) =>
-            `Traduza do Português para ${langName}. Mantenha toda a formatação Markdown. NÃO resuma. Categoria deve ser uma de: IA, Gadgets, Software, Startups, Gaming, Tech, Tutoriales.
-
-TÍTULO: ${ptTitle}
-RESUMO: ${ptSummary}
-CATEGORIA: ${ptCategory}
-PALAVRAS-CHAVE: ${ptKeywords}
-
-CONTEÚDO:
-${ptContent}
-
-FORMATO — retorne EXATAMENTE este XML:
-<article>
-<title>TÍTULO TRADUZIDO</title>
-<summary>RESUMO TRADUZIDO</summary>
-<category>${ptCategory}</category>
-<seo_keywords>KWS TRADUZIDAS</seo_keywords>
-<content>
-CONTEÚDO MARKDOWN TRADUZIDO
-</content>
-</article>`;
-
-        const extractTag = (tag, text) => {
-            const m = text.match(new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`));
-            if (!m) return '';
-            return m[0].replace(`<${tag}>`, '').replace(`</${tag}>`, '').trim();
-        };
-
         // Gerar artigo mestre PT
         let masterData = null;
         try {
@@ -295,11 +245,11 @@ CONTEÚDO MARKDOWN TRADUZIDO
         try {
             const [esRaw, enRaw] = await Promise.all([
                 base44.asServiceRole.integrations.Core.InvokeLLM({
-                    prompt: translatePrompt('Español (LATAM neutro)', masterData.title, masterData.summary, masterData.category, masterData.seo_keywords, masterData.content),
+                    prompt: buildTranslatePrompt('Español (LATAM neutro)', masterData),
                     model: "gemini_3_flash"
                 }),
                 base44.asServiceRole.integrations.Core.InvokeLLM({
-                    prompt: translatePrompt('English (US)', masterData.title, masterData.summary, masterData.category, masterData.seo_keywords, masterData.content),
+                    prompt: buildTranslatePrompt('English (US)', masterData),
                     model: "gemini_3_flash"
                 })
             ]);

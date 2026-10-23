@@ -1,0 +1,45 @@
+{
+  "name": "Pautas Semanais Ferramentas Financas B2B",
+  "description": "Gera duas mat\u00e9rias por semana alternando entre utilit\u00e1rios de IA e SaaS, gest\u00e3o de d\u00edvidas e finan\u00e7as pessoais, e produtividade e automa\u00e7\u00e3o B2B. Sempre como rascunho, para aprova\u00e7\u00e3o manual.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 9 * * 2,5",
+      "one_time_date": null,
+      "timezone": "America/Sao_Paulo",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "pautas_semanais_ferramentas_financas_b2b",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "gerar_pautas": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateTopicArticles",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Gerar mat\u00e9ria do tema da semana",
+            "description": "Rascunho para aprova\u00e7\u00e3o"
+          }
+        }
+      }
+    ]
+  }
+}
