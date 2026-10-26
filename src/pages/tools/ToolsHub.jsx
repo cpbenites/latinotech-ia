@@ -1,16 +1,30 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { base44 } from '@/api/base44Client';
 import { TOOLS } from '@/lib/tools/config';
 import { T } from '@/lib/tools/i18n';
+import { generatedCard } from '@/lib/tools/toolCopy';
 import ToolCard from '@/components/tools/ToolCard';
 
 export default function ToolsHub({ lang }) {
     const t = T[lang];
+    const [generated, setGenerated] = useState([]);
 
     useEffect(() => {
         document.title = `${t.hub.title} | LatinoTech IA`;
         const meta = document.querySelector('meta[name="description"]');
         if (meta) meta.setAttribute('content', t.hub.subtitle);
     }, [t]);
+
+    useEffect(() => {
+        base44.entities.GeneratedTool
+            .filter({ status: 'published' }, { sort: '-created_date', limit: 100 })
+            .then((page) => setGenerated(page.items));
+    }, []);
+
+    const cards = [
+        ...TOOLS.map((tool) => ({ ...tool, copy: t.tools[tool.key] })),
+        ...generated.map((record) => generatedCard(lang, record)),
+    ];
 
     return (
         <div className="container mx-auto px-4 py-10 max-w-5xl">
@@ -23,7 +37,7 @@ export default function ToolsHub({ lang }) {
             </header>
 
             <div className="grid md:grid-cols-2 gap-5">
-                {TOOLS.map((tool) => (
+                {cards.map((tool) => (
                     <ToolCard key={tool.key} lang={lang} tool={tool} />
                 ))}
             </div>

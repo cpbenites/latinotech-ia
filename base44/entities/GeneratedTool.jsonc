@@ -1,0 +1,91 @@
+{
+  "name": "GeneratedTool",
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "Identificador da URL, em kebab-case"
+    },
+    "title_pt": {
+      "type": "string"
+    },
+    "title_es": {
+      "type": "string"
+    },
+    "title_en": {
+      "type": "string"
+    },
+    "subtitle_pt": {
+      "type": "string"
+    },
+    "subtitle_es": {
+      "type": "string"
+    },
+    "subtitle_en": {
+      "type": "string"
+    },
+    "about_pt": {
+      "type": "string"
+    },
+    "about_es": {
+      "type": "string"
+    },
+    "about_en": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "array",
+      "description": "Campos num\u00e9ricos: key, label_pt/es/en, default, currency, suffix, hint_pt/es/en",
+      "items": {
+        "type": "object"
+      }
+    },
+    "outputs": {
+      "type": "array",
+      "description": "Resultados: key, label_pt/es/en, expr, format (money|number|percent), accent",
+      "items": {
+        "type": "object"
+      }
+    },
+    "search_context": {
+      "type": "string",
+      "description": "Pesquisa de demanda usada na gera\u00e7\u00e3o"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "published",
+        "draft"
+      ],
+      "default": "published"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "slug",
+    "title_pt",
+    "fields",
+    "outputs"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { toolPath } from '@/lib/tools/config';
 import { T } from '@/lib/tools/i18n';
 
 export default function ToolCard({ lang, tool, compact = false }) {
-    const copy = T[lang].tools[tool.key];
+    const copy = tool.copy || T[lang].tools[tool.key];
     const Icon = tool.icon;
 
     return (

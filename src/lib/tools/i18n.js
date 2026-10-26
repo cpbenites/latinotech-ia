@@ -10,6 +10,7 @@ export const T = {
             relatedTitle: 'Outras ferramentas',
             aboutTitle: 'Como funciona',
             privacyNote: 'Nenhum dado é enviado. Todos os cálculos acontecem no seu navegador.',
+            results: 'Resultados',
         },
         tools: {
             aiCost: {
@@ -100,6 +101,7 @@ export const T = {
             relatedTitle: 'Otras herramientas',
             aboutTitle: 'Cómo funciona',
             privacyNote: 'No se envía ningún dato. Todos los cálculos ocurren en tu navegador.',
+            results: 'Resultados',
         },
         tools: {
             aiCost: {
@@ -190,6 +192,7 @@ export const T = {
             relatedTitle: 'Other tools',
             aboutTitle: 'How it works',
             privacyNote: 'No data is sent anywhere. Every calculation runs in your browser.',
+            results: 'Results',
         },
         tools: {
             aiCost: {

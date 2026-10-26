@@ -1,0 +1,45 @@
+{
+  "description": "Cria um novo utilit\u00e1rio interativo de c\u00e1lculo a cada 2 dias, com foco em tr\u00e1fego org\u00e2nico. Tamb\u00e9m pode ser executado manualmente pelo bot\u00e3o de executar.",
+  "name": "Gerador de Utilit\u00e1rios IA",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "gerador_de_utilitarios_ia",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "gerar_utilitario": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "generateTool",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Gerar novo utilit\u00e1rio",
+            "description": "Pesquisa demanda e cria a calculadora"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 2,
+      "interval_unit": "days",
+      "interval_anchor": "2026-10-27T12:00:00Z",
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

@@ -38,6 +38,18 @@ export default async function (req) {
       push(`${BASE_URL}/en/tools/${slug}`, '0.7', 'monthly');
     }
 
+    // Utilitários gerados por IA
+    const generatedTools = await base44.asServiceRole.entities.GeneratedTool.filter(
+      { status: 'published' },
+      { sort: '-created_date', limit: 500, fields: ['slug'] }
+    );
+    for (const tool of generatedTools.items) {
+      if (!tool.slug) continue;
+      push(`${BASE_URL}/tools/${tool.slug}`, '0.6', 'monthly');
+      push(`${BASE_URL}/br/tools/${tool.slug}`, '0.6', 'monthly');
+      push(`${BASE_URL}/en/tools/${tool.slug}`, '0.6', 'monthly');
+    }
+
     // Artículos publicados (paginado)
     let cursor = undefined;
     do {

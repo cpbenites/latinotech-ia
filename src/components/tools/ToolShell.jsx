@@ -7,7 +7,7 @@ import ToolCard from './ToolCard';
 
 export default function ToolShell({ lang, tool, children }) {
     const t = T[lang];
-    const copy = t.tools[tool.key];
+    const copy = tool.copy || t.tools[tool.key];
     const others = TOOLS.filter((x) => x.key !== tool.key);
 
     useEffect(() => {
