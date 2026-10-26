@@ -5,6 +5,7 @@ import { TOOLS, hubPath } from '@/lib/tools/config';
 import { generatedCopy } from '@/lib/tools/toolCopy';
 import ToolShell from '@/components/tools/ToolShell';
 import GeneratedToolView from '@/components/tools/GeneratedToolView';
+import GeneratedGeneratorView from '@/components/tools/generators/GeneratedGeneratorView';
 import AiCostCalculator from '@/components/tools/AiCostCalculator';
 import DebtPayoffSimulator from '@/components/tools/DebtPayoffSimulator';
 import AutomationRoiCalculator from '@/components/tools/AutomationRoiCalculator';
@@ -59,7 +60,11 @@ export default function ToolPage({ lang }) {
 
     return (
         <ToolShell lang={lang} tool={{ key: `gen-${record.slug}`, copy: generatedCopy(lang, record) }}>
-            <GeneratedToolView key={record.slug} lang={lang} tool={record} />
+            {record.kind === 'generator' ? (
+                <GeneratedGeneratorView key={record.slug} lang={lang} tool={record} />
+            ) : (
+                <GeneratedToolView key={record.slug} lang={lang} tool={record} />
+            )}
         </ToolShell>
     );
 }

@@ -6,6 +6,15 @@
       "type": "string",
       "description": "Identificador da URL, em kebab-case"
     },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "calculator",
+        "generator"
+      ],
+      "default": "calculator",
+      "description": "calculator = campos num\u00e9ricos e f\u00f3rmulas; generator = produz resultado em um clique"
+    },
     "title_pt": {
       "type": "string"
     },
@@ -35,17 +44,21 @@
     },
     "fields": {
       "type": "array",
-      "description": "Campos num\u00e9ricos: key, label_pt/es/en, default, currency, suffix, hint_pt/es/en",
+      "description": "Calculadoras: campos num\u00e9ricos (key, label_pt/es/en, default, currency, suffix, hint_pt/es/en)",
       "items": {
         "type": "object"
       }
     },
     "outputs": {
       "type": "array",
-      "description": "Resultados: key, label_pt/es/en, expr, format (money|number|percent), accent",
+      "description": "Calculadoras: resultados (key, label_pt/es/en, expr, format, accent)",
       "items": {
         "type": "object"
       }
+    },
+    "generator": {
+      "type": "object",
+      "description": "Geradores: type (password | numbers | template) e as op\u00e7\u00f5es do tipo"
     },
     "search_context": {
       "type": "string",
@@ -66,9 +79,7 @@
   },
   "required": [
     "slug",
-    "title_pt",
-    "fields",
-    "outputs"
+    "title_pt"
   ],
   "rls": {
     "create": {
